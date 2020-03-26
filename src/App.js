@@ -1,25 +1,61 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {Suspense, lazy} from 'react';
+import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import './App.css';
 
+import {APP_TOKEN} from  './api/config/Constants.js'
+import PageLoader from './Views/Partials/Loader';
+
+// const WhyUs = lazy(()=> import('./modules/WhyUs'));
+// const About = lazy(()=> import('./modules/AboutCompany'));
+// const Contact = lazy(()=> import('./modules/ContactUs'));
+// const OurGoals = lazy(()=> import('./modules/OurGoals'));
+// const OurPartners = lazy(()=> import('./modules/OurPartners'));
+// const Portfolio = lazy(()=> import('./modules/Portfolio'));
+// const Index = lazy(()=> import('./modules/index'));
+// const Services = lazy(()=> import('./modules/Services'));
+// const OurTechnology = lazy(()=> import('./modules/OurTechnology'));
+// const Editor = lazy(()=> import('./modules/editor'));
+
+const Login = lazy(()=> import('./Views/Auth/login'));
+const Home = lazy(()=> import('./Views/Home'));
+
+
+
+
+
 function App() {
+ 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+          <Router>
+            <Suspense fallback={<PageLoader />}>
+              <Switch>
+                {/* <Route exact path="/" component={Index} />
+                <Route exact path="/editor"  render={props => { return <Editor {...props.location.state} /> }}  />
+                <Route exact path="/OurTechnology" component={OurTechnology} />
+                <Route exact path="/Services" component={Services} />
+                <Route exact path="/Contact" component={Contact} />
+                <Route exact path="/About" component={About} />
+                <Route exact path="/WhyUs" component={WhyUs} />
+                <Route exact path="/OurGoals" component={OurGoals} />
+                <Route exact path="/OurPartners" component={OurPartners} />
+                <Route exact path="/Portfolio" component={Portfolio} />                
+                <Route exact path="/login" render={props => { return <Login {...props} /> }}   />      */}
+
+                <Route exact path="/" render={props => {return APP_TOKEN.notEmpty ? <Home {...props} /> : <Redirect to="/login" /> }} />
+                {/* <Route exact path="/home" render={props => { return APP_TOKEN.notEmpty ? <Index {...props}/> :  <Redirect to="/login" /> }} />
+                <Route exact path="/editor"  render={props => { return APP_TOKEN.notEmpty ? <Editor {...props}  />  :  <Redirect to="/login" />  }}  />
+                <Route exact path="/OurTechnology" render={props => { return APP_TOKEN.notEmpty ? <OurTechnology  {...props}/>  :  <Redirect to="/login" />  }} />
+                <Route exact path="/Services" render={props => { return APP_TOKEN.notEmpty ? <Services {...props}/>  :  <Redirect to="/login" />  }} />
+                <Route exact path="/Contact" render={props => { return APP_TOKEN.notEmpty ? <Contact {...props} />  :  <Redirect to="/login" />  }} />
+                <Route exact path="/About" render={props => { return APP_TOKEN.notEmpty ? <About  {...props}/>  :  <Redirect to="/login" />  }} />
+                <Route exact path="/WhyUs" render={props => { return APP_TOKEN.notEmpty ? <WhyUs  {...props}/>  :  <Redirect to="/login" />  }}  />
+                <Route exact path="/OurGoals" render={props => { return APP_TOKEN.notEmpty ? <OurGoals  {...props}/>  :  <Redirect to="/login" />  }} />
+                <Route exact path="/OurPartners" render={props => { return APP_TOKEN.notEmpty ? <OurPartners {...props} />  :  <Redirect to="/login" />  }} />
+                <Route exact path="/Portfolio" render={props => { return APP_TOKEN.notEmpty ? <Portfolio {...props} />  :  <Redirect to="/login" />  }} />                 */}
+                <Route exact path="/login" render={props =>  <Login {...props} /> } />
+              </Switch>
+            </Suspense>
+          </Router>      
   );
 }
 
