@@ -7,7 +7,7 @@ const PARAMS = ({ methodType = 'GET' }) => ({
   method: methodType,
   headers: authHeader(),
 });
-console.log('API_CONSUMER: ', c.API_CONSUMER)
+
 export default {
 
   

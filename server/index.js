@@ -23,8 +23,12 @@ if (env === 'dev' || env === 'uat' || env === 'prod') {
 
 const mainRoute = require('./routes/mainRoute');
 
+
+app.use('/staticrecords', require('./routes/static'));
 app.use('/categories', require('./routes/categories'));
 app.use('/auth', require('./routes/auth'));
+
+
 app.use('/',mainRoute);
 
 let port ='';

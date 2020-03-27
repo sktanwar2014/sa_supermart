@@ -9,7 +9,7 @@ export default function Home() {
  return(
     <Fragment>
         <Header />
-        <BrowseProduct />
+            <BrowseProduct />
         <Footer />
     </Fragment>
  )

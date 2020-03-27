@@ -16,7 +16,7 @@ Auth.prototype.login = function () {
       }
 
       connection.changeUser({database : dbName});
-      connection.query(`SELECT name, token, account_id, user_id, is_active FROM users WHERE user_id = '${that.user_id}' AND password = AES_ENCRYPT('${that.password}','secret')`, function (error, rows, fields) { 
+      connection.query(`SELECT id, name, token, account_id, role_id, user_id, is_active FROM users WHERE user_id = '${that.user_id}' AND password = AES_ENCRYPT('${that.password}','secret')`, function (error, rows, fields) { 
         if (error) {  console.log("Error...", error); reject(error);  }          
         resolve(rows);
       });

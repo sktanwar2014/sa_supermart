@@ -7,15 +7,19 @@ export const AUTH_URL = 'http://localhost:5000'; // Config[KEY].AUTH_URL;
  export const API_CONSUMER = 'http://localhost:5000'; // Config[KEY].API_URL;
 
 export const APP_TOKEN = {
-    set: ({user_id, name, token, account_id}) => {
+    set: ({user_id, name, token, account_id, id, role_id}) => {
+        sessionStorage.setItem('userId', id);
         sessionStorage.setItem('token', token);
         sessionStorage.setItem('user_id', user_id);
+        sessionStorage.setItem('role_id', role_id);
         sessionStorage.setItem('name', name);
         sessionStorage.setItem('account_id', account_id);
     },
     get: () => ({
+        userId: sessionStorage.getItem('userId'),
         token: sessionStorage.getItem('token'),
         user_id : sessionStorage.getItem('user_id'),
+        role_id : sessionStorage.getItem('role_id'),
         name : sessionStorage.getItem('name'),
         account_id: sessionStorage.getItem('account_id'),
     }),
@@ -26,5 +30,11 @@ export const APP_TOKEN = {
         const cond1 = this.get().token !== null;
         const cond2 = this.get().token !== '';
         return cond1 && cond2;
+    },
+    get isAdmin() {
+        const cond1 = this.get().user_id == 'admin';
+        const cond2 = this.get().userId == 1;
+        const cond3 = this.get().role_id == 1;
+        return cond1 && cond2 && cond3;
     }
 }

@@ -17,8 +17,9 @@ import PageLoader from './Views/Partials/Loader';
 // const Editor = lazy(()=> import('./modules/editor'));
 
 const Login = lazy(()=> import('./Views/Auth/login'));
+const AdminHome = lazy(()=> import('./Views/Admin/AdminHome'));
 const Home = lazy(()=> import('./Views/Home'));
-
+const AddProduct = lazy(()=> import('./Views/Admin/AddProduct.js'));
 
 
 
@@ -40,8 +41,33 @@ function App() {
                 <Route exact path="/OurPartners" component={OurPartners} />
                 <Route exact path="/Portfolio" component={Portfolio} />                
                 <Route exact path="/login" render={props => { return <Login {...props} /> }}   />      */}
-
-                <Route exact path="/" render={props => {return APP_TOKEN.notEmpty ? <Home {...props} /> : <Redirect to="/login" /> }} />
+                
+                <Route 
+                  exact 
+                  path="/"
+                  render = { props => {
+                    return (!APP_TOKEN.notEmpty)
+                    ? <Redirect to="/login" />
+                    : (APP_TOKEN.isAdmin)
+                    ? <AdminHome {...props} />
+                    : <Home {...props} /> }}
+                />
+                <Route 
+                  exact 
+                  path="/add-new-product" 
+                  render = { props => {
+                    return (!APP_TOKEN.notEmpty)
+                    ? <Redirect to="/login" />
+                    : (APP_TOKEN.isAdmin)
+                    ? <AddProduct {...props} />
+                    : <Redirect to="/" /> }}                    
+                />
+                
+                <Route exact path="/login"  render={props =>  <Login {...props} /> } />
+                <Route exact path="/logout" render={props =>  <Redirect to="/login" /> }/>
+                
+                
+                
                 {/* <Route exact path="/home" render={props => { return APP_TOKEN.notEmpty ? <Index {...props}/> :  <Redirect to="/login" /> }} />
                 <Route exact path="/editor"  render={props => { return APP_TOKEN.notEmpty ? <Editor {...props}  />  :  <Redirect to="/login" />  }}  />
                 <Route exact path="/OurTechnology" render={props => { return APP_TOKEN.notEmpty ? <OurTechnology  {...props}/>  :  <Redirect to="/login" />  }} />
@@ -52,7 +78,7 @@ function App() {
                 <Route exact path="/OurGoals" render={props => { return APP_TOKEN.notEmpty ? <OurGoals  {...props}/>  :  <Redirect to="/login" />  }} />
                 <Route exact path="/OurPartners" render={props => { return APP_TOKEN.notEmpty ? <OurPartners {...props} />  :  <Redirect to="/login" />  }} />
                 <Route exact path="/Portfolio" render={props => { return APP_TOKEN.notEmpty ? <Portfolio {...props} />  :  <Redirect to="/login" />  }} />                 */}
-                <Route exact path="/login" render={props =>  <Login {...props} /> } />
+                
               </Switch>
             </Suspense>
           </Router>      

@@ -2,24 +2,77 @@ import React, {useState, useEffect} from 'react';
 
 //Components 
 import CategoriesAPI from '../../api/categories.js';
-
+import StaticAPI from '../../api/static.js';
 
 export default function BrowseProduct() {
 
-    const [mainCategory, setMainCategory] = useState([]);
+	const [categories, setCategories] = useState([]);
+	const [productsList, setProductsList] = useState([]);
+	const [staticRecordList, setStaticRecordList] = useState([]);
 
-    const getMainCategoryList = async () => {
+	const getRequiredStaticRecordList = async () => {
         try{
-            const result = await CategoriesAPI.getMainCategoryList();            
-            setMainCategory(result.mainCategoriesList);
+            const result = await StaticAPI.getRequiredStaticRecordList();
+            setStaticRecordList(result);            
         }catch(e){
             console.log('Error...',e);
         }
     }
-    
+
+    const getAllCategoryTableRecords = async () => {
+        try{
+            const result = await CategoriesAPI.getAllCategoryTableRecords();            
+            setCategories(result.allCategoryTableRecords);
+        }catch(e){
+            console.log('Error...',e);
+        }
+	}    
+	
+	const getTotalProductList = async () => {		
+        try{
+            const result = await CategoriesAPI.getTotalProductList();            
+			setProductsList(result.totalProductList);			
+        }catch(e){
+            console.log('Error...',e);
+        }
+	}
+
+	
+	const getProductUnderMainCategory = async (id) => {  
+        try{
+            const result = await CategoriesAPI.getProductUnderMainCategory({mainCategoryId: id});
+			setProductsList(result.totalProductList);	
+        }catch(e){
+            console.log('Error...',e);
+        }
+	}
+
+	const getProductUnderMiddleCategory = async (id) => {
+		try{
+			const result = await CategoriesAPI.getProductUnderMiddleCategory({middleCategoryId: id});
+			setProductsList(result.totalProductList);
+		}catch(e){
+			console.log('Error...',e);
+		}
+	}
+	 
+	const getProductUnderSubCategory = async (id) => {
+		try{
+			const result = await CategoriesAPI.getProductUnderSubCategory({subCategoryId: id});
+			setProductsList(result.totalProductList);
+		}catch(e){
+			console.log('Error...',e);
+		}
+	}
+
+
     useEffect(()=>{
-        getMainCategoryList();
+		getAllCategoryTableRecords();
+		getTotalProductList();
+		getRequiredStaticRecordList();
     },[]);
+
+
 
     return(
         <section className="cat_product_area section_gap">
@@ -33,27 +86,28 @@ export default function BrowseProduct() {
 			 				</div>
 			 				<div className="widgets_inner">
 			 					<ul className="list">
-                                     {(mainCategory.length > 0 ? mainCategory : []).map((top) => {
+                                     {(categories.length > 0 ? categories : []).map((top) => {
                                          if(top.type === 1 && top.parent_id === 0){
                                             return(
-                                            <li> <a href="#"  >{top.category_name}</a>
-                                                {(mainCategory.length > 0 ? mainCategory : []).map((middle) => {
+                                            <li > 
+												<a href="#"  onClick={()=>{getProductUnderMainCategory(top.id)}}>{top.category_name}</a>
+                                                {(categories.length > 0 ? categories : []).map((middle) => {
                                                     if(middle.type === 2 && middle.parent_id === top.id){
                                                         return(
-                                                            <ul className="list" style={{display: 'none'}}>
-                                                                <li><a href="#">{middle.category_name}</a>
-                                                                    {(mainCategory.length > 0 ? mainCategory : []).map((sub) => {
+                                                            <ul className="list" style={{display: 'block'}} id={`categories_${top.id}`} >
+                                                                <li><a href="#" onClick={()=>{getProductUnderMiddleCategory(middle.id)}}>{middle.category_name}</a>
+                                                                    {(categories.length > 0 ? categories : []).map((sub) => {
                                                                         if(sub.type === 3 && sub.parent_id === middle.id){
                                                                             return(
-                                                                                <ul className="list" style={{display: 'none'}}>
-                                                                                    <li><a href="#">{sub.category_name}</a></li>
+                                                                                <ul className="list" style={{display: 'block'}}>
+                                                                                    <li><a href="#" onClick={()=>{getProductUnderSubCategory(sub.id)}}>{sub.category_name}</a></li>
                                                                                 </ul>
                                                                                 )
                                                                         }
                                                                     })}
                                                                 </li>
                                                             </ul>
-                                                            )
+                                                        )
                                                     }
                                                 })}
                                             </li>
@@ -127,42 +181,70 @@ export default function BrowseProduct() {
 				 				</ul>
 				 			</nav>
 				 		</div>
-				 	</div>
-				 </div>				
+				 	</div>				 
+					<section className="ftco-section ftco-cart">
+						<div className="container">
+							<div className="row">
+								<div className="col-md-12 ftco-animate fadeInUp ftco-animated">
+									<div className="cart-list">
+										<table className="table">
+											<thead className="thead-primary">
+											<tr className="text-center">
+												<th>Product List</th>
+												<th>Unit</th>
+												<th>Price</th>
+												<th>Quantity</th>
+												<th>Total</th>
+												<th>&nbsp;</th>
+											</tr>
+											</thead>
+											<tbody>
+												{(productsList.length > 0 ? productsList : []).map((data, index) => {
+													return(
+														<tr className="text-center">
+															<td className="product-name">
+																<h3>{data.product_name + '  :  ' + data.model_no }</h3>
+																<p>{data.description}</p>
+															</td>
+															<td>
+																<div className="input-group mb-3">
+																	<select className="form-control"  defaultValue={String(data.unit_id)}>
+																		{(staticRecordList.productUnitList !== undefined && staticRecordList.productUnitList !== null && staticRecordList.productUnitList !== "") && 
+																			(staticRecordList.productUnitList.length > 0 ? staticRecordList.productUnitList : [] ).map((unit, index)=>{
+																				return(
+																					<option id={unit.id}  value={unit.id} >{unit.value}</option>
+																				)
+																			})
+																		}																		
+																	</select>
+																</div>
+															</td>
+															<td className="price">${data.price}</td>
+															<td className="quantity">
+																<div className="input-group mb-3">
+																	<input type="text" name="quantity" className="quantity form-control input-number" value="1" min="1" max="100" />
+																</div>
+															</td>
+															<td className="total">$4.90</td>
+															<td className="product-remove">
+																<a href="#" className="buy-now d-flex justify-content-center align-items-center mx-1">
+																	<span><i className="ion-ios-cart"></i></span>
+																</a>    
+															</td>
+														</tr>
+													)
+												})
+											}
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>	
+					</div>	
+				</section>	
 			</div>
-
-			 {/* <div className="row">
-			 	<nav className="cat_page mx-auto" aria-label="Page navigation example">
-			 		<ul className="pagination">
-			 			<li className="page-item">
-			 				<a className="page-link" href="#">
-			 					<i className="fa fa-chevron-left" aria-hidden="true"></i>
-			 				</a>
-			 			</li>
-			 			<li className="page-item active">
-			 				<a className="page-link" href="#">01</a>
-			 			</li>
-			 			<li className="page-item">
-			 				<a className="page-link" href="#">02</a>
-			 			</li>
-			 			<li className="page-item">
-			 				<a className="page-link" href="#">03</a>
-			 			</li>
-			 			<li className="page-item blank">
-			 				<a className="page-link" href="#">...</a>
-			 			</li>
-			 			<li className="page-item">
-			 				<a className="page-link" href="#">09</a>
-			 			</li>
-			 			<li className="page-item">
-			 				<a className="page-link" href="#">
-			 					<i className="fa fa-chevron-right" aria-hidden="true"></i>
-			 				</a>
-			 			</li>
-			 		</ul>
-			 	</nav>
-			 </div> */}
 		</div>
+	</div>
 	</section>
     )
 }
