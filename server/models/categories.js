@@ -2,6 +2,7 @@ const connection = require("../lib/connection.js");
 const {dbName} = require("../lib/connection.js");
 
 const Categories = function (params) {
+  this.productId = params.productId;
   this.mainCategoryId = params.mainCategoryId;
   this.middleCategoryId = params.middleCategoryId;
   this.subCategoryId = params.subCategoryId;
@@ -45,7 +46,7 @@ Categories.prototype.getTotalProductList = function () {
         throw error;
       }
       connection.changeUser({database : dbName});
-      let Query = 'SELECT p.main_category_id, p.middle_category_id, p.sub_category_id, p.product_name, p.model_no, p.price, p.description, p.brand_id, p.color_id, p.unit_id, p.is_active, p.status, brand.value as brand_name, color.value as color_name, unit.value as unit_name FROM `products` as p INNER JOIN static_records_value as brand ON brand.id = p.brand_id INNER JOIN static_records_value as color ON color.id = p.color_id INNER JOIN static_records_value as unit ON unit.id = p.unit_id WHERE p.is_active = 1';
+      let Query = 'SELECT p.id, p.main_category_id, p.middle_category_id, p.sub_category_id, p.product_name, p.model_no, p.price, p.description, p.brand_id, p.color_id, p.unit_id, p.is_active, p.status, brand.value as brand_name, color.value as color_name, unit.value as unit_name FROM `products` as p INNER JOIN static_records_value as brand ON brand.id = p.brand_id INNER JOIN static_records_value as color ON color.id = p.color_id INNER JOIN static_records_value as unit ON unit.id = p.unit_id WHERE p.is_active = 1';
       connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);
@@ -149,7 +150,7 @@ Categories.prototype.getProductUnderMainCategory = function () {
         throw error;
       }
       connection.changeUser({database : dbName});
-      let Query = `SELECT p.main_category_id, p.middle_category_id, p.sub_category_id, p.product_name, p.model_no, p.price, p.description, p.brand_id, p.color_id, p.unit_id, p.is_active, p.status, brand.value as brand_name, color.value as color_name, unit.value as unit_name FROM products as p INNER JOIN static_records_value as brand ON brand.id = p.brand_id INNER JOIN static_records_value as color ON color.id = p.color_id INNER JOIN static_records_value as unit ON unit.id = p.unit_id WHERE p.is_active = 1 AND p.main_category_id = ${that.mainCategoryId}`;
+      let Query = `SELECT p.id, p.main_category_id, p.middle_category_id, p.sub_category_id, p.product_name, p.model_no, p.price, p.description, p.brand_id, p.color_id, p.unit_id, p.is_active, p.status, brand.value as brand_name, color.value as color_name, unit.value as unit_name FROM products as p INNER JOIN static_records_value as brand ON brand.id = p.brand_id INNER JOIN static_records_value as color ON color.id = p.color_id INNER JOIN static_records_value as unit ON unit.id = p.unit_id WHERE p.is_active = 1 AND p.main_category_id = ${that.mainCategoryId}`;
       connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);
@@ -169,7 +170,7 @@ Categories.prototype.getProductUnderMiddleCategory = function () {
         throw error;
       }
       connection.changeUser({database : dbName});
-      let Query = `SELECT p.main_category_id, p.middle_category_id, p.sub_category_id, p.product_name, p.model_no, p.price, p.description, p.brand_id, p.color_id, p.unit_id, p.is_active, p.status, brand.value as brand_name, color.value as color_name, unit.value as unit_name FROM products as p INNER JOIN static_records_value as brand ON brand.id = p.brand_id INNER JOIN static_records_value as color ON color.id = p.color_id INNER JOIN static_records_value as unit ON unit.id = p.unit_id WHERE p.is_active = 1 AND p.middle_category_id = ${that.middleCategoryId}`;
+      let Query = `SELECT p.id, p.main_category_id, p.middle_category_id, p.sub_category_id, p.product_name, p.model_no, p.price, p.description, p.brand_id, p.color_id, p.unit_id, p.is_active, p.status, brand.value as brand_name, color.value as color_name, unit.value as unit_name FROM products as p INNER JOIN static_records_value as brand ON brand.id = p.brand_id INNER JOIN static_records_value as color ON color.id = p.color_id INNER JOIN static_records_value as unit ON unit.id = p.unit_id WHERE p.is_active = 1 AND p.middle_category_id = ${that.middleCategoryId}`;
       connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);
@@ -189,7 +190,28 @@ Categories.prototype.getProductUnderSubCategory = function () {
         throw error;
       }
       connection.changeUser({database : dbName});
-      let Query = `SELECT p.main_category_id, p.middle_category_id, p.sub_category_id, p.product_name, p.model_no, p.price, p.description, p.brand_id, p.color_id, p.unit_id, p.is_active, p.status, brand.value as brand_name, color.value as color_name, unit.value as unit_name FROM products as p INNER JOIN static_records_value as brand ON brand.id = p.brand_id INNER JOIN static_records_value as color ON color.id = p.color_id INNER JOIN static_records_value as unit ON unit.id = p.unit_id WHERE p.is_active = 1 AND p.sub_category_id = ${that.subCategoryId}`;
+      let Query = `SELECT p.id, p.main_category_id, p.middle_category_id, p.sub_category_id, p.product_name, p.model_no, p.price, p.description, p.brand_id, p.color_id, p.unit_id, p.is_active, p.status, brand.value as brand_name, color.value as color_name, unit.value as unit_name FROM products as p INNER JOIN static_records_value as brand ON brand.id = p.brand_id INNER JOIN static_records_value as color ON color.id = p.color_id INNER JOIN static_records_value as unit ON unit.id = p.unit_id WHERE p.is_active = 1 AND p.sub_category_id = ${that.subCategoryId}`;
+      connection.query(Query, function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(rows);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+}
+
+
+
+Categories.prototype.getSingleProduct = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+      let Query = `SELECT p.id, p.main_category_id, p.middle_category_id, p.sub_category_id, p.product_name, p.model_no, p.price, p.description, p.brand_id, p.color_id, p.unit_id, p.is_active, p.status, brand.value as brand_name, color.value as color_name, unit.value as unit_name FROM products as p INNER JOIN static_records_value as brand ON brand.id = p.brand_id INNER JOIN static_records_value as color ON color.id = p.color_id INNER JOIN static_records_value as unit ON unit.id = p.unit_id WHERE p.id = ${that.productId}`;
       connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);

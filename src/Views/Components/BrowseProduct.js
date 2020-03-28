@@ -3,12 +3,15 @@ import React, {useState, useEffect} from 'react';
 //Components 
 import CategoriesAPI from '../../api/categories.js';
 import StaticAPI from '../../api/static.js';
+import CartAPI from '../../api/cart.js';
 
 export default function BrowseProduct() {
 
 	const [categories, setCategories] = useState([]);
 	const [productsList, setProductsList] = useState([]);
 	const [staticRecordList, setStaticRecordList] = useState([]);
+	const [productCart, setProductCart] = useState([]);
+
 
 	const getRequiredStaticRecordList = async () => {
         try{
@@ -65,6 +68,19 @@ export default function BrowseProduct() {
 		}
 	}
 
+	const addProductInCart =async (productId) => {
+		let tempCart = [...productCart];
+		
+		// tempCart.productId = productId
+		// productCart = tempCa
+		document.getElementById('addincart'+productId).style.color = '#82ae46';
+		// try{
+        //     const result = await CartAPI.addProduct({productId: productId});
+        //     // setCategories(result.allCategoryTableRecords);
+        // }catch(e){
+        //     console.log('Error...',e);
+        // }
+	}
 
     useEffect(()=>{
 		getAllCategoryTableRecords();
@@ -72,6 +88,11 @@ export default function BrowseProduct() {
 		getRequiredStaticRecordList();
     },[]);
 
+
+	const handleValueChange = (data, e) =>{
+		let quantity = Number(e.target.value);
+		document.getElementById(`productTotal-${data.id}`).value = (data.price * quantity);
+	}
 
 
     return(
@@ -186,7 +207,7 @@ export default function BrowseProduct() {
 						<div className="container">
 							<div className="row">
 								<div className="col-md-12 ftco-animate fadeInUp ftco-animated">
-									<div className="cart-list">
+									<div className="">
 										<table className="table">
 											<thead className="thead-primary">
 											<tr className="text-center">
@@ -200,6 +221,7 @@ export default function BrowseProduct() {
 											</thead>
 											<tbody>
 												{(productsList.length > 0 ? productsList : []).map((data, index) => {
+
 													return(
 														<tr className="text-center">
 															<td className="product-name">
@@ -208,7 +230,7 @@ export default function BrowseProduct() {
 															</td>
 															<td>
 																<div className="input-group mb-3">
-																	<select className="form-control"  defaultValue={String(data.unit_id)}>
+																	<select className="form-control"  name='product_unit' defaultValue={String(data.unit_id)} >
 																		{(staticRecordList.productUnitList !== undefined && staticRecordList.productUnitList !== null && staticRecordList.productUnitList !== "") && 
 																			(staticRecordList.productUnitList.length > 0 ? staticRecordList.productUnitList : [] ).map((unit, index)=>{
 																				return(
@@ -222,12 +244,19 @@ export default function BrowseProduct() {
 															<td className="price">${data.price}</td>
 															<td className="quantity">
 																<div className="input-group mb-3">
-																	<input type="text" name="quantity" className="quantity form-control input-number" value="1" min="1" max="100" />
+																	<input type="text" className="quantity form-control input-number" defaultValue="1"  min="1" max="100" onChange={(e)=>{handleValueChange(data, e)}} />
 																</div>
 															</td>
-															<td className="total">$4.90</td>
+															<td className="total">
+																<div className="input-group mb-3">
+																	<input type="text" id={'productTotal-'+data.id} className="quantity form-control input-number" defaultValue={data.price} disabled/>
+																</div>
+															</td>
 															<td className="product-remove">
-																<a href="#" className="buy-now d-flex justify-content-center align-items-center mx-1">
+																<a 
+																	className="buy-now d-flex justify-content-center align-items-center mx-1"
+																	onClick={()=>{addProductInCart(data.id)}} id={'addincart' + data.id}
+																>
 																	<span><i className="ion-ios-cart"></i></span>
 																</a>    
 															</td>
@@ -237,6 +266,9 @@ export default function BrowseProduct() {
 											}
 										</tbody>
 									</table>
+									{/* <div className= "cart-detail p-3 p-md-4">
+										<p><a onClick={placeOrder} class="btn btn-primary py-3 px-4">Place an order</a></p>
+									</div> */}
 								</div>
 							</div>
 						</div>	

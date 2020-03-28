@@ -8,7 +8,7 @@ mainRoute.get('*', (req, res) => {
     const route = path.join(__dirname, '..', 'dist', 'index.html');
     res.sendFile(route);
   } else {
-    const route = path.join(__dirname, '..', '..', 'src', 'index.html');
+    const route = path.join(__dirname, '..', '..', 'public', 'index.html');
     res.sendFile(route);
   }
 });
