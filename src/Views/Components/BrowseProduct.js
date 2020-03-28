@@ -69,17 +69,13 @@ export default function BrowseProduct() {
 	}
 
 	const addProductInCart =async (productId) => {
-		let tempCart = [...productCart];
-		
-		// tempCart.productId = productId
-		// productCart = tempCa
-		document.getElementById('addincart'+productId).style.color = '#82ae46';
-		// try{
-        //     const result = await CartAPI.addProduct({productId: productId});
-        //     // setCategories(result.allCategoryTableRecords);
-        // }catch(e){
-        //     console.log('Error...',e);
-        // }
+		// document.getElementById('addincart'+productId).style.color = '#82ae46';
+		try{
+            const result = await CartAPI.addProduct({productId: productId});
+            // setCategories(result.allCategoryTableRecords);
+        }catch(e){
+            console.log('Error...',e);
+        }
 	}
 
     useEffect(()=>{
