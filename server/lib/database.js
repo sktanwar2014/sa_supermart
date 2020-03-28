@@ -1,13 +1,13 @@
 const env = 'local';
 
-let DbName = 'shopping';
-let domainName = 'localhost:5000';
+let DbName = 'a1abiliti_shopping';
+let domainName = 'ordernow.a1abilities.co.nz';
 
 console.log('env...', env);
 
 if (env === 'prod') {
-  DbName = 'shopping';
-  domainName = '';
+  DbName = 'a1abiliti_shopping';
+  domainName = 'ordernow.a1abilities.co.nz';
 } else {  
   DbName = 'shopping'
   domainName = 'localhost:5000'

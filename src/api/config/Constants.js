@@ -1,10 +1,10 @@
-// export const API_URL = 'http://newgc.sargatechnology.com'; // Config[KEY].API_URL;
-// export const AUTH_URL = 'http://newgc.sargatechnology.com'; // Config[KEY].AUTH_URL;
-// export const API_CONSUMER = 'http://newgc.sargatechnology.com'; // Config[KEY].API_URL;
+export const API_URL = 'http://ordernow.a1abilities.co.nz/'; // Config[KEY].API_URL;
+export const AUTH_URL = 'http://ordernow.a1abilities.co.nz/'; // Config[KEY].AUTH_URL;
+export const API_CONSUMER = 'http://ordernow.a1abilities.co.nz/'; // Config[KEY].API_URL;
 
-export const API_URL = 'http://localhost:5000'; // Config[KEY].API_URL;
-export const AUTH_URL = 'http://localhost:5000'; // Config[KEY].AUTH_URL;
- export const API_CONSUMER = 'http://localhost:5000'; // Config[KEY].API_URL;
+// export const API_URL = 'http://localhost:5000'; // Config[KEY].API_URL;
+// export const AUTH_URL = 'http://localhost:5000'; // Config[KEY].AUTH_URL;
+//  export const API_CONSUMER = 'http://localhost:5000'; // Config[KEY].API_URL;
 
 export const APP_TOKEN = {
     set: ({user_id, name, token, account_id, id, role_id}) => {

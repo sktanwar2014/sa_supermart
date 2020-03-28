@@ -36,7 +36,7 @@ let port ='';
 if(env === 'local'){
     port = 5000;
 }else if(env === 'prod'){
-    port = 3020;
+    port = 3010;
 }
 
 
