@@ -1,9 +1,18 @@
 const Categories = require('../models/categories.js');
 
-const getAllCategoryTableRecords = async function (req, res, next) {    
+// const getAllCategoryTableRecords = async function (req, res, next) {    
+//     try {
+//         const allCategoryTableRecords = await new Categories({}).getAllCategoryTableRecords();        
+//         res.send({ allCategoryTableRecords: allCategoryTableRecords});
+//     } catch (err) {
+//         next(err);
+//     }
+// }
+
+const getCategoryList = async function (req, res, next) {    
     try {
-        const allCategoryTableRecords = await new Categories({}).getAllCategoryTableRecords();        
-        res.send({ allCategoryTableRecords: allCategoryTableRecords});
+        const categoryList = await new Categories({}).getCategoryList();        
+        res.send({ categoryList: categoryList});
     } catch (err) {
         next(err);
     }
@@ -26,8 +35,8 @@ const getProductUnderMainCategory = async function (req, res, next) {
         mainCategoryId : req.body.mainCategoryId,
     };
     try {
-        const totalProductList = await new Categories(params).getProductUnderMainCategory();        
-        res.send({ totalProductList: totalProductList});
+        const productList = await new Categories(params).getProductUnderMainCategory();        
+        res.send({ productList: productList});
     } catch (err) {
         next(err);
     }
@@ -99,14 +108,14 @@ const getSubCategoryList = async function (req, res, next) {
 const insertNewProduct = async function (req, res, next) {
     const params = {
         mainCategoryId : Number(req.body.mainCategoryId),
-        middleCategoryId : Number(req.body.middleCategoryId),
-        subCategoryId : Number(req.body.subCategoryId),
+        // middleCategoryId : Number(req.body.middleCategoryId),
+        // subCategoryId : Number(req.body.subCategoryId),
         productName : req.body.productName,
-        brandId : Number(req.body.brandId),
-        colorId : Number(req.body.colorId),
-        modelNo : req.body.modelNo,
+        // brandId : Number(req.body.brandId),
+        // colorId : Number(req.body.colorId),
+        // modelNo : req.body.modelNo,
         sellerId : Number(req.body.sellerId),
-        imageId : Number(req.body.imageId),
+        // imageId : Number(req.body.imageId),
         price : Number(req.body.price),
         unitId : Number(req.body.unitId),
         description : req.body.description,
@@ -127,7 +136,8 @@ const insertNewProduct = async function (req, res, next) {
 
 
 module.exports = {    
-    getAllCategoryTableRecords : getAllCategoryTableRecords,
+    // getAllCategoryTableRecords : getAllCategoryTableRecords,
+    getCategoryList: getCategoryList,
     getTotalProductList : getTotalProductList,
     getMainCategoryList : getMainCategoryList,
     getMiddleCategoryList : getMiddleCategoryList,

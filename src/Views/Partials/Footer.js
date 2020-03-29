@@ -2,8 +2,9 @@ import React from 'react';
 
 export default function Footer(){
     return(
-        <footer className="ftco-footer ftco-section">
-        <div className="container">
+        // <footer className="ftco-footer ftco-section">
+        <footer style={{backgroundColor: '#82ae46'}}>
+        {/* <div className="container">
             <div className="row">
                 <div className="mouse">
                     <a href="#" className="mouse-icon">
@@ -66,12 +67,35 @@ export default function Footer(){
             </div>
             <div className="row">
             <div className="col-md-12 text-center">
-                {/* <p>
+                { <p>
                     Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i className="icon-heart color-danger" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
-                </p> */}
+                </p> 
             </div>
             </div>
-        </div>
+        </div> */}
+
+        <div className="container">
+                <div className="row no-gutters d-flex align-items-start align-items-center px-md-0">
+                    <div className="col-lg-12 d-block">
+                        <div className="row " >
+                            <div className="col-md pr-4 d-flex topper align-items-center">
+                              <p  className="text">Copyright 2019 &copy;All rights reserved | A1abilities PTY TLD  ABN# 82631548224</p>
+                            </div>
+                            {/* <div className="col-md pr-4 d-flex topper align-items-center">
+                                <div className="icon mr-2 d-flex justify-content-center align-items-center"><span className="icon-phone2"></span></div>
+                                <span className="text">+ 1235 2355 98</span>
+                            </div>
+                            <div className="col-md pr-4 d-flex topper align-items-center">
+                                <div className="icon mr-2 d-flex justify-content-center align-items-center"><span className="icon-paper-plane"></span></div>
+                                <span className="text">youremail@email.com</span>
+                            </div>
+                            <div className="col-md-5 pr-4 d-flex topper align-items-center text-lg-right">
+                                <span className="text">3-5 Business days delivery &amp; Free Returns</span>
+                            </div> */}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </footer>
     )
 }

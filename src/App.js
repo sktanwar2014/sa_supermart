@@ -5,17 +5,6 @@ import './App.css';
 import {APP_TOKEN} from  './api/config/Constants.js'
 import PageLoader from './Views/Partials/Loader';
 
-// const WhyUs = lazy(()=> import('./modules/WhyUs'));
-// const About = lazy(()=> import('./modules/AboutCompany'));
-// const Contact = lazy(()=> import('./modules/ContactUs'));
-// const OurGoals = lazy(()=> import('./modules/OurGoals'));
-// const OurPartners = lazy(()=> import('./modules/OurPartners'));
-// const Portfolio = lazy(()=> import('./modules/Portfolio'));
-// const Index = lazy(()=> import('./modules/index'));
-// const Services = lazy(()=> import('./modules/Services'));
-// const OurTechnology = lazy(()=> import('./modules/OurTechnology'));
-// const Editor = lazy(()=> import('./modules/editor'));
-
 const Login = lazy(()=> import('./Views/Auth/login'));
 const AdminHome = lazy(()=> import('./Views/Admin/AdminHome'));
 const Home = lazy(()=> import('./Views/Home'));

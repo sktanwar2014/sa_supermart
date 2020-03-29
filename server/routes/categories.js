@@ -3,7 +3,8 @@ const Router = express.Router();
 const Categories = require('../controllers/categories.js');
 
 
-Router.route("/getAllCategoryTableRecords").get(Categories.getAllCategoryTableRecords);
+// Router.route("/getAllCategoryTableRecords").get(Categories.getAllCategoryTableRecords);
+Router.route("/getCategoryList").get(Categories.getCategoryList);
 Router.route("/getTotalProductList").get(Categories.getTotalProductList);
 
 Router.route("/getMainCategoryList").get(Categories.getMainCategoryList);

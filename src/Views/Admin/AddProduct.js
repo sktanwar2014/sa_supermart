@@ -10,13 +10,14 @@ import Footer from '../Partials/Footer.js';
 
 export default function AddProduct(props) {
 
-    const [mainCategory, setMainCategory] = useState([]);
-    const [middleCategory, setMiddleCategory] = useState([]);
-    const [subCategory, setSubCategory] = useState([]);
+    // const [mainCategory, setMainCategory] = useState([]);
+    // const [middleCategory, setMiddleCategory] = useState([]);
+    // const [subCategory, setSubCategory] = useState([]);
+    const [categoryList, setCategoryList] = useState([]);
     const [staticRecordList, setStaticRecordList] = useState([]);
     
     useEffect(()=>{
-        getMainCategoryList();
+        getCategoryList();
         getRequiredStaticRecordList();
     },[]);
 
@@ -28,59 +29,67 @@ export default function AddProduct(props) {
             console.log('Error...',e);
         }
     }
-
-    const getMainCategoryList = async () => {
-        // document.getElementById('middleCategoryDropDown').value = "";
-        // setMiddleCategory([]);
+    const getCategoryList = async () => {
         try{
-            const result = await CategoriesAPI.getMainCategoryList();
-            setMainCategory(result.mainCategoriesList);
+            const result = await CategoriesAPI.getCategoryList();
+            setCategoryList(result.categoryList);            
         }catch(e){
             console.log('Error...',e);
         }
     }
 
-    const getMiddleCategoryList = async () => {
-        // document.getElementById('subCategoryDropDown').value = "";
-        // setSubCategory([]);
+    // const getMainCategoryList = async () => {
+    //     // document.getElementById('middleCategoryDropDown').value = "";
+    //     // setMiddleCategory([]);
+    //     try{
+    //         const result = await CategoriesAPI.getMainCategoryList();
+    //         setMainCategory(result.mainCategoriesList);
+    //     }catch(e){
+    //         console.log('Error...',e);
+    //     }
+    // }
+
+    // const getMiddleCategoryList = async () => {
+    //     // document.getElementById('subCategoryDropDown').value = "";
+    //     // setSubCategory([]);
         
-        let id = document.getElementById('mainCategoryDropDown').value;        
+    //     let id = document.getElementById('mainCategoryDropDown').value;        
 
-        if(id !== '' && id !== undefined && id !== null){
-            try{
-                const result = await CategoriesAPI.getMiddleCategoryList({mainCategoryId: id});
-                setMiddleCategory(result.middleCategoriesList);
-            }catch(e){
-                console.log('Error...',e);
-            }
-        }        
-    }
+    //     if(id !== '' && id !== undefined && id !== null){
+    //         try{
+    //             const result = await CategoriesAPI.getMiddleCategoryList({mainCategoryId: id});
+    //             setMiddleCategory(result.middleCategoriesList);
+    //         }catch(e){
+    //             console.log('Error...',e);
+    //         }
+    //     }        
+    // }
 
-    const getSubCategoryList = async () => {
-        let id = document.getElementById('middleCategoryDropDown').value;
-        if(id !== '' && id !== undefined && id !== null){
-            try{
-                const result = await CategoriesAPI.getSubCategoryList({middleCategoryId: id});
-                setSubCategory(result.subCategoriesList);
-            }catch(e){
-                console.log('Error...',e);
-            }
-        }
-    }
+    // const getSubCategoryList = async () => {
+    //     let id = document.getElementById('middleCategoryDropDown').value;
+    //     if(id !== '' && id !== undefined && id !== null){
+    //         try{
+    //             const result = await CategoriesAPI.getSubCategoryList({middleCategoryId: id});
+    //             setSubCategory(result.subCategoriesList);
+    //         }catch(e){
+    //             console.log('Error...',e);
+    //         }
+    //     }
+    // }
     
     const handleSubmit = async (e) => {
         e.preventDefault();
         try{
             const formData = {
-                mainCategoryId : document.getElementById('mainCategoryDropDown').value,
-                middleCategoryId : document.getElementById('middleCategoryDropDown').value,
-                subCategoryId : document.getElementById('subCategoryDropDown').value,
+                // mainCategoryId : document.getElementById('mainCategoryDropDown').value,
+                // middleCategoryId : document.getElementById('middleCategoryDropDown').value,
+                // subCategoryId : document.getElementById('subCategoryDropDown').value,
+                mainCategoryId : document.getElementById('categoryDropDown').value,
                 productName : document.getElementById('productName').value,
-                brandId : document.getElementById('productBrand').value,
-                colorId : document.getElementById('productColor').value,
-                modelNo : document.getElementById('modelNo').value,
+                // brandId : document.getElementById('productBrand').value,
+                // colorId : document.getElementById('productColor').value,
+                // modelNo : document.getElementById('modelNo').value,
                 sellerId : APP_TOKEN.get().userId,
-                imageId : 0,
                 price : document.getElementById('productPrice').value,
                 unitId : document.getElementById('unit_measurement').value,
                 description : document.getElementById('productDescription').value,
@@ -107,7 +116,7 @@ export default function AddProduct(props) {
                             <h3 class="mb-4 billing-heading">Add New Product</h3>
                             <form onSubmit={handleSubmit} class="p-5 bg-light">
                                     <div class="row align-items-end">
-                                        <div class="col-md-4">
+                                        {/* <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="country">Main Category *</label>
                                                 <div class="select-wrap">
@@ -157,15 +166,32 @@ export default function AddProduct(props) {
                                                     </select>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="w-100"></div>
+                                        </div> */}
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="country">Category * </label>
+                                                <div class="select-wrap">
+                                                    <select id="categoryDropDown" class="form-control" required>
+                                                        <option  value = "">Select any one</option>
+                                                        {(categoryList !== undefined && categoryList !== null && categoryList !== "") && 
+                                                         (categoryList.length > 0 ? categoryList : [] ).map((data, index)=>{
+                                                            return(
+                                                                <option id={data.id} value={data.id} >{data.category_name}</option>
+                                                            )
+                                                         })
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>                                         
                                         <div class="col-md-8">
                                             <div class="form-group">
                                                 <label for="productName">product Name *</label>
                                                 <input id="productName" type="text" class="form-control" placeholder="" required/>
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="w-100"></div>
+                                        <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="unit_measurement">Unit/Measurement *</label>
                                                 <div class="select-wrap">                                                
@@ -182,21 +208,20 @@ export default function AddProduct(props) {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="w-100"></div>
-                                        <div class="col-md-6">
+                                        {/* <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="modelNo">Model No *</label>
                                                 <input id="modelNo" type="text" class="form-control" placeholder="" required/>
                                             </div>
-                                        </div>
+                                        </div> */}
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="productPrice">Price *</label>
+                                                <label for="productPrice">Price (In $)*</label>
                                                 <input id="productPrice" type="text" class="form-control" placeholder="" required/>
                                             </div>
                                         </div>
                                         <div class="w-100"></div>
-                                        <div class="col-md-6">
+                                        {/* <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="brand">Brand *</label>
                                                 <div class="select-wrap">
@@ -230,7 +255,7 @@ export default function AddProduct(props) {
                                                 </div>
                                             </div>
                                         </div>   
-                                        <div class="w-100"></div>
+                                        <div class="w-100"></div> */}
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label for="description">Description *</label>

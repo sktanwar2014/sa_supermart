@@ -10,8 +10,8 @@ const PARAMS = ({ methodType = 'GET' }) => ({
 
 export default {
 
-  getAllCategoryTableRecords:async () => {
-    const URL = `${c.API_CONSUMER}/categories/getAllCategoryTableRecords`;
+  getCategoryList:async () => {
+    const URL = `${c.API_CONSUMER}/categories/getCategoryList`;
     try {
       const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'GET' })));
       return data;
@@ -20,6 +20,18 @@ export default {
       throw error;
     }
   },
+
+  
+  // getAllCategoryTableRecords:async () => {
+  //   const URL = `${c.API_CONSUMER}/categories/getAllCategoryTableRecords`;
+  //   try {
+  //     const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'GET' })));
+  //     return data;
+  //   } catch (error) {
+  //     checkError(error);
+  //     throw error;
+  //   }
+  // },
 
   getTotalProductList:async () => {
     const URL = `${c.API_CONSUMER}/categories/getTotalProductList`;
@@ -32,6 +44,7 @@ export default {
     }
   },
 
+ 
   getProductUnderMainCategory:async ({...payload }) => {
     const URL = `${c.API_CONSUMER}/categories/getProductUnderMainCategory`;
     try {
