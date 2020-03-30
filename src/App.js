@@ -10,6 +10,7 @@ const AdminHome = lazy(()=> import('./Views/Admin/AdminHome'));
 const Home = lazy(()=> import('./Views/Home'));
 const AddProduct = lazy(()=> import('./Views/Admin/AddProduct.js'));
 const ViewProduct = lazy(()=> import('./Views/Admin/ViewProduct.js'));
+const ViewOrder = lazy(()=> import('./Views/Admin/ViewOrder.js'));
 
 
 
@@ -60,6 +61,16 @@ function App() {
                     ? <Redirect to="/login" />
                     : (APP_TOKEN.isAdmin)
                     ? <ViewProduct {...props} />
+                    : <Redirect to="/" /> }}                    
+                />
+                <Route 
+                  exact 
+                  path="/view-order-list" 
+                  render = { props => {
+                    return (!APP_TOKEN.notEmpty)
+                    ? <Redirect to="/login" />
+                    : (APP_TOKEN.isAdmin)
+                    ? <ViewOrder {...props} />
                     : <Redirect to="/" /> }}                    
                 />
 

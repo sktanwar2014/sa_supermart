@@ -10346,3 +10346,61 @@ textarea.form-control {
 
 /* End Product Sidebar Area css
 ============================================================================================ */
+
+#exTab2 h3 {
+  padding : 5px 15px;
+}
+
+
+.tab-panel-tabs {
+  border-bottom: 1px solid #ddd;
+}
+.tab-panel {
+  display: flex;
+  padding-left: 0;
+  margin-bottom: 0;
+  list-style: none;
+}
+
+.tab-panel-tabs li {
+  float: left;
+  margin-bottom: -1px;
+}
+.tab-panel li {
+  /* position: relative; */
+  display: block;
+}
+
+
+.tab-panel-tabs li.active a, .tab-panel-tabs li.active a:hover, .tab-panel-tabs li.active a:focus {
+  color: #555;
+  cursor: default;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-bottom-color: transparent;
+}
+
+.tab-panel-tabs li a {
+  margin-right: 2px;
+  line-height: 1.42857143;
+  border: 1px solid transparent;
+  border-radius: 4px 4px 0 0;
+}
+.tab-panel  li a {
+  position: relative;
+  display: block;
+  padding: 10px 15px;
+}
+
+.order-list-table{
+  width: 100%;
+  text-align: center;
+}
+.order-list-table thead{
+  border-bottom: 1px solid;
+  font-size: 14px;
+}
+.order-list-table thead tr th{
+  padding: 5px;
+  min-width: 40px;
+}

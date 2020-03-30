@@ -44,6 +44,7 @@ app.use('/staticrecords', require('./routes/static'));
 app.use('/categories', require('./routes/categories'));
 app.use('/auth', require('./routes/auth'));
 app.use('/cart', require('./routes/cart'));
+app.use('/order', require('./routes/order'));
 
 
 app.use('/',mainRoute);

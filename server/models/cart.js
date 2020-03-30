@@ -18,7 +18,7 @@ ProductCart.prototype.addProduct = function(item, id){
       that.totalItems++;
       that.totalPrice += cartItem.item.price;
     }catch(Error){
-      reject(Error);
+      console.log(Error)
     }
 }
 
