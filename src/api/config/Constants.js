@@ -4,7 +4,7 @@
 
 export const API_URL = 'http://localhost:5000';         // Config[KEY].API_URL;
 export const AUTH_URL = 'http://localhost:5000';        // Config[KEY].AUTH_URL;
- export const API_CONSUMER = 'http://localhost:5000';   // Config[KEY].API_URL;
+export const API_CONSUMER = 'http://localhost:5000';   // Config[KEY].API_URL;
 
 export const APP_TOKEN = {
     set: ({user_id, name, token, account_id, id, role_id}) => {
@@ -24,8 +24,14 @@ export const APP_TOKEN = {
         account_id: sessionStorage.getItem('account_id'),
     }),
     remove: () => {
-        sessionStorage.clear();
-    },
+        // sessionStorage.clear();
+        sessionStorage.removeItem('userId');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user_id');
+        sessionStorage.removeItem('role_id');
+        sessionStorage.removeItem('name');
+        sessionStorage.removeItem('account_id');
+    },    
     get notEmpty() {
         const cond1 = this.get().token !== null;
         const cond2 = this.get().token !== '';
@@ -36,5 +42,34 @@ export const APP_TOKEN = {
         const cond2 = this.get().userId == 1;
         const cond3 = this.get().role_id == 1;
         return cond1 && cond2 && cond3;
+    }
+}
+
+
+
+export const CART_TOKEN = {
+    set: ({product}) => {
+        let prev = sessionStorage.getItem('cart');
+        if(prev !== null && prev !== ""){
+            let obj = JSON.parse(prev);
+            let filtered = obj.filter(ele => ele.id !== product.id)            
+            filtered.push(product);
+            sessionStorage.setItem('cart', JSON.stringify(filtered));
+        }else{
+            sessionStorage.setItem('cart', JSON.stringify([product]));            
+        }
+            
+    },
+    get: () => ({
+        cartTotal: sessionStorage.getItem('cart') !== null && sessionStorage.getItem('cart') !== "" ? JSON.parse(sessionStorage.getItem('cart')).length : 0,
+        cart: sessionStorage.getItem('cart') !== null && sessionStorage.getItem('cart') !== "" ? JSON.parse(sessionStorage.getItem('cart')) : [],
+    }),
+    removeProduct:({productId}) => {
+        let prev = sessionStorage.getItem('cart');
+        if(prev !== null && prev !== ""){
+            let obj = JSON.parse(prev);
+            let filtered = obj.filter(ele => ele.id !== productId)            
+            sessionStorage.setItem('cart', JSON.stringify(filtered));
+        }
     }
 }

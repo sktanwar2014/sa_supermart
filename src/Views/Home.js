@@ -7,10 +7,8 @@ import BrowseProduct from './Components/BrowseProduct.js';
 
 export default function Home() {
  return(
-    <Fragment>
-        <Header />
+
             <BrowseProduct />
-        <Footer />
-    </Fragment>
+    
  )
 }

@@ -31,7 +31,35 @@ const proceedToDelivered = async function (req, res, next) {
 }
 
 
+const addNewOrder = async function (req, res, next) {    
+    const params = {
+        firstName : req.body.firstName,
+        lastName : req.body.lastName,
+        state : req.body.state,
+        streetAddress : req.body.streetAddress,
+        flatAdd : req.body.flatAdd,
+        city : req.body.city,
+        postCode : req.body.postCode,
+        phone : req.body.phone,
+        email : req.body.email,
+        createdBy : req.body.createdBy,
+        itemsTotal: req.body.itemsTotal,
+        cartItems : req.body.cartItems,
+    }
+    try {
+        const Model = new Order(params);
+        await Model.addNewOrder();
+        
+        // const orderList = await Model.getOrderList();
+        // const orderedProducts = await Model.getOrderedProduct();
+        res.send(true);
+    } catch (err) {
+        next(err);
+    }
+}
+
 module.exports = {    
     getOrderList: getOrderList,
     proceedToDelivered: proceedToDelivered,
+    addNewOrder: addNewOrder,
 };

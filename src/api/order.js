@@ -50,5 +50,19 @@ export default {
     }
   },
 
+  addNewOrder:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/order/addNewOrder`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
 
 };
