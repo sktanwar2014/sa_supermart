@@ -57,36 +57,6 @@
   <script src="./js/google-map.js"></script>
   <script src="./js/main.js"></script> 
   
-  <script>
-    // var dropToggle = $('.widgets_inner .list li').has('ul').children('a');    
-    //  dropToggle.on('click', function() {
-    //      dropToggle.not(this).closest('li').find('ul').slideUp(200);
-    //      $(this).closest('li').children('ul').slideToggle(200);
-    //      return false;
-    //  });
-    var dropToggleOuter = $('.widgets_inner .list li').has('ul').children('a'); 
-    var dropToggleInner = $('.widgets_inner .list li ul li').has('ul').children('a'); 
-    var isInnerClicked = false;
-
-    dropToggleOuter.on('click', function() {
-    if(isInnerClicked === false){
-    console.log('isclick',isInnerClicked);
-    $(this).closest('li').children('ul').slideToggle(200);
-    // dropToggleOuter.not(this).closest('li').find('ul').slideUp(200);    
-    // console.log('droptoggleouter',dropToggleOuter)
-        return false;
-    }
-    });
-
-    dropToggleInner.on('click', function() {
-    isInnerClicked = true;
-    // console.log('dropToggleInner',dropToggleInner)
-    console.log('isclick',isInnerClicked);
-    $(this).closest('li').children('ul').slideToggle(200);
-    return false;
-    });
-
-   </script>
    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 	 <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
   </body>

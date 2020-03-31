@@ -1,12 +1,11 @@
-import React,{Fragment, useState} from 'react';
+import React,{Fragment, useState, useEffect} from 'react';
 import {APP_TOKEN, CART_TOKEN} from '../../api/config/Constants.js';
 
-export default function Header({totalInCart=0}) {
+export default function Header() {
     const userId = APP_TOKEN.get().userId;
     const roleId = APP_TOKEN.get().role_id;
-    const [cartTotal, setCartTotal] = useState(totalInCart);
-    
-
+    const [cartTotal, setCartTotal] = useState(CART_TOKEN.get().cartTotal);
+  
  return(
      <Fragment>
         <div className="py-1 bg-primary">
@@ -61,7 +60,7 @@ export default function Header({totalInCart=0}) {
                         <li className="nav-item dropdown">
                             <a className="nav-link dropdown-toggle" href="#" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Orders</a>
                             <div className="dropdown-menu" aria-labelledby="dropdown04">
-                                <a className="dropdown-item" href="#">View</a>
+                                <a className="dropdown-item" href="/view-user-order-list">View</a>
                             </div>
                         </li>
                         <li className="nav-item cta cta-colored"><a href="/cart-list" className="nav-link"><span className="icon-shopping_cart"></span>[{cartTotal}]</a></li>

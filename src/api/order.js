@@ -36,6 +36,20 @@ export default {
     }
   },
 
+  getCustomerOrderList:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/order/getCustomerOrderList`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
   proceedToDelivered:async ({...payload }) => {
     const URL = `${c.API_CONSUMER}/order/proceedToDelivered`;
     try {

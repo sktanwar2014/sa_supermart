@@ -1,9 +1,10 @@
-import React, {Suspense, lazy} from 'react';
+import React, {Suspense, lazy, useEffect} from 'react';
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import './App.css';
 
 import {APP_TOKEN} from  './api/config/Constants.js'
 import PageLoader from './Views/Partials/Loader';
+import ViewCustomerOrder from './Views/Components/ViewCustomerOrder';
 
 const Login = lazy(()=> import('./Views/Auth/login'));
 const AdminHome = lazy(()=> import('./Views/Admin/AdminHome'));
@@ -74,6 +75,16 @@ function App() {
                     : (APP_TOKEN.isAdmin)
                     ? <AddProduct {...props} />
                     : <Redirect to="/" /> }}                    
+                />
+                <Route 
+                  exact 
+                  path="/view-user-order-list" 
+                  render = { props => {
+                    return (!APP_TOKEN.notEmpty)
+                    ? <Redirect to="/login" />
+                    : (APP_TOKEN.isAdmin)
+                    ? <Redirect to="/view-added-product" />
+                    : <ViewCustomerOrder {...props} />}}                    
                 />
                 <Route 
                   exact 

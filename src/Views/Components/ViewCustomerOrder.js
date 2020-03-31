@@ -5,8 +5,9 @@ import Header from '../Partials/Header.js';
 import Footer from '../Partials/Footer.js';
 import OrderAPI from '../../api/order.js';
 import {getDateInDDMMYYYY} from '../../common/moment.js';
+import {APP_TOKEN} from  '../../api/config/Constants.js'
 
-export default function ViewOrder() {
+export default function ViewCustomerOrder() {
 
 	const [orderList, setOrderList] = useState([]);
     const [orderedProductList, setOrderedProductList] = useState([]);
@@ -18,8 +19,9 @@ export default function ViewOrder() {
 
     const getOrderList = async () => {
         try{
-            const result = await OrderAPI.getOrderList({
+            const result = await OrderAPI.getCustomerOrderList({
                 order_status : tabValue,
+                createdBy : APP_TOKEN.get().userId,
             });
             setOrderList(result.orderList);            
             setOrderedProductList(result.orderedProducts);            
@@ -28,20 +30,7 @@ export default function ViewOrder() {
         }
     }
 
-    console.log(orderList, orderedProductList)
 
-    const proceedToDelivered = async (orderId) => {
-        try{
-            const result = await OrderAPI.proceedToDelivered({
-                orderId : orderId,
-                order_status : tabValue,
-            });
-            setOrderList(result.orderList);
-            setOrderedProductList(result.orderedProducts);            
-        }catch(e){
-            console.log('Error...',e);
-        }
-    }
 
     
     const handleTabChange = (index) =>{
@@ -81,7 +70,6 @@ export default function ViewOrder() {
                                                     <th>Total</th>
                                                     <th>Address</th>
                                                     <th>Total</th>
-                                                    {tabValue === 1 && <th>Action</th>}
                     					        </tr>
 						                    </thead>
 						                    <tbody>
@@ -108,7 +96,6 @@ export default function ViewOrder() {
                                                                         <Fragment>
                                                                             <td rowspan={totalProduct}>{`${order.flat_add}, ${order.street_add}, ${order.city}`}</td>
                                                                             <td rowspan={totalProduct}>{order.total}</td>
-                                                                            {tabValue === 1 && <td rowspan={totalProduct}><a href="" onClick={()=>{proceedToDelivered(order.id)}}>Click to delivered</a></td>}
                                                                         </Fragment>
                                                                     }   
                                                                     <div style={{display:'none'}}>{totalProduct = 0}</div>

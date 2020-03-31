@@ -1,4 +1,5 @@
 import React, {useState, useEffect, Fragment} from 'react';
+import $ from "jquery";
 
 //Components 
 import Header from '../Partials/Header.js';
@@ -6,11 +7,23 @@ import Footer from '../Partials/Footer.js';
 
 import CategoriesAPI from '../../api/categories.js';
 
-export default function BrowseProduct() {
+export default function ViewProduct() {
 
 	const [categoryList, setCategoryList] = useState([]);
     const [productsList, setProductsList] = useState([]);
-    
+	
+	
+	useEffect(() => {
+		$(document).ready(function () {
+        	$('.product-category li a').click(function(e) {
+				$('.product-category li a').removeClass('active');
+				var $parent = $(this);
+				$parent.addClass('active');
+				e.preventDefault();
+        	});
+		});
+	})
+
     useEffect(()=>{
 		getCategoryList();
 		getTotalProductList();
@@ -38,8 +51,6 @@ export default function BrowseProduct() {
 		try{
             const result = await CategoriesAPI.getProductUnderMainCategory({mainCategoryId: id});
 			setProductsList(result.productList);	
-		console.log(id, result)
-
         }catch(e){
             console.log('Error...',e);
         }
@@ -53,12 +64,12 @@ export default function BrowseProduct() {
 					<div className="row justify-content-center">
 						<div className="col-md-10 mb-5 text-center">
 							<ul className="product-category">
-								<li><a  onClick={getTotalProductList} className={"active"}>All</a></li>
+								<li><a href="#" onClick={getTotalProductList} className={"active"}>All</a></li>
 
 								{(categoryList.length > 0 ? categoryList : []).map((data, index) => {
 									return(
 										<li > 
-											<a   onClick={()=>{getProductUnderMainCategory(data.id)}}>{data.category_name}</a>														
+											<a href="#" onClick={()=>{getProductUnderMainCategory(data.id)}}>{data.category_name}</a>														
 										</li>
 										)
 									}
@@ -88,9 +99,14 @@ export default function BrowseProduct() {
 											</div>
 											<div className="bottom-area d-flex px-3">
 												<div className="m-auto d-flex">
-													<a href="#" className="add-to-cart d-flex justify-content-center align-items-center text-center">
+													{/* <a href="#" className="add-to-cart d-flex justify-content-center align-items-center text-center">
 														<span><i className="ion-ios-menu"></i></span>
-													</a>
+													</a> */}
+													<p className="price">
+														<span>{`$${data.price} / ${data.unit_name}`}</span>
+														{/* <span className="mr-2 price-dc">{`$${data.price}`}</span>
+														<span className="price-sale">$80.00</span>*/}
+													</p> 
 												</div>
 											</div>
 										</div>

@@ -10404,3 +10404,10 @@ textarea.form-control {
   padding: 5px;
   min-width: 40px;
 }
+
+.product-in-cart {
+    pointer-events: none;
+    cursor: default;
+    background-color: #82ae46;
+    color: #ffffff;
+}

@@ -14,6 +14,24 @@ const getOrderList = async function (req, res, next) {
     }
 }
 
+
+
+const getCustomerOrderList = async function (req, res, next) {    
+    const params = {
+        order_status: req.body.order_status,
+        createdBy : req.body.createdBy,
+    }
+    try {
+        const Model = new Order(params);
+        const orderList = await Model.getCustomerOrderList();
+        const orderedProducts = await Model.getCustomerOrderedProduct();
+        res.send({ orderList: orderList, orderedProducts: orderedProducts});
+    } catch (err) {
+        next(err);
+    }
+}
+
+
 const proceedToDelivered = async function (req, res, next) {    
     const params = {
         order_status: req.body.order_status,
@@ -48,11 +66,13 @@ const addNewOrder = async function (req, res, next) {
     }
     try {
         const Model = new Order(params);
-        await Model.addNewOrder();
-        
-        // const orderList = await Model.getOrderList();
-        // const orderedProducts = await Model.getOrderedProduct();
-        res.send(true);
+        const result = await Model.addNewOrder();
+        console.log(result)
+        if(result !== null && result !== undefined && result !== ""){
+            res.send(true);
+        }else{
+            res.send(false);
+        }
     } catch (err) {
         next(err);
     }
@@ -60,6 +80,7 @@ const addNewOrder = async function (req, res, next) {
 
 module.exports = {    
     getOrderList: getOrderList,
+    getCustomerOrderList: getCustomerOrderList,
     proceedToDelivered: proceedToDelivered,
     addNewOrder: addNewOrder,
 };

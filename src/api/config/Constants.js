@@ -71,5 +71,8 @@ export const CART_TOKEN = {
             let filtered = obj.filter(ele => ele.id !== productId)            
             sessionStorage.setItem('cart', JSON.stringify(filtered));
         }
+    },
+    removeCart: () =>{
+        sessionStorage.removeItem('cart');
     }
 }

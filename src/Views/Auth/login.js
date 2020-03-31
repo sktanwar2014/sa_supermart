@@ -21,7 +21,6 @@ export default function Login(props){
                 username: inputs.username,
                 password: inputs.password,
             });
-            console.log(result)
             if(result.length !== undefined && result.length >0){
                 APP_TOKEN.set(result[0]);
                 history.push('/');
@@ -31,7 +30,9 @@ export default function Login(props){
         }catch(e){
             console.log('Error...',e);
             }
-        } 
+       }else{
+            alert('Fill the details');
+        }
     }
 
     return(

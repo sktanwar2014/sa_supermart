@@ -6,11 +6,10 @@ import {CART_TOKEN, APP_TOKEN} from '../../api/config/Constants.js';
 import Footer from '../Partials/Footer.js';
 import Header from '../Partials/Header.js';
 
-export default function BrowseProduct() {
+export default function ProceedToCheckout(props) {
 	
     
 	const [cartTotal, setCartTotal]= useState();
-	const [totalInCart, setTotalInCart] = useState(CART_TOKEN.get().cartTotal);
 
 
 	useEffect(()=>{
@@ -43,12 +42,10 @@ export default function BrowseProduct() {
 			};
 			
 			const result = await OrderAPI.addNewOrder(formData);
-			console.log(result)
-            // if(result === true){    // true = inserted
-            //     // props.history.push('/');
-            // }else{
-            //     alert('Failed Insertion');
-            // }            
+			if(result=== true){
+				CART_TOKEN.removeCart();
+			}
+                props.history.push('/');
         }catch(e){
             console.log('Error...', e);
         }
@@ -57,7 +54,7 @@ export default function BrowseProduct() {
 
     return(
 		<Fragment>
-		<Header totalInCart = {totalInCart} />
+		<Header />
         	<section class="ftco-section">
       			<div class="container">
 				  <form onSubmit={handleSubmit} class="billing-form">
@@ -105,7 +102,7 @@ export default function BrowseProduct() {
 										</div>
 										<div class="col-md-6">
 											<div class="form-group">
-											<input type="text" id="flatAdd" class="form-control" placeholder="Appartment, suite, unit etc: (optional)" />
+											<input type="text" id="flatAdd" class="form-control" placeholder="Appartment, suite, unit etc." required />
 											</div>
 										</div>
 										<div class="w-100"></div>
