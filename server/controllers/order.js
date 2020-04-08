@@ -1,4 +1,6 @@
 const Order = require('../models/order.js');
+const {isEmpty} = require('../utils/conditionChecker.js');
+
 
 const getOrderList = async function (req, res, next) {    
     const params = {
@@ -51,6 +53,7 @@ const proceedToDelivered = async function (req, res, next) {
 
 const addNewOrder = async function (req, res, next) {    
     const params = {
+        shipping_id : req.body.shipping_id,
         firstName : req.body.firstName,
         lastName : req.body.lastName,
         state : req.body.state,
@@ -66,8 +69,20 @@ const addNewOrder = async function (req, res, next) {
     }
     try {
         const Model = new Order(params);
-        const result = await Model.addNewOrder();
-        console.log(result)
+        
+        if(!isEmpty(params.shipping_id)){
+            const shippingId = await Model.insertShippingDetails();
+            Model.shipping_id = shippingId;
+        }else{
+            await Model.updateShippingDetails();
+        }
+        
+        const orderId = await Model.insertOrderDetails();
+        Model.order_id = orderId;
+        
+        await Model.insertBillingDetails();
+        const result = await Model.insertOrderedProduct();
+
         if(result !== null && result !== undefined && result !== ""){
             res.send(true);
         }else{
@@ -78,9 +93,46 @@ const addNewOrder = async function (req, res, next) {
     }
 }
 
+
+
+const fetchPreviousBillingAddresss = async function (req, res, next) {    
+    const params = {
+       userId : req.body.userId
+    }
+    try {
+        const Model = new Order(params);
+        const result = await Model.fetchPreviousBillingAddresss();
+        res.send({billingAddresses: result});
+    } catch (err) {
+        next(err);
+    }
+}
+
+
+
+const removeSelectedAddress = async function (req, res, next) {    
+    const params = {
+       id : req.body.id,
+       userId : req.body.userId
+    }
+    try {
+        const Model = new Order(params);
+        await Model.removeSelectedAddress();
+
+        const result = await Model.fetchPreviousBillingAddresss();
+
+        res.send({billingAddresses: result});
+    } catch (err) {
+        next(err);
+    }
+}
+
+
 module.exports = {    
     getOrderList: getOrderList,
     getCustomerOrderList: getCustomerOrderList,
     proceedToDelivered: proceedToDelivered,
     addNewOrder: addNewOrder,
+    fetchPreviousBillingAddresss: fetchPreviousBillingAddresss,
+    removeSelectedAddress: removeSelectedAddress,
 };

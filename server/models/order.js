@@ -16,6 +16,10 @@ const Order = function (params) {
   this.createdBy = params.createdBy;
   this.itemsTotal= params.itemsTotal;
   this.cartItems = params.cartItems;
+  this.userId = params.userId;
+  this.shipping_id = params.shipping_id;
+  this.order_id = params.order_id;
+  this.id = params.id;
 };
 
 
@@ -39,7 +43,24 @@ Order.prototype.proceedToDelivered = function () {
 
 
 
-Order.prototype.addNewOrder = function () {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Order.prototype.updateShippingDetails = function () {
   const that = this;
   return new Promise(function (resolve, reject) {
     connection.getConnection(function (error, connection) {
@@ -47,38 +68,139 @@ Order.prototype.addNewOrder = function () {
         throw error;
       }
       connection.changeUser({database : dbName});
+      
+      const shippingDetails = [
+       that.firstName + ' ' + that.lastName, that.phone, that.email, that.postCode, that.flatAdd, that.streetAddress, that.city, that.state, 1 , 1, that.createdBy, that.shipping_id
+      ]
+      connection.query('UPDATE `shipping_details` SET `full_name` = ?, `mobile` = ?, `email` = ?, `pincode` = ?, `flat_add` = ?, `street_add` = ?, `city` = ?, `state` = ?, `status` = ?, `is_active` = ?, `updated_by` = ? WHERE `id`  =  ?', shippingDetails, function (error, shippingResult, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(shippingResult)
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
+
+
+
+
+
+Order.prototype.insertShippingDetails = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+      
       const shippingDetails = [
         that.createdBy, that.firstName + ' ' + that.lastName, that.phone, that.email, that.postCode, that.flatAdd, that.streetAddress, that.city, that.state, 1 , 1, that.createdBy
       ]
       connection.query('INSERT INTO `shipping_details`(`user_id`, `full_name`, `mobile`, `email`, `pincode`, `flat_add`, `street_add`, `city`, `state`, `status`, `is_active`, `created_by`) VALUES (?)', [shippingDetails], function (error, shippingResult, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
-          
-        const orderDetails=[Math.ceil(Math.random() *1000000000), that.createdBy, shippingResult.insertId, new Date(), 1, 1, that.createdBy]
+        resolve(shippingResult.insertId)
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
+
+
+Order.prototype.insertOrderDetails = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+        connection.changeUser({database : dbName});
+        const orderDetails=[Math.ceil(Math.random() *1000000000), that.createdBy, that.shipping_id, new Date(), 1, 1, that.createdBy]
         connection.query('INSERT INTO `orders`(`order_id`, `user_id`, `shipping_id`, `order_date`, `status`, `is_active`, `created_by`) VALUES (?)', [orderDetails], function (error, orderResult, fields) {
           if (error) {  console.log("Error...", error); reject(error);  }
-        
-          const billingDetails=[ orderResult.insertId, that.createdBy, that.itemsTotal, 0, 0, 0, 0, that.itemsTotal, 1, 1, that.createdBy]
-          connection.query('INSERT INTO `order_billing`( `order_id`, `user_id`, `items_total`, `packing`, `delivery`, `tax`, `promotion`, `total`, `status`, `is_active`, `created_by`) VALUES (?)', [billingDetails], function (error, rows, fields) {
-              if (error) {  console.log("Error...", error); reject(error);  }
-              
-              // let orderedProductDetails = [];
-              that.cartItems.map((data, index) => {
-                let product = [that.createdBy, orderResult.insertId, Math.ceil(Math.random() *1000000000), data.id, data.quantity, data.unit_id, data.total, 1, 1, that.createdBy]
-                connection.query('INSERT INTO `ordered_product`( `user_id`, `order_id`, `tracking_id`, `product_id`, `quantity`, `unit_id`, `total`, `status`, `is_active`, `created_by`) VALUES (?)', [product], function (error, rows, fields) {
-                  if (error) {  console.log("Error...", error); reject(error);}
-                    resolve(rows);
-                });
-              })
-              // console.log(orderedProductDetails)
-              
-            });            
-          });
+          resolve(orderResult.insertId)
         });
         connection.release();
         console.log('Process Complete %d', connection.threadId);
     });
   });
 } 
+
+
+
+Order.prototype.insertBillingDetails = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+          const billingDetails=[ that.order_id, that.createdBy, that.itemsTotal, 0, 0, 0, 0, that.itemsTotal, 1, 1, that.createdBy]
+          connection.query('INSERT INTO `order_billing`( `order_id`, `user_id`, `items_total`, `packing`, `delivery`, `tax`, `promotion`, `total`, `status`, `is_active`, `created_by`) VALUES (?)', [billingDetails], function (error, rows, fields) {
+              if (error) {  console.log("Error...", error); reject(error);  }
+              resolve(rows.insertId);
+        });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
+
+
+Order.prototype.insertOrderedProduct = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+
+      that.cartItems.map((data, index) => {
+        let product = [that.createdBy, that.order_id, Math.ceil(Math.random() *1000000000), data.id, data.quantity, data.unit_id, data.total, 1, 1, that.createdBy]
+        connection.query('INSERT INTO `ordered_product`( `user_id`, `order_id`, `tracking_id`, `product_id`, `quantity`, `unit_id`, `total`, `status`, `is_active`, `created_by`) VALUES (?)', [product], function (error, rows, fields) {
+          if (error) {  console.log("Error...", error); reject(error);}
+            resolve(rows);
+        });
+      })
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -166,5 +288,48 @@ Order.prototype.getCustomerOrderList = function () {
 } 
 
 
+
+
+
+
+
+Order.prototype.fetchPreviousBillingAddresss = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+      connection.query('SELECT `id`, `user_id`, `full_name`, `mobile`, `email`, `pincode`, `flat_add`, `street_add`, `city`, `state`,  `status`, `is_active` FROM `shipping_details` WHERE user_id = "'+that.userId+'" AND is_active = 1', function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(rows);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
+
+
+
+
+Order.prototype.removeSelectedAddress = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+      connection.query('UPDATE `shipping_details` SET is_active = 0 WHERE id = "'+that.id+'"', function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(rows);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
 
 module.exports = Order;

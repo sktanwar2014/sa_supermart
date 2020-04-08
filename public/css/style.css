@@ -10409,5 +10409,29 @@ textarea.form-control {
     pointer-events: none;
     cursor: default;
     background-color: #82ae46;
-    color: #ffffff;
+    color: #a8a0a0;
+}
+
+.pre-address {
+  border: 2px solid #eff2f6;
+  padding: 26PX;
+  margin-bottom: 40px;
+  min-height: 250px;
+}
+
+
+.pre-address h4{
+  font-size: 16px;
+}
+
+
+.pre-address ul{
+  list-style: none;
+  padding: 0px;
+  font-family: monospace;
+  white-space: nowrap;
+}
+
+.pre-address a {
+  padding-right: 15px;
 }

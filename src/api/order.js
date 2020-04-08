@@ -21,6 +21,35 @@ export default {
   //   }
   // },
 
+  fetchPreviousBillingAddresss:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/order/fetchPreviousBillingAddresss`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
+  removeSelectedAddress:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/order/removeSelectedAddress`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
+
  
   getOrderList:async ({...payload }) => {
     const URL = `${c.API_CONSUMER}/order/getOrderList`;
