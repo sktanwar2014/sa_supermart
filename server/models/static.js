@@ -2,7 +2,8 @@ const connection = require("../lib/connection.js");
 const {dbName} = require("../lib/connection.js");
 
 const StaticModel = function (params) {
-  
+  this.id = params.id;
+  this.is_bundle = params.is_bundle;
 };
 
 
@@ -14,26 +15,7 @@ StaticModel.prototype.getProductUnitList = function () {
         throw error;
       }
       connection.changeUser({database : dbName});
-      connection.query(`SELECT * FROM static_records_value WHERE records_type_id = 4 AND is_active = 1`, function (error, rows, fields) {
-        if (error) {  console.log("Error...", error); reject(error);  }
-        resolve(rows);
-      });
-        connection.release();
-        console.log('Process Complete %d', connection.threadId);
-    });
-  });
-} 
-
-
-StaticModel.prototype.getColorList = function () {
-  const that = this;
-  return new Promise(function (resolve, reject) {
-    connection.getConnection(function (error, connection) {
-      if (error) {
-        throw error;
-      }
-      connection.changeUser({database : dbName});
-      connection.query(`SELECT * FROM static_records_value WHERE records_type_id = 6 AND is_active = 1`, function (error, rows, fields) {
+      connection.query(`SELECT * FROM unit_records WHERE is_active = 1`, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);
       });
@@ -45,7 +27,7 @@ StaticModel.prototype.getColorList = function () {
 
 
 
-StaticModel.prototype.getBrandList = function () {
+StaticModel.prototype.getMainUnitRelateRecords = function () {
   const that = this;
   return new Promise(function (resolve, reject) {
     connection.getConnection(function (error, connection) {
@@ -53,7 +35,14 @@ StaticModel.prototype.getBrandList = function () {
         throw error;
       }
       connection.changeUser({database : dbName});
-      connection.query(`SELECT * FROM static_records_value WHERE records_type_id = 5 AND is_active = 1`, function (error, rows, fields) {
+
+      let Query = ``;
+      if(that.is_bundle === 0){
+        Query = `SELECT * FROM unit_records WHERE id = ${that.id} OR parent_id = ${that.id} OR id = (SELECT parent_id FROM unit_records WHERE id = ${that.id}) OR is_bundle = 1`;
+      }else if(that.is_bundle === 1){
+        Query = `SELECT * FROM unit_records WHERE is_bundle = 0`;
+      }
+      connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);
       });

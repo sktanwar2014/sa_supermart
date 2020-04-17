@@ -3,7 +3,8 @@ const Router = express.Router();
 const Static = require('../controllers/static.js');
 
 
-Router.route("/getRequiredStaticRecordList").get(Static.getRequiredStaticRecordList);
+Router.route("/getProductUnitList").get(Static.getProductUnitList);
+Router.route("/getMainUnitRelateRecords").post(Static.getMainUnitRelateRecords);
 
 
 module.exports = Router;

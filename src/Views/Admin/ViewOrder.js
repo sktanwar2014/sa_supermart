@@ -4,22 +4,37 @@ import React, {useState, useEffect, Fragment} from 'react';
 import Header from '../Partials/Header.js';
 import Footer from '../Partials/Footer.js';
 import OrderAPI from '../../api/order.js';
-import {getDateInDDMMYYYY} from '../../common/moment.js';
+import {getDateInDDMMYYYY, getDate} from '../../common/moment.js';
+
+const RESET_VALUES = {
+    toDate : new Date(),
+    fromDate : new Date(),
+    orderStatus : '1',
+}
+
 
 export default function ViewOrder() {
 
+    const [inputs, setInputs] =  useState(RESET_VALUES);
 	const [orderList, setOrderList] = useState([]);
     const [orderedProductList, setOrderedProductList] = useState([]);
-    const [tabValue, setTabValue] = useState(1);
 
     useEffect(()=>{
 		getOrderList();		
-    },[tabValue]);
+    },[]);
+
+
+    
+	const  handleInputChange = (e) => {
+		setInputs({...inputs, [e.target.name]: e.target.value});
+	}
 
     const getOrderList = async () => {
         try{
             const result = await OrderAPI.getOrderList({
-                order_status : tabValue,
+                order_status : inputs.orderStatus,
+                from_date : getDate(inputs.fromDate),
+                to_date : getDate(inputs.toDate),
             });
             setOrderList(result.orderList);            
             setOrderedProductList(result.orderedProducts);            
@@ -28,13 +43,12 @@ export default function ViewOrder() {
         }
     }
 
-    console.log(orderList, orderedProductList)
 
     const proceedToDelivered = async (orderId) => {
         try{
             const result = await OrderAPI.proceedToDelivered({
                 orderId : orderId,
-                order_status : tabValue,
+                order_status : inputs.orderStatus,
             });
             setOrderList(result.orderList);
             setOrderedProductList(result.orderedProducts);            
@@ -43,49 +57,85 @@ export default function ViewOrder() {
         }
     }
 
-    
-    const handleTabChange = (index) =>{
-        setTabValue(index)        
-    }
-
-
     return(
 		<Fragment>
 			<Header />
 			<section className="ftco-section">
                 <div class="container">
-                    <div class="row justify-content-center">
+                <div class="row justify-content-center p-bottom-30">
                         <div class="col-xl-12 ftco-animate fadeInUp ftco-animated">
-                            <h3 class="mb-4 billing-heading">Order List</h3>
-                                <div id="exTab2" class="container">	
-                                    <ul class="tab-panel tab-panel-tabs">
-                                        <li class="active">
-                                            <a onClick={() => {handleTabChange(1)}} href="" data-toggle="tab">Undelivered</a>
-                                        </li>
-                                        <li>
-                                            <a onClick={() => {handleTabChange(2)}} href="" data-toggle="tab">Delivered</a>
-                                        </li>                                        
-                                    </ul>
-                                    <div class="tab-content p-5 bg-light">
-                                        <div class="tab-pane active">
-                                        <table className="table">
-						                    <thead>
-						                        <tr class="text-center">
-                                                    <th>#</th>
-                                                    <th>Order Date</th>
-                                                    <th>Order Id</th>
-                                                    <th>Customer</th>
-                                                    <th>Product</th>
-                                                    <th>Price</th>
-                                                    <th>Quantity</th>
-                                                    <th>Total</th>
-                                                    <th>Address</th>
-                                                    <th>Total</th>
-                                                    {tabValue === 1 && <th>Action</th>}
-                    					        </tr>
-						                    </thead>
-						                    <tbody>
-                                                {(orderList.length>0 ? orderList :[]).map((order, index) => {                                                    
+                            <div class="p-5 bg-light b-top-dark">
+                                    <div class="row align-items-end">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="fromDate">From * </label>
+                                                <input id="fromDate" name="fromDate" type="date" value={getDate(inputs.fromDate)} class="form-control"  onChange={handleInputChange} />
+                                            </div>
+                                        </div>   
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="toDate">To * </label>
+                                                <input id="toDate" name="toDate" type="date" value={getDate(inputs.toDate)} class="form-control" onChange={handleInputChange} />
+                                            </div>
+                                        </div>  
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="orderStatus">Status * </label>
+                                                <select id="orderStatus" name="orderStatus" value={inputs.orderStatus} class="form-control" onChange={handleInputChange}>
+                                                    <option  value = "1">New Orders</option>
+                                                    <option  value = "2">Delivered</option>
+                                                    {/* {(subCategory !== undefined && subCategory !== null && subCategory !== "") && 
+                                                        (subCategory.length > 0 ? subCategory : [] ).map((data, index)=>{
+                                                        return(
+                                                            <option id={data.id} value={data.id} >{data.category_name}</option>
+                                                        )
+                                                        })
+                                                    } */}
+                                                </select>
+                                            </div>
+                                        </div> 
+                                        <div class="col-md-12 m-bottom-20">
+                                            <div class="form-group">
+                                                <div class="d-flex f-right">
+                                                <button class="btn btn-primary px-4" onClick={getOrderList}> Click to view</button>
+                                                </div>
+                                            </div>
+                                        </div> 
+                                        <div class="w-100">
+                                            <table className="unit-array-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Order Date</th>
+                                                        <th>Order Id</th>
+                                                        <th>Customer</th>
+                                                        <th>Product</th>
+                                                        {/* <th>Price</th> */}
+                                                        <th>Quantity</th>
+                                                        {/* <th>Total</th> */}
+                                                        <th>Address</th>
+                                                        {/* <th>Total</th> */}
+                                                        {inputs.orderStatus == 1 && <th>Action</th>}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                    {/* {(productUnitBio.length > 0 ? productUnitBio : []).map((data, index) => {
+                                                        return(
+                                                            <tr>
+                                                                <td>{index + 1}</td>
+                                                                <td>
+                                                                    {data.unitValue + ' ' + data.unitInName}
+                                                                    {(data.packetWeight && data.packetUnitId) ? `(${data.packetWeight} ${data.packetUnitIdName} per  ${data.unitInName})` : ``}
+                                                                </td>
+                                                                <td>{data.price}</td>
+                                                                <td>
+                                                                    <button type="button" className="delete-button" onClick={()=>{handleDeleteProductUnit(index)}}>Delete</button>
+                                                                </td>
+                                                            </tr>
+                                                        )
+                                                    })} */}
+                                                    {(orderList.length>0 ? orderList :[]).map((order, index) => {                                                    
                                                     let totalProduct = orderedProductList.filter(pro => pro.order_id === order.id).length;                                                    
                                                     return(
                                                         (orderedProductList.length >0 ? orderedProductList :[]).map((product) =>  {
@@ -101,14 +151,14 @@ export default function ViewOrder() {
                                                                         </Fragment>
                                                                     }
                                                                     <td>{product.product_name}</td>
-                                                                    <td>{`$${product.price}/${product.unit_name}`}</td>
-                                                                    <td>{`${product.quantity}/${product.ordered_unit_name}`}</td>
-                                                                    <td>{product.total}</td>
+                                                                    {/* <td>{`$${product.price}/${product.unit_name}`}</td> */}
+                                                                    <td>{`${product.quantity}  ${product.ordered_unit_name}`}</td>
+                                                                    {/* <td>{product.total}</td> */}
                                                                     {totalProduct !== 0 &&
                                                                         <Fragment>
                                                                             <td rowspan={totalProduct}>{`${order.flat_add}, ${order.street_add}, ${order.city}`}</td>
-                                                                            <td rowspan={totalProduct}>{order.total}</td>
-                                                                            {tabValue === 1 && <td rowspan={totalProduct}><a href="" onClick={()=>{proceedToDelivered(order.id)}}>Click to delivered</a></td>}
+                                                                            {/* <td rowspan={totalProduct}>{order.total}</td> */}
+                                                                            {inputs.orderStatus == 1 && <td rowspan={totalProduct}><a href="" onClick={()=>{proceedToDelivered(order.id)}}>Click to delivered</a></td>}
                                                                         </Fragment>
                                                                     }   
                                                                     <div style={{display:'none'}}>{totalProduct = 0}</div>
@@ -118,14 +168,15 @@ export default function ViewOrder() {
                                                             })
                                                         )
                                                     })
-                                                }						                       
-                						    </tbody>
-						                </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                                }	
+                                                </tbody>
+                                            </table>
+                                        </div>
+									</div>
+								</div>
+							</div>
+						</div>
+                    
                 </div>
 					{/* <div className="row mt-5">
 						<div className="col text-center">

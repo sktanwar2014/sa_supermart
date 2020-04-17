@@ -10,6 +10,8 @@ Router.route("/proceedToDelivered").post(Order.proceedToDelivered);
 Router.route("/addNewOrder").post(Order.addNewOrder);
 Router.route("/fetchPreviousBillingAddresss").post(Order.fetchPreviousBillingAddresss);
 Router.route("/removeSelectedAddress").post(Order.removeSelectedAddress);
+Router.route("/getOrderedProductList").post(Order.getOrderedProductList);
+
 
 
 module.exports = Router;

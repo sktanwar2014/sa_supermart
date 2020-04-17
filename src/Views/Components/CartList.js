@@ -112,9 +112,9 @@ export default function CartList() {
 								<thead className="thead-primary">
 								<tr className="text-center">
 									<th>Product List</th>
-									<th>Price</th>
+									{/* <th>Price</th> */}
 									<th>Quantity</th>
-									<th>Total</th>
+									{/* <th>Total</th> */}
 									<th>&nbsp;</th>
 								</tr>
 								</thead>
@@ -123,9 +123,9 @@ export default function CartList() {
 										return(
 											<tr className="text-center">
 												<td className="product-name"> <h3>{data.product_name }</h3></td>
-												<td className="price">{`$${data.price}/${data.unit_name}`}</td>
+												{/* <td className="price">{`$${data.price}/${data.unit_name}`}</td> */}
 												<td className="price">{`${data.quantity} ${data.ordered_unit_name}`}</td>
-												<td className="price">{`${data.total}`}</td>
+												{/* <td className="price">{`${data.total}`}</td> */}
 												<td className="product-remove">
 													<a className="buy-now d-flex justify-content-center align-items-center mx-1"
 														onClick={()=>{removeProductInCart(data.id)}} 
@@ -178,9 +178,9 @@ export default function CartList() {
     				<p><a href="checkout.html" class="btn btn-primary py-3 px-4">Estimate</a></p> */}
     			</div>
     			<div class="col-lg-4 mt-5 cart-wrap ftco-animate fadeInUp ftco-animated">
-    				<div class="cart-total mb-3">
+    				{/* <div class="cart-total mb-3">
     					<h3>Cart Totals</h3>
-    					{/* <p class="d-flex">
+    					<p class="d-flex">
     						<span>Subtotal</span>
     						<span>$20.60</span>
     					</p>
@@ -191,14 +191,14 @@ export default function CartList() {
     					<p class="d-flex">
     						<span>Discount</span>
     						<span>$3.00</span>
-    					</p> */}
+    					</p>
     					<hr />
     					<p class="d-flex total-price">
     						<span>Total</span>
     						<span>{`$${cartTotal}`}</span>
     					</p>
-    				</div>
-    				<p><a href="/proceed-to-checkout" class="btn btn-primary py-3 px-4">Proceed to Checkout</a></p>
+    				</div> */}
+    				<p><a href="/proceed-to-checkout" class="btn btn-primary py-3 px-4 w-100" >Proceed to Checkout</a></p>
     			</div>
     		</div>
 		</div>

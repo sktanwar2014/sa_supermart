@@ -65,11 +65,11 @@ export default function ViewCustomerOrder() {
                                                     <th>Order Id</th>
                                                     <th>Customer</th>
                                                     <th>Product</th>
-                                                    <th>Price</th>
+                                                    {/* <th>Price</th> */}
                                                     <th>Quantity</th>
-                                                    <th>Total</th>
+                                                    {/* <th>Total</th> */}
                                                     <th>Address</th>
-                                                    <th>Total</th>
+                                                    {/* <th>Total</th> */}
                     					        </tr>
 						                    </thead>
 						                    <tbody>
@@ -89,13 +89,13 @@ export default function ViewCustomerOrder() {
                                                                         </Fragment>
                                                                     }
                                                                     <td>{product.product_name}</td>
-                                                                    <td>{`$${product.price}/${product.unit_name}`}</td>
+                                                                    {/* <td>{`$${product.price}/${product.unit_name}`}</td> */}
                                                                     <td>{`${product.quantity}/${product.ordered_unit_name}`}</td>
-                                                                    <td>{product.total}</td>
+                                                                    {/* <td>{product.total}</td> */}
                                                                     {totalProduct !== 0 &&
                                                                         <Fragment>
                                                                             <td rowspan={totalProduct}>{`${order.flat_add}, ${order.street_add}, ${order.city}`}</td>
-                                                                            <td rowspan={totalProduct}>{order.total}</td>
+                                                                            {/* <td rowspan={totalProduct}>{order.total}</td> */}
                                                                         </Fragment>
                                                                     }   
                                                                     <div style={{display:'none'}}>{totalProduct = 0}</div>

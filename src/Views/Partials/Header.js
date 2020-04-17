@@ -50,7 +50,8 @@ export default function Header() {
                         <li className="nav-item dropdown">
                             <a className="nav-link dropdown-toggle" href="#" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Orders</a>
                             <div className="dropdown-menu" aria-labelledby="dropdown04">
-                                <a className="dropdown-item" href="/view-order-list">View</a>
+                                <a className="dropdown-item" href="/view-order-list">View Customer Wise</a>
+                                <a className="dropdown-item" href="/view-ordered-product">View Product Wise</a>
                             </div>
                         </li>
                         <li className="nav-item"><a href="/logout" className="nav-link">Logout</a></li> 
@@ -60,7 +61,7 @@ export default function Header() {
                         <li className="nav-item dropdown">
                             <a className="nav-link dropdown-toggle" href="#" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Orders</a>
                             <div className="dropdown-menu" aria-labelledby="dropdown04">
-                                <a className="dropdown-item" href="/view-user-order-list">View</a>
+                                <a className="dropdown-item" href="/view-user-order-list">View </a>
                             </div>
                         </li>
                         <li className="nav-item cta cta-colored"><a href="/cart-list" className="nav-link"><span className="icon-shopping_cart"></span>[{cartTotal}]</a></li>

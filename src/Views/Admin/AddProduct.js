@@ -1,4 +1,5 @@
 import React, {useState, useEffect, Fragment} from 'react';
+import Table from 'react-bootstrap/Table';
 
 //Components 
 import CategoriesAPI from '../../api/categories.js';
@@ -6,29 +7,39 @@ import {APP_TOKEN} from '../../api/config/Constants.js';
 import StaticAPI from '../../api/static.js';
 import Header from '../Partials/Header.js';
 import Footer from '../Partials/Footer.js';
+import AddUpdateCategoriesDialog from './Components/AddUpdateCategoriesDialog.js';
 
 
 export default function AddProduct(props) {
 
-    // const [mainCategory, setMainCategory] = useState([]);
-    // const [middleCategory, setMiddleCategory] = useState([]);
-    // const [subCategory, setSubCategory] = useState([]);
+    const [subCategory, setSubCategory] = useState([]);
     const [categoryList, setCategoryList] = useState([]);
-    const [staticRecordList, setStaticRecordList] = useState([]);
+    const [productUnitList, setProductUnitList] = useState([]);
+    const [filteredUnitList, setFilteredUnitList] = useState([]);
+    const [singleUnitList, setSingleUnitList] = useState([]);
     
+    const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
+    const [categoryDialogProps, setCategoryDialogProps] = useState({});
+    const [defaultCategoryId, setDefaultCategoryId] = useState("");
+    const [defaultSubCategoryId, setDefaultSubCategoryId] = useState("");
+    const [showWeightFields, setShowWeightFields] = useState(0);
+    const [productUnitBio, setProductUnitBio] = useState([]);
+
+
     useEffect(()=>{
         getCategoryList();
-        getRequiredStaticRecordList();
+        getProductUnitList();
     },[]);
 
-    const getRequiredStaticRecordList = async () => {
+    const getProductUnitList = async () => {
         try{
-            const result = await StaticAPI.getRequiredStaticRecordList();
-            setStaticRecordList(result);            
+            const result = await StaticAPI.getProductUnitList();
+            setProductUnitList(result.productUnitList);            
         }catch(e){
             console.log('Error...',e);
         }
     }
+
     const getCategoryList = async () => {
         try{
             const result = await CategoriesAPI.getCategoryList();
@@ -38,69 +49,131 @@ export default function AddProduct(props) {
         }
     }
 
-    // const getMainCategoryList = async () => {
-    //     // document.getElementById('middleCategoryDropDown').value = "";
-    //     // setMiddleCategory([]);
-    //     try{
-    //         const result = await CategoriesAPI.getMainCategoryList();
-    //         setMainCategory(result.mainCategoriesList);
-    //     }catch(e){
-    //         console.log('Error...',e);
-    //     }
-    // }
 
-    // const getMiddleCategoryList = async () => {
-    //     // document.getElementById('subCategoryDropDown').value = "";
-    //     // setSubCategory([]);
-        
-    //     let id = document.getElementById('mainCategoryDropDown').value;        
+    const addUpdateCategoriesDialog = (type) => {
+        if (type === 2 && (document.getElementById('categoryDropDown').value === "")) {
+            alert('Select Category !');
+        }else{
+            setCategoryDialogProps({type: type, operation: 'add', id: document.getElementById('categoryDropDown').value })
+            setCategoryDialogOpen(true);
+        }
+    }
 
-    //     if(id !== '' && id !== undefined && id !== null){
-    //         try{
-    //             const result = await CategoriesAPI.getMiddleCategoryList({mainCategoryId: id});
-    //             setMiddleCategory(result.middleCategoriesList);
-    //         }catch(e){
-    //             console.log('Error...',e);
-    //         }
-    //     }        
-    // }
 
-    // const getSubCategoryList = async () => {
-    //     let id = document.getElementById('middleCategoryDropDown').value;
-    //     if(id !== '' && id !== undefined && id !== null){
-    //         try{
-    //             const result = await CategoriesAPI.getSubCategoryList({middleCategoryId: id});
-    //             setSubCategory(result.subCategoriesList);
-    //         }catch(e){
-    //             console.log('Error...',e);
-    //         }
-    //     }
-    // }
+    const getSubCategoryList = async () => {
+        let id = document.getElementById('categoryDropDown').value;
+        if(id !== '' && id !== undefined && id !== null){
+            try{
+                const result = await CategoriesAPI.getSubCategoryList({categoryId: id});
+                setSubCategory(result.subCategoriesList);
+            }catch(e){
+                console.log('Error...',e);
+            }
+        }
+    }
+
+    const getMainUnitRelateRecords = async (e) => {
+        if(e.target.value === ""){
+            setFilteredUnitList([]);
+            setSingleUnitList([]);
+        }else {
+            let unitId = e.target.value;
+            const selectedUnit = productUnitList.find(ele => {return ele.id == e.target.value});
+            let is_bundle = selectedUnit.is_bundle;
+            try{
+                const result = await StaticAPI.getMainUnitRelateRecords({id: unitId, is_bundle: is_bundle});
+                setFilteredUnitList(result.productUnitList);
+                const singleUnitList = result.productUnitList.filter(ele => {return ele.is_bundle == 0});
+                setSingleUnitList(singleUnitList);
+            } catch(e){
+                console.log(e)
+            }
+        }
+        setProductUnitBio([]);
+    }
     
+    const handleMeasurementSelection = (e) => {        
+        const selectedUnit = productUnitList.find(ele => {return ele.id == e.target.value});
+        if(selectedUnit){
+            setShowWeightFields(selectedUnit.is_bundle);
+            document.getElementById('productUnitValue').value = selectedUnit.default_weight;            
+        }else{
+            setShowWeightFields(0);
+            document.getElementById('productUnitValue').value = 1;
+        }
+    }
+
+    const handleAddProductUnit = (e) => {
+        e.preventDefault();
+        if(e.target.name === "innerForm"){
+            let tempUnitArray = [...productUnitBio];
+            
+            let packetWeight =  document.getElementById("packetWeight") ? document.getElementById("packetWeight").value : '';
+            let packetUnitId =  document.getElementById("packetUnitId") ? document.getElementById("packetUnitId").value :'';
+            let unitInName = productUnitList.find(ele => { return ele.id == document.getElementById("productUnitIn").value});
+            let packetUnitIdName = productUnitList.find(ele => {return ele.id ==  packetUnitId});
+
+            let unitData = {
+                unitValue : document.getElementById("productUnitValue").value,
+                unitIn : document.getElementById("productUnitIn").value,
+                price : document.getElementById("productPrice").value,
+                isPacket : packetUnitId ? 1 : 0,
+                packetWeight : packetWeight,
+                packetUnitId : packetUnitId,
+                unitInName : unitInName.unit_name,
+                packetUnitIdName :  packetUnitIdName ?  packetUnitIdName.unit_name : '',
+            }
+            tempUnitArray.push(unitData);
+            setProductUnitBio(tempUnitArray);
+
+            let temp = [...filteredUnitList];
+            temp.map((data, index) => {
+                if(data.id == unitData.unitIn){
+                    filteredUnitList.splice(index,1);
+                }
+            });
+            document.getElementById("productUnitIn").value = "";
+        }
+    }
+
+    const handleDeleteProductUnit = (index) => {
+        let tempUnitArray = [...productUnitBio];
+        let temp = [...filteredUnitList];
+
+
+        const unit_id = tempUnitArray[index].unitIn;
+        const found = productUnitList.find(ele => {return ele.id == unit_id})
+        temp.push(found);
+        setFilteredUnitList(temp);
+
+        tempUnitArray.splice(index,1);
+        setProductUnitBio(tempUnitArray);
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try{
-            const formData = {
-                // mainCategoryId : document.getElementById('mainCategoryDropDown').value,
-                // middleCategoryId : document.getElementById('middleCategoryDropDown').value,
-                // subCategoryId : document.getElementById('subCategoryDropDown').value,
-                mainCategoryId : document.getElementById('categoryDropDown').value,
-                productName : document.getElementById('productName').value,
-                // brandId : document.getElementById('productBrand').value,
-                // colorId : document.getElementById('productColor').value,
-                // modelNo : document.getElementById('modelNo').value,
-                sellerId : APP_TOKEN.get().userId,
-                price : document.getElementById('productPrice').value,
-                unitId : document.getElementById('unit_measurement').value,
-                description : document.getElementById('productDescription').value,
-                createdBy :  APP_TOKEN.get().userId,
-            };
-            const result = await CategoriesAPI.insertNewProduct(formData);
-            if(result === true){    // true = inserted
-                props.history.push('/');
-            }else{
-                alert('Failed Insertion');
-            }            
+        try{            
+            if(e.target.name === "mainForm"){
+                if(productUnitBio.length > 0){
+                    const formData = {
+                        categoryId : document.getElementById('categoryDropDown').value,
+                        subCategoryId : document.getElementById('subCategoryDropDown').value,
+                        productName : document.getElementById('productName').value,
+                        description : document.getElementById('productDescription').value,
+                        createdBy :  APP_TOKEN.get().userId,
+                        productUnits : productUnitBio,
+                        mainUnitId : document.getElementById('productMainUnit').value,
+                    };
+                    const result = await CategoriesAPI.insertNewProduct(formData);
+                    if(result === true){    // true = inserted
+                        props.history.push('/');
+                    }else{
+                        alert('Failed Insertion');
+                    }
+                }else{
+                    alert('Add atleast one unit for product..');
+                }
+            }
         }catch(e){
             console.log('Error...', e);
         }
@@ -114,64 +187,13 @@ export default function AddProduct(props) {
                     <div class="row justify-content-center">
                         <div class="col-xl-12 ftco-animate fadeInUp ftco-animated">
                             <h3 class="mb-4 billing-heading">Add New Product</h3>
-                            <form onSubmit={handleSubmit} class="p-5 bg-light">
+                            <form onSubmit={handleSubmit} name="mainForm" class="p-5 bg-light">
                                     <div class="row align-items-end">
-                                        {/* <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="country">Main Category *</label>
-                                                <div class="select-wrap">
-                                                    <select id="mainCategoryDropDown" class="form-control" onChange={getMiddleCategoryList} required >                                                        
-                                                        <option  value = "">Select any one</option>
-                                                        {(mainCategory !== undefined && mainCategory !== null && mainCategory !== "") && 
-                                                         (mainCategory.length > 0 ?mainCategory : [] ).map((data, index)=>{
-                                                            return(
-                                                                <option id={data.id} value={data.id} >{data.category_name}</option>
-                                                            )
-                                                         })
-                                                        }
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                            <label for="country">Middle Category *</label>
-                                                <div class="select-wrap">
-                                                    <select id="middleCategoryDropDown" class="form-control" onChange={getSubCategoryList} required>
-                                                        <option  value = "">Select any one</option>
-                                                        {(middleCategory !== undefined && middleCategory !== null && middleCategory !== "") && 
-                                                         (middleCategory.length > 0 ? middleCategory : [] ).map((data, index)=>{
-                                                            return(
-                                                                <option id={data.id} value={data.id}>{data.category_name}</option>
-                                                            )
-                                                         })
-                                                        }
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="country">Sub Category * </label>
-                                                <div class="select-wrap">
-                                                    <select id="subCategoryDropDown" class="form-control" required>
-                                                        <option  value = "">Select any one</option>
-                                                        {(subCategory !== undefined && subCategory !== null && subCategory !== "") && 
-                                                         (subCategory.length > 0 ? subCategory : [] ).map((data, index)=>{
-                                                            return(
-                                                                <option id={data.id} value={data.id} >{data.category_name}</option>
-                                                            )
-                                                         })
-                                                        }
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div> */}
-                                        <div class="col-md-4">
+                                        <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="country">Category * </label>
-                                                <div class="select-wrap">
-                                                    <select id="categoryDropDown" class="form-control" required>
+                                                <div class="d-flex">
+                                                    <select id="categoryDropDown" class="form-control" defaultValue={defaultCategoryId} onChange={getSubCategoryList} required>
                                                         <option  value = "">Select any one</option>
                                                         {(categoryList !== undefined && categoryList !== null && categoryList !== "") && 
                                                          (categoryList.length > 0 ? categoryList : [] ).map((data, index)=>{
@@ -181,85 +203,136 @@ export default function AddProduct(props) {
                                                          })
                                                         }
                                                     </select>
-                                                </div>
-                                            </div>
-                                        </div>                                         
-                                        <div class="col-md-8">
-                                            <div class="form-group">
-                                                <label for="productName">product Name *</label>
-                                                <input id="productName" type="text" class="form-control" placeholder="" required/>
-                                            </div>
-                                        </div>
-                                        <div class="w-100"></div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="unit_measurement">Unit/Measurement *</label>
-                                                <div class="select-wrap">                                                
-                                                    <select id="unit_measurement" class="form-control" required>
-                                                        <option  value = "">Select any one</option>
-                                                        {(staticRecordList.productUnitList !== undefined && staticRecordList.productUnitList !== null && staticRecordList.productUnitList !== "") && 
-                                                        (staticRecordList.productUnitList.length > 0 ? staticRecordList.productUnitList : [] ).map((data, index)=>{
-                                                            return(
-                                                                <option id={data.id} value={data.id} >{data.value}</option>
-                                                            )
-                                                        })
-                                                        }
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {/* <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="modelNo">Model No *</label>
-                                                <input id="modelNo" type="text" class="form-control" placeholder="" required/>
-                                            </div>
-                                        </div> */}
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="productPrice">Price (In $)*</label>
-                                                <input id="productPrice" type="text" class="form-control" placeholder="" required/>
-                                            </div>
-                                        </div>
-                                        <div class="w-100"></div>
-                                        {/* <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="brand">Brand *</label>
-                                                <div class="select-wrap">
-                                                    <select id="productBrand" class="form-control" required>
-                                                        <option  value = "">Select any one</option>
-                                                        {(staticRecordList.brandList !== undefined && staticRecordList.brandList !== null && staticRecordList.brandList !== "") && 
-                                                        (staticRecordList.brandList.length > 0 ? staticRecordList.brandList : [] ).map((data, index)=>{
-                                                            return(
-                                                                <option id={data.id} value={data.id} >{data.value}</option>
-                                                            )
-                                                        })
-                                                        }
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>                                
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="color">Color *</label>
-                                                <div class="select-wrap">
-                                                    <select id="productColor" class="form-control" required>
-                                                        <option  value = "">Select any one</option>
-                                                        {(staticRecordList.colorList !== undefined && staticRecordList.colorList !== null && staticRecordList.colorList !== "") && 
-                                                        (staticRecordList.colorList.length > 0 ? staticRecordList.colorList : [] ).map((data, index)=>{
-                                                            return(
-                                                                <option id={data.id} value={data.id} >{data.value}</option>
-                                                            )
-                                                        })
-                                                        }
-                                                    </select>
+                                                    <input type="button" class="btn btn-primary br-none" onClick={()=>{addUpdateCategoriesDialog(1)}} value="Add New" />
                                                 </div>
                                             </div>
                                         </div>   
-                                        <div class="w-100"></div> */}
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="country">Sub Category * </label>
+                                                <div class="d-flex">
+                                                    <select id="subCategoryDropDown" class="form-control"  defaultValue={defaultSubCategoryId}  required>
+                                                        <option  value = "">Select any one</option>
+                                                        {(subCategory !== undefined && subCategory !== null && subCategory !== "") && 
+                                                         (subCategory.length > 0 ? subCategory : [] ).map((data, index)=>{
+                                                            return(
+                                                                <option id={data.id} value={data.id} >{data.category_name}</option>
+                                                            )
+                                                         })
+                                                        }
+                                                    </select>
+                                                    <input type="button" class="btn btn-primary br-none" onClick={()=>{addUpdateCategoriesDialog(2)}} value="Add New" />
+                                                </div>
+                                            </div>
+                                        </div>    
+                                        <div class="w-100"></div>
+                                        <div class="col-md-8">
+                                            <div class="form-group">
+                                                <label for="productName">Product Name *</label>
+                                                <input id="productName" type="text" class="form-control" placeholder="" required/>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="productMainUnit">Measure Main Unit *</label>
+                                                    <select id="productMainUnit" class="form-control" required onChange={getMainUnitRelateRecords}>
+                                                        <option  value = "">Select any one</option>
+                                                        {(productUnitList !== undefined && productUnitList !== null && productUnitList !== "") && 
+                                                        (productUnitList.length > 0 ? productUnitList : [] ).map((data, index)=>{
+                                                            return(
+                                                            data.is_bundle ===0 ?    <option id={data.id} value={data.id} >{data.unit_name}</option> :null
+                                                            )
+                                                        })
+                                                        }
+                                                    </select>
+                                            </div>
+                                        </div>
+                                        {filteredUnitList.length > 0 && 
+                                        <form onSubmit={handleAddProductUnit} name="innerForm" class="inner-form">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="productUnitIn">Unit/Measurement *</label>
+                                                <div class="d-flex">  
+                                                    <input id="productUnitValue" type="text" class="form-control" defaultValue="1" disabled required/>                                         
+                                                    <select id="productUnitIn" class="form-control" required defaultValue=""  onChange={handleMeasurementSelection}>
+                                                        <option  value = "">Select any one</option>
+                                                        {(filteredUnitList !== undefined && filteredUnitList !== null && filteredUnitList !== "") && 
+                                                        (filteredUnitList.length > 0 ? filteredUnitList : [] ).map((data, index)=>{
+                                                            return(
+                                                                <option id={data.id} value={data.id} >{data.unit_name}</option>
+                                                            )
+                                                        })
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {showWeightFields  === 1 &&
+                                            <div class="col-md-4">
+                                                <div class="form-group">                                                
+                                                    <label for="productWeight">Weight *</label>
+                                                    <div class="d-flex">  
+                                                        <input id="packetWeight" type="text" class="form-control" placeholder="" required/>
+                                                        <select id="packetUnitId" class="form-control" required>
+                                                            <option  value = "">Select any one</option>
+                                                            {(singleUnitList !== undefined && singleUnitList !== null && singleUnitList !== "") && 
+                                                            (singleUnitList.length > 0 ? singleUnitList : [] ).map((data, index)=>{
+                                                                return(
+                                                                    <option id={data.id} value={data.id} >{data.unit_name}</option > 
+                                                                )
+                                                            })
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                        <div class={showWeightFields  === 0 ? "col-md-6" : "col-md-2"}>
+                                            <div class="form-group">
+                                                <label for="productPrice">Price (In $)</label>
+                                                <input id="productPrice" type="text" class="form-control" placeholder=""/>
+                                            </div>
+                                        </div>
+                                        <div class="add-unit">
+                                            <button type="submit"> Add</button>
+                                        </div>
+                                        </form>
+                                        }
+                                        <div class="w-100">
+                                        {productUnitBio.length > 0 &&
+                                        <table className="unit-array-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Units</th>
+                                                    <th>Price</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {(productUnitBio.length > 0 ? productUnitBio : []).map((data, index) => {
+                                                    return(
+                                                        <tr>
+                                                            <td>{index + 1}</td>
+                                                            <td>
+                                                                {data.unitValue + ' ' + data.unitInName}
+                                                                {(data.packetWeight && data.packetUnitId) ? `(${data.packetWeight} ${data.packetUnitIdName} per  ${data.unitInName})` : ``}
+                                                            </td>
+                                                            <td>{data.price}</td>
+                                                            <td>
+                                                                <button type="button" className="delete-button" onClick={()=>{handleDeleteProductUnit(index)}}>Delete</button>
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                })}
+                                            </tbody>
+                                            </table>
+                                        }
+                                        </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label for="description">Description *</label>
-                                                <textarea name="" id="productDescription" cols="30" rows="10" class="form-control" required></textarea>
+                                                <label for="description">Description </label>
+                                                <textarea name="" id="productDescription" cols="30" rows="10" class="form-control"></textarea>
                                             </div>
                                         </div>
                                         <div class="w-100"></div>
@@ -273,6 +346,18 @@ export default function AddProduct(props) {
                     </div>
                 </section>
         <Footer />
+            { categoryDialogOpen ? 
+                <AddUpdateCategoriesDialog 
+                    open={categoryDialogOpen} 
+                    setCategoryDialogOpen = {setCategoryDialogOpen} 
+                    props = {categoryDialogProps} 
+                    setCategoryList = {setCategoryList}
+                    setSubCategory = {setSubCategory}
+                    setDefaultCategoryId = {setDefaultCategoryId}
+                    setDefaultSubCategoryId = {setDefaultSubCategoryId}
+                /> 
+                : null 
+            }
     </Fragment>
     )
 }

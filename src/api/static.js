@@ -10,8 +10,8 @@ const PARAMS = ({ methodType = 'GET' }) => ({
 
 export default {
 
-  getRequiredStaticRecordList:async () => {
-    const URL = `${c.API_CONSUMER}/staticrecords/getRequiredStaticRecordList`;
+  getProductUnitList:async () => {
+    const URL = `${c.API_CONSUMER}/staticrecords/getProductUnitList`;
     try {
       const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'GET' })));
       return data;
@@ -21,5 +21,18 @@ export default {
     }
   },
 
+  getMainUnitRelateRecords:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/staticrecords/getMainUnitRelateRecords`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
 
 };

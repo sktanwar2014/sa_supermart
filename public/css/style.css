@@ -10435,3 +10435,70 @@ textarea.form-control {
 .pre-address a {
   padding-right: 15px;
 }
+
+.br-none {
+  border-radius: 0px;
+}
+
+.add-unit {
+  width : 100% !important;
+  padding-right : 15px;
+  margin-top: -15px;
+}
+
+.add-unit button{
+  float :  right;
+  background: none!important;
+  border: none;
+  font-family: arial, sans-serif;
+  color: #82ae46;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.inner-form {
+  display: contents;
+}
+
+.unit-array-table {
+  width: 97%;
+  text-align: center;
+  border: 1px solid;
+  margin-left: 15px;
+}
+.unit-array-table tr {
+  border: 1px solid;
+}
+
+.delete-button {
+  background: none!important;
+  border: none;
+  font-family: arial, sans-serif;
+  color: #82ae46;
+  cursor: pointer;
+}
+
+.p-bottom-30 {
+  padding-bottom: 30px;
+}
+
+.b-top-dark {
+  border-top: 10px solid #82ae46;
+}
+
+.packet-unit {
+  margin-top: 37px;
+}
+
+.packet-unit-text {
+    float: left;
+    padding-left: 15px;
+}
+
+.f-right {
+  float: right;
+}
+
+.m-bottom-20 {
+  margin-bottom: 20px;
+}

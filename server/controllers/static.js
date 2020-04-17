@@ -1,17 +1,26 @@
 const Static = require('../models/static.js');
 
-const getRequiredStaticRecordList = async function (req, res, next) {    
+const getProductUnitList = async function (req, res, next) {    
     try {
         const StaticModel = new Static({});
         const productUnitList = await StaticModel.getProductUnitList();
-        const brandList = await StaticModel.getBrandList();
-        const colorList = await StaticModel.getColorList();
         
-        res.send({ 
-            productUnitList: productUnitList,
-            brandList : brandList,
-            colorList : colorList,
-        });
+        res.send({ productUnitList: productUnitList});
+    } catch (err) {
+        next(err);
+    }
+}
+
+
+const getMainUnitRelateRecords = async function (req, res, next) { 
+    let params = {
+        id : Number(req.body.id),
+        is_bundle : Number(req.body.is_bundle),
+    }   
+    try {
+        const StaticModel = new Static(params);
+        const productUnitList = await StaticModel.getMainUnitRelateRecords();
+        res.send({ productUnitList: productUnitList});
     } catch (err) {
         next(err);
     }
@@ -19,6 +28,8 @@ const getRequiredStaticRecordList = async function (req, res, next) {
 
 
 
+
 module.exports = {    
-    getRequiredStaticRecordList : getRequiredStaticRecordList,    
+    getProductUnitList : getProductUnitList,    
+    getMainUnitRelateRecords : getMainUnitRelateRecords,
 };

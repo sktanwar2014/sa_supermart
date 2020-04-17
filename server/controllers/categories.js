@@ -1,4 +1,5 @@
 const Categories = require('../models/categories.js');
+const {isEmpty} = require('../utils/conditionChecker.js');
 
 // const getAllCategoryTableRecords = async function (req, res, next) {    
 //     try {
@@ -19,10 +20,15 @@ const getCategoryList = async function (req, res, next) {
 }
 
 
-const getTotalProductList = async function (req, res, next) {    
+const getProductList = async function (req, res, next) {    
+    const params = {
+        categoryId : Number(req.body.categoryId),
+        subCategoryId : Number(req.body.subCategoryId),
+    }
     try {
-        const totalProductList = await new Categories({}).getTotalProductList();
-        res.send({ totalProductList: totalProductList});
+        const defModal = new Categories(params);
+        const productList = await defModal.getProductList();
+        res.send({ productList: productList});
     } catch (err) {
         next(err);
     }
@@ -42,29 +48,6 @@ const getProductUnderMainCategory = async function (req, res, next) {
     }
 }
 
-const getProductUnderMiddleCategory = async function (req, res, next) {
-    const params = {
-        middleCategoryId : req.body.middleCategoryId,
-    };
-    try {
-        const totalProductList = await new Categories(params).getProductUnderMiddleCategory();        
-        res.send({ totalProductList: totalProductList});
-    } catch (err) {
-        next(err);
-    }
-}
-
-const getProductUnderSubCategory = async function (req, res, next) {
-    const params = {
-        subCategoryId : req.body.subCategoryId,
-    };
-    try {
-        const totalProductList = await new Categories(params).getProductUnderSubCategory();        
-        res.send({ totalProductList: totalProductList});
-    } catch (err) {
-        next(err);
-    }
-}
 
 
 
@@ -94,7 +77,7 @@ const getMiddleCategoryList = async function (req, res, next) {
 
 const getSubCategoryList = async function (req, res, next) {
     const params = {
-        middleCategoryId : req.body.middleCategoryId,
+        categoryId : req.body.categoryId,
     };
     try {
         const subCategoriesList = await new Categories(params).getSubCategoryList();
@@ -105,25 +88,29 @@ const getSubCategoryList = async function (req, res, next) {
 }
 
 
+
+
+
 const insertNewProduct = async function (req, res, next) {
     const params = {
-        mainCategoryId : Number(req.body.mainCategoryId),
-        // middleCategoryId : Number(req.body.middleCategoryId),
-        // subCategoryId : Number(req.body.subCategoryId),
+        categoryId : Number(req.body.categoryId),
+        subCategoryId : Number(req.body.subCategoryId),
         productName : req.body.productName,
-        // brandId : Number(req.body.brandId),
-        // colorId : Number(req.body.colorId),
-        // modelNo : req.body.modelNo,
-        sellerId : Number(req.body.sellerId),
-        // imageId : Number(req.body.imageId),
-        price : Number(req.body.price),
-        unitId : Number(req.body.unitId),
         description : req.body.description,
         createdBy : Number(req.body.createdBy),
+        productUnits : req.body.productUnits,
+        mainUnitId : Number(req.body.mainUnitId),
     };
     try {
-        const result = await new Categories(params).insertNewProduct();
-        if(result !== "" && result !== undefined && result !== null && result.insertId > 0){
+        const defineModal = new Categories(params);
+        const productInsertId = await defineModal.insertNewProduct();
+        defineModal.productId = productInsertId;
+                
+        if(params.productUnits.length > 0){
+            const unitsInsertId = await defineModal.insertProductUnits();
+        }
+
+        if(isEmpty(productInsertId)){
             res.send(true);
         }else{
             res.send(false);
@@ -135,17 +122,66 @@ const insertNewProduct = async function (req, res, next) {
 }
 
 
+
+
+const addNewCategory = async function (req, res, next) {
+    const params = {
+        category_name : req.body.category_name,
+    };
+    try {
+        const insertId = await new Categories(params).addNewCategory();
+        const categoryList = await new Categories({}).getCategoryList();        
+        res.send({ categoryList: categoryList, newCategoryId : insertId});
+    } catch (err) {
+        next(err);
+    }
+}
+
+
+
+const addNewSubCategory = async function (req, res, next) {
+    const params = {
+        categoryId : req.body.categoryId,
+        category_name : req.body.category_name,
+    };
+    try {
+        const insertId = await new Categories(params).addNewSubCategory();
+        const subCategoriesList = await new Categories(params).getSubCategoryList();
+        res.send({ subCategoriesList: subCategoriesList, newSubCategoryId : insertId});
+    } catch (err) {
+        next(err);
+    }
+}
+
+
+
+const getProductPacketInfo = async function (req, res, next) {
+    const params = {
+        productId : req.body.productId,
+        unitId : req.body.unitId,
+    };
+    try {
+        const result = await new Categories(params).getProductPacketInfo();
+        res.send({ productPacketInfo: result });
+    } catch (err) {
+        next(err);
+    }
+}
+
+
+
 module.exports = {    
     // getAllCategoryTableRecords : getAllCategoryTableRecords,
     getCategoryList: getCategoryList,
-    getTotalProductList : getTotalProductList,
+    getProductList : getProductList,
     getMainCategoryList : getMainCategoryList,
     getMiddleCategoryList : getMiddleCategoryList,
     getSubCategoryList : getSubCategoryList,
     insertNewProduct : insertNewProduct,
 
     getProductUnderMainCategory : getProductUnderMainCategory,
-    getProductUnderMiddleCategory : getProductUnderMiddleCategory,
-    getProductUnderSubCategory : getProductUnderSubCategory ,
     
+    addNewCategory : addNewCategory,
+    addNewSubCategory : addNewSubCategory,
+    getProductPacketInfo : getProductPacketInfo,
 };

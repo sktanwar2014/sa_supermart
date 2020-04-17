@@ -11,22 +11,23 @@ export default function ViewProduct() {
 
 	const [categoryList, setCategoryList] = useState([]);
     const [productsList, setProductsList] = useState([]);
+    const [subCategory, setSubCategory] = useState([]);
 	
 	
-	useEffect(() => {
-		$(document).ready(function () {
-        	$('.product-category li a').click(function(e) {
-				$('.product-category li a').removeClass('active');
-				var $parent = $(this);
-				$parent.addClass('active');
-				e.preventDefault();
-        	});
-		});
-	})
+	// useEffect(() => {
+	// 	$(document).ready(function () {
+    //     	$('.product-category li a').click(function(e) {
+	// 			$('.product-category li a').removeClass('active');
+	// 			var $parent = $(this);
+	// 			$parent.addClass('active');
+	// 			e.preventDefault();
+    //     	});
+	// 	});
+	// })
 
     useEffect(()=>{
 		getCategoryList();
-		getTotalProductList();
+		getProductList();
     },[]);
 
     const getCategoryList = async () => {
@@ -38,22 +39,37 @@ export default function ViewProduct() {
         }
     }
 	
-	const getTotalProductList = async () => {		
+	const getProductList = async (categoryId = 0, subCategoryId=0) => {
         try{
-            const result = await CategoriesAPI.getTotalProductList();            
-			setProductsList(result.totalProductList);			
+            const result = await CategoriesAPI.getProductList({categoryId: categoryId, subCategoryId: subCategoryId});
+			setProductsList(result.productList);			
         }catch(e){
             console.log('Error...',e);
         }
 	}
 
-	const getProductUnderMainCategory = async (id) => {
-		try{
-            const result = await CategoriesAPI.getProductUnderMainCategory({mainCategoryId: id});
-			setProductsList(result.productList);	
-        }catch(e){
-            console.log('Error...',e);
-        }
+	const getSubCategoryList = async () => {
+        let id = document.getElementById('categoryDropDown').value;
+        if(id !== '' && id !== undefined && id !== null){
+            try{
+                const result = await CategoriesAPI.getSubCategoryList({categoryId: id});
+                setSubCategory(result.subCategoriesList);
+            }catch(e){
+                console.log('Error...',e);
+			}
+			getProductList(id, 0);
+        }else{
+			setSubCategory([]);
+			getProductList();
+		}
+    }
+
+	const getProductUnderSubCategoryList = async (id) => {
+        let categoryId = document.getElementById('categoryDropDown').value;		
+		let subCategoryId = document.getElementById('subCategoryDropDown').value;
+        if(subCategoryId !== '' && subCategoryId !== undefined && subCategoryId !== null){
+			getProductList(categoryId, subCategoryId);
+		}
 	}
 
     return(
@@ -61,10 +77,10 @@ export default function ViewProduct() {
 			<Header />
 			<section className="ftco-section">
 				<div className="container">
-					<div className="row justify-content-center">
+					{/* <div className="row justify-content-center">
 						<div className="col-md-10 mb-5 text-center">
 							<ul className="product-category">
-								<li><a href="#" onClick={getTotalProductList} className={"active"}>All</a></li>
+								<li><a href="#" onClick={getProductList} className={"active"}>All</a></li>
 
 								{(categoryList.length > 0 ? categoryList : []).map((data, index) => {
 									return(
@@ -76,39 +92,81 @@ export default function ViewProduct() {
 								)}
 							</ul>
 						</div>
-					</div>
+					</div> */}
+					<div class="row justify-content-center p-bottom-30">
+                        <div class="col-xl-12 ftco-animate fadeInUp ftco-animated">
+                            <div class="p-5 bg-light b-top-dark">
+                                    <div class="row align-items-end">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="country">Category * </label>
+                                                <div class="d-flex">
+                                                    <select id="categoryDropDown" class="form-control" onChange={getSubCategoryList}>
+                                                        <option  value = "">All</option>
+                                                        {(categoryList !== undefined && categoryList !== null && categoryList !== "") && 
+                                                         (categoryList.length > 0 ? categoryList : [] ).map((data, index)=>{
+                                                            return(
+                                                                <option id={data.id} value={data.id} >{data.category_name}</option>
+                                                            )
+                                                         })
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>   
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="country">Sub Category * </label>
+                                                <div class="d-flex">
+                                                    <select id="subCategoryDropDown" class="form-control"  onChange={getProductUnderSubCategoryList}>
+                                                        <option  value = "">Select Any One</option>
+                                                        {(subCategory !== undefined && subCategory !== null && subCategory !== "") && 
+                                                         (subCategory.length > 0 ? subCategory : [] ).map((data, index)=>{
+                                                            return(
+                                                                <option id={data.id} value={data.id} >{data.category_name}</option>
+                                                            )
+                                                         })
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>  
+									</div>
+								</div>
+							</div>
+						</div>
 					<div className="row">
 						{(productsList.length > 0 ? productsList : []).map((data, index) => {
 							return(
 								<div className="col-md-6 col-lg-3 ftco-animate fadeInUp ftco-animated">
 									<div className="product">
-										<a href="" className="img-prod"><img className="img-fluid" src="images/product-1.jpg" alt="Colorlib Template" />
+										<a className="img-prod"><img className="img-fluid" src="images/product-1.jpg" alt="Colorlib Template" />
 											{/* <span className="status">30%</span> */}
 											<div className="overlay"></div>
 										</a>
 										<div className="text py-3 pb-4 px-3 text-center">
-											<h3><a href="#">{data.product_name}</a></h3>
-											<div className="d-flex">
+											<h3><a>{data.product_name}</a></h3>
+											{/* <div className="d-flex">
 												<div className="pricing">
 													<p className="price">
 														<span>{`$${data.price} / ${data.unit_name}`}</span>
-														{/* <span className="mr-2 price-dc">{`$${data.price}`}</span>
-														<span className="price-sale">$80.00</span>*/}
+														<span className="mr-2 price-dc">{`$${data.price}`}</span>
+														<span className="price-sale">$80.00</span>
 													</p> 
 												</div>
 											</div>
 											<div className="bottom-area d-flex px-3">
 												<div className="m-auto d-flex">
-													{/* <a href="#" className="add-to-cart d-flex justify-content-center align-items-center text-center">
+													<a href="#" className="add-to-cart d-flex justify-content-center align-items-center text-center">
 														<span><i className="ion-ios-menu"></i></span>
-													</a> */}
+													</a>
 													<p className="price">
 														<span>{`$${data.price} / ${data.unit_name}`}</span>
-														{/* <span className="mr-2 price-dc">{`$${data.price}`}</span>
-														<span className="price-sale">$80.00</span>*/}
+														<span className="mr-2 price-dc">{`$${data.price}`}</span>
+														<span className="price-sale">$80.00</span>
 													</p> 
 												</div>
-											</div>
+											</div> */}
 										</div>
 									</div>
 								</div>
@@ -116,23 +174,8 @@ export default function ViewProduct() {
 						})
 					}
 					</div>
-					{/* <div className="row mt-5">
-						<div className="col text-center">
-							<div className="block-27">
-							<ul>
-								<li><a href="#">&lt;</a></li>
-								<li className="active"><span>1</span></li>
-								<li><a href="#">2</a></li>
-								<li><a href="#">3</a></li>
-								<li><a href="#">4</a></li>
-								<li><a href="#">5</a></li>
-								<li><a href="#">&gt;</a></li>
-							</ul>
-							</div>
-						</div>
-					</div> */}
 				</div>
-    </section>
+   			</section>
 		<Footer />
 	</Fragment>
     )

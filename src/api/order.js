@@ -10,16 +10,20 @@ const PARAMS = ({ methodType = 'GET' }) => ({
 
 export default {
 
-  // getTotalProductList:async () => {
-  //   const URL = `${c.API_CONSUMER}/categories/getTotalProductList`;
-  //   try {
-  //     const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'GET' })));
-  //     return data;
-  //   } catch (error) {
-  //     checkError(error);
-  //     throw error;
-  //   }
-  // },
+  getOrderedProductList:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/order/getOrderedProductList`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
 
   fetchPreviousBillingAddresss:async ({...payload }) => {
     const URL = `${c.API_CONSUMER}/order/fetchPreviousBillingAddresss`;
