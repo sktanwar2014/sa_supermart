@@ -19,6 +19,21 @@ const getOrderList = async function (req, res, next) {
 }
 
 
+const getOrderListOfSingleDay = async function (req, res, next) {    
+    const params = {
+        order_status: req.body.order_status,
+        date :  req.body.date,
+    }
+    try {
+        const Model = new Order(params);
+        const orderList = await Model.getOrderListOfSingleDay();
+        const orderedProducts = await Model.getOrderedProduct();
+        res.send({ orderList: orderList, orderedProducts: orderedProducts});
+    } catch (err) {
+        next(err);
+    }
+}
+
 
 const getCustomerOrderList = async function (req, res, next) {    
     const params = {
@@ -132,6 +147,23 @@ const removeSelectedAddress = async function (req, res, next) {
 
 
 
+const getOrderedProductListSingleDay = async function (req, res, next) {    
+    const params = {
+        date :  req.body.date,
+    }
+    try {
+        const Model = new Order(params);
+        const result = await Model.getOrderedProductListSingleDay();
+
+        const calculatedResult = await calculateProductTotalQuantity(result);
+        
+        // console.log(calculatedResult);
+        res.send({orderedProductListSingleDay: calculatedResult});
+    } catch (err) {
+        next(err);
+    }
+}
+
 const getOrderedProductList = async function (req, res, next) {    
     const params = {
         from_date :  req.body.from_date,
@@ -141,9 +173,7 @@ const getOrderedProductList = async function (req, res, next) {
         const Model = new Order(params);
         const result = await Model.getOrderedProductList();
 
-        const productUnitList = await new Static({}).getProductUnitList();
-
-        const calculatedResult = await calculateProductTotalQuantity(result, productUnitList);
+        const calculatedResult = await calculateProductTotalQuantity(result);
         
         // console.log(calculatedResult);
         res.send({orderedProductList: calculatedResult});
@@ -152,7 +182,9 @@ const getOrderedProductList = async function (req, res, next) {
     }
 }
 
-async function calculateProductTotalQuantity(products, unitList){
+
+
+async function calculateProductTotalQuantity(products){
 
     const prodIds = [...new Set(products.map(dist => dist.product_id))];
     let returnValues  = [];
@@ -288,4 +320,6 @@ module.exports = {
     fetchPreviousBillingAddresss: fetchPreviousBillingAddresss,
     removeSelectedAddress: removeSelectedAddress,
     getOrderedProductList: getOrderedProductList,
+    getOrderedProductListSingleDay: getOrderedProductListSingleDay,
+    getOrderListOfSingleDay : getOrderListOfSingleDay,
 };

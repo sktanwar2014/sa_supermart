@@ -54,6 +54,13 @@ export default function Header() {
                                 <a className="dropdown-item" href="/view-ordered-product">View Product Wise</a>
                             </div>
                         </li>
+                        <li className="nav-item dropdown">
+                            <a className="nav-link dropdown-toggle" href="#" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Reports</a>
+                            <div className="dropdown-menu" aria-labelledby="dropdown04">
+                                <a className="dropdown-item" href="/view-order-report">Order Report</a>
+                                <a className="dropdown-item" href="/view-ordered-product-report">Ordered Product Report</a>
+                            </div>
+                        </li>
                         <li className="nav-item"><a href="/logout" className="nav-link">Logout</a></li> 
                     </ul>
                     :

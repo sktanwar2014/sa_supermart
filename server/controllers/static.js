@@ -12,6 +12,17 @@ const getProductUnitList = async function (req, res, next) {
 }
 
 
+const getOrderStatusList = async function (req, res, next) {    
+    try {
+        const StaticModel = new Static({});
+        const orderStatusList = await StaticModel.getOrderStatusList();
+        
+        res.send({ orderStatusList: orderStatusList});
+    } catch (err) {
+        next(err);
+    }
+}
+
 const getMainUnitRelateRecords = async function (req, res, next) { 
     let params = {
         id : Number(req.body.id),
@@ -32,4 +43,5 @@ const getMainUnitRelateRecords = async function (req, res, next) {
 module.exports = {    
     getProductUnitList : getProductUnitList,    
     getMainUnitRelateRecords : getMainUnitRelateRecords,
+    getOrderStatusList: getOrderStatusList,
 };

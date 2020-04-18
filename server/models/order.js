@@ -22,6 +22,7 @@ const Order = function (params) {
   this.id = params.id;
   this.to_date = params.to_date;
   this.from_date = params.from_date;
+  this.date = params.date;
 };
 
 
@@ -269,6 +270,25 @@ Order.prototype.getOrderList = function () {
 } 
 
 
+Order.prototype.getOrderListOfSingleDay = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+      connection.query(`SELECT o.id, o.order_id, o.user_id, o.order_date, sd.full_name, sd.mobile, sd.email, sd.pincode, sd.flat_add, sd.street_add, sd.state, sd.city FROM orders as o INNER JOIN shipping_details as sd ON o.shipping_id = sd.id WHERE o.is_active = 1 AND o.status = ${that.order_status} AND  (DATE_FORMAT(o.order_date, '%Y-%m-%d') = '${that.date}')`, function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(rows);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
+
+
 
 
 
@@ -350,6 +370,27 @@ Order.prototype.getOrderedProductList = function () {
       }
       connection.changeUser({database : dbName});
       let Query = `SELECT op.id, op.user_id, op.order_id, op.tracking_id, op.product_id, op.quantity, op.unit_id, op.status, op.is_active, p.product_name, p.main_unit_id, unit.unit_name, unit.id as unit_table_id, unit.equal_value_of_parent, pm.unit_value, pm.price, pm.is_packet, pm.packet_weight, pm.packet_unit_id from ordered_product as op INNER JOIN products AS p ON p.id = op.product_id INNER JOIN unit_records as unit ON unit.id = p.main_unit_id INNER JOIN products_measurement as pm ON pm.product_id = op.product_id AND pm.unit_id = op.unit_id WHERE op.order_id IN(SELECT id FROM orders WHERE is_active = 1 AND status = 1 AND (DATE_FORMAT(order_date, '%Y-%m-%d') BETWEEN '${that.from_date}' AND '${that.to_date}'))`;
+      connection.query(Query, function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(rows);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+}
+
+
+
+Order.prototype.getOrderedProductListSingleDay = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+      let Query = `SELECT op.id, op.user_id, op.order_id, op.tracking_id, op.product_id, op.quantity, op.unit_id, op.status, op.is_active, p.product_name, p.main_unit_id, unit.unit_name, unit.id as unit_table_id, unit.equal_value_of_parent, pm.unit_value, pm.price, pm.is_packet, pm.packet_weight, pm.packet_unit_id from ordered_product as op INNER JOIN products AS p ON p.id = op.product_id INNER JOIN unit_records as unit ON unit.id = p.main_unit_id INNER JOIN products_measurement as pm ON pm.product_id = op.product_id AND pm.unit_id = op.unit_id WHERE op.order_id IN(SELECT id FROM orders WHERE is_active = 1 AND status = 1 AND (DATE_FORMAT(order_date, '%Y-%m-%d')  = '${that.date}'))`;
       connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);

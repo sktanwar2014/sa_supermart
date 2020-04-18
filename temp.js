@@ -1,32 +1,25 @@
-(2, 'CARRY BAGS', 72, 1,1,1),
-(2, 'PRODUCE ROLLS', 72, 1,1,1),
-(2, 'FILM', 72, 1,1,1),
-(2, 'MUSHROOM BAGS', 72, 1,1,1),
-(2, 'CHICKEN BAGS', 72, 1,1,1),
-(2, 'BUTCHER', 72, 1,1,1),
-(2, 'PACKAGING BAGS FRUIT VEG', 72, 1,1,1),
-(2, 'TRAYS FRUIT VEG', 72, 1,1,1),
-(2, 'TICKETS', 72, 1,1,1),
+INSERT INTO `products`( `category_id`, `sub_category_id`, `product_name`, `main_unit_id`, `status`, `is_active`, `created_by`) 
+(1,20,'',1,1,1,1);
 
-(2, 'KNIVES', 73, 1,1,1),
-(2, 'GLOVES', 73, 1,1,1),
-(2, 'CHECK-OUT', 73, 1,1,1),
-(2, 'CHALK', 73, 1,1,1),
-(2, 'STICKERS SMALL X 500', 73, 1,1,1),
-(2, 'STICKERS LARGE X 500', 73, 1,1,1),
+INSERT INTO `products`( `category_id`, `sub_category_id`, `product_name`, `main_unit_id`, `status`, `is_active`, `created_by`) VALUES 
+(2,38,'GRANNYSMITH APPLE',1,1,1,1);
 
-(2, 'S.A. SPRINGWATER', 75, 1,1,1),
-(2, 'ANSTEY HILL SPRING WATER', 75, 1,1,1),
-(2, 'SPARKLING WATER', 75, 1,1,1),
-(2, 'CLEAR JUICES 1 LITRE', 75, 1,1,1),
-(2, 'FULL BODY JUICES', 75, 1,1,1),
-(2, 'SPARKLING JUICES', 75, 1,1,1),
 
-(2, 'FLOWERS MON-WED-FRI', 74, 1,1,1),
 
-(2, 'EGGS', 71, 1,1,1),
-(2, 'CHOC DIPPING', 71, 1,1,1),
-(2, 'CHARCOAL', 71, 1,1,1),
-(2, 'CROUTONS', 71, 1,1,1),
-(2, 'MEDJOOL DATES', 71, 1,1,1),
-(2, 'NEWMANS HORSE RADISH', 71, 1,1,1);
+
+
+
+
+
+INSERT INTO `products_measurement` (`product_id`, `unit_value`, `unit_id`, `price`, `is_packet`, `packet_weight`, `packet_unit_id`, `is_active`) VALUES 
+('64', '1', '1', '0.00', '0', '0', '0', '1'),
+('64', '100', '2', '0.00', '0', '0', '0', '1');
+
+
+
+
+INSERT INTO `products_measurement` (`product_id`, `unit_value`, `unit_id`, `price`, `is_packet`, `packet_weight`, `packet_unit_id`, `is_active`) 
+SELECT id, '1', '1', '0.00', '0', '0', '0', '1' FROM products WHERE sub_category_id = 37;
+INSERT INTO `products_measurement` (`product_id`, `unit_value`, `unit_id`, `price`, `is_packet`, `packet_weight`, `packet_unit_id`, `is_active`) 
+SELECT id, '100', '2', '0.00', '0', '0', '0', '1' FROM products WHERE sub_category_id = 37;
+

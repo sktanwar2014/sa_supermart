@@ -24,6 +24,19 @@ export default {
     }
   },
 
+  getOrderedProductListSingleDay:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/order/getOrderedProductListSingleDay`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
 
   fetchPreviousBillingAddresss:async ({...payload }) => {
     const URL = `${c.API_CONSUMER}/order/fetchPreviousBillingAddresss`;
@@ -68,6 +81,21 @@ export default {
       throw error;
     }
   },
+
+  getOrderListOfSingleDay:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/order/getOrderListOfSingleDay`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
 
   getCustomerOrderList:async ({...payload }) => {
     const URL = `${c.API_CONSUMER}/order/getCustomerOrderList`;

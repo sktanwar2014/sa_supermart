@@ -1,16 +1,16 @@
 import React, {useState, useEffect, Fragment} from 'react';
 
 //Components 
-import Header from '../Partials/Header.js';
-import Footer from '../Partials/Footer.js';
-import OrderAPI from '../../api/order.js';
-import StaticAPI from '../../api/static.js';
+import Header from '../../Partials/Header.js';
+import Footer from '../../Partials/Footer.js';
+import StaticAPI from '../../../api/static.js';
+import OrderAPI from '../../../api/order.js';
 
-
-import {getDateInDDMMYYYY, getDate} from '../../common/moment.js';
+import {getDateInDDMMYYYY, getDate} from '../../../common/moment.js';
 
 const RESET_VALUES = {
-    date : new Date(),
+    toDate : new Date(),
+    fromDate : new Date(),
     orderStatus : '1',
 }
 
@@ -23,8 +23,8 @@ export default function ViewOrder() {
     const [orderStatusList, setOrderStatusList]  = useState([]);
 
     useEffect(()=>{
-        getOrderListOfSingleDay();
-        getOrderStatusList();
+		getOrderList();		
+		getOrderStatusList();		
     },[]);
 
 
@@ -33,11 +33,12 @@ export default function ViewOrder() {
 		setInputs({...inputs, [e.target.name]: e.target.value});
 	}
 
-    const getOrderListOfSingleDay = async () => {
+    const getOrderList = async () => {
         try{
-            const result = await OrderAPI.getOrderListOfSingleDay({
+            const result = await OrderAPI.getOrderList({
                 order_status : inputs.orderStatus,
-                date : getDate(inputs.date),
+                from_date : getDate(inputs.fromDate),
+                to_date : getDate(inputs.toDate),
             });
             setOrderList(result.orderList);            
             setOrderedProductList(result.orderedProducts);            
@@ -45,6 +46,7 @@ export default function ViewOrder() {
             console.log('Error...',e);
         }
     }
+
 
     const getOrderStatusList = async () => {
         try{
@@ -56,36 +58,29 @@ export default function ViewOrder() {
     }
 
 
-    const proceedToDelivered = async (orderId) => {
-        try{
-            const result = await OrderAPI.proceedToDelivered({
-                orderId : orderId,
-                order_status : inputs.orderStatus,
-            });
-            setOrderList(result.orderList);
-            setOrderedProductList(result.orderedProducts);            
-        }catch(e){
-            console.log('Error...',e);
-        }
-    }
-
     return(
 		<Fragment>
 			<Header />
 			<section className="ftco-section">
                 <div class="container">
-                <h3>Modify Orders</h3>
+                <h3>View Order List</h3>
                 <div class="row justify-content-center p-bottom-30">
                         <div class="col-xl-12 ftco-animate fadeInUp ftco-animated">
                             <div class="p-5 bg-light b-top-dark">
                                     <div class="row align-items-end">
-                                        <div class="col-md-6">
+                                        <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="date">Date * </label>
-                                                <input id="date" name="date" type="date" value={getDate(inputs.date)} class="form-control"  onChange={handleInputChange} />
+                                                <label for="fromDate">From * </label>
+                                                <input id="fromDate" name="fromDate" type="date" value={getDate(inputs.fromDate)} class="form-control"  onChange={handleInputChange} />
                                             </div>
                                         </div>   
-                                        <div class="col-md-6">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="toDate">To * </label>
+                                                <input id="toDate" name="toDate" type="date" value={getDate(inputs.toDate)} class="form-control" onChange={handleInputChange} />
+                                            </div>
+                                        </div>  
+                                        <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="orderStatus">Status * </label>
                                                 <select id="orderStatus" name="orderStatus" value={inputs.orderStatus} class="form-control" onChange={handleInputChange}>
@@ -101,7 +96,7 @@ export default function ViewOrder() {
                                         <div class="col-md-12 m-bottom-20">
                                             <div class="form-group">
                                                 <div class="d-flex f-right">
-                                                <button class="btn btn-primary px-4" onClick={getOrderListOfSingleDay}> Click to view</button>
+                                                <button class="btn btn-primary px-4" onClick={getOrderList}> Click to view</button>
                                                 </div>
                                             </div>
                                         </div> 
@@ -114,12 +109,8 @@ export default function ViewOrder() {
                                                         <th>Order Id</th>
                                                         <th>Customer</th>
                                                         <th>Product</th>
-                                                        {/* <th>Price</th> */}
                                                         <th>Quantity</th>
-                                                        {/* <th>Total</th> */}
                                                         <th>Address</th>
-                                                        {/* <th>Total</th> */}
-                                                        {inputs.orderStatus == 1 && <th>Action</th>}
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -139,14 +130,10 @@ export default function ViewOrder() {
                                                                         </Fragment>
                                                                     }
                                                                     <td>{product.product_name}</td>
-                                                                    {/* <td>{`$${product.price}/${product.unit_name}`}</td> */}
                                                                     <td>{`${product.quantity}  ${product.ordered_unit_name}`}</td>
-                                                                    {/* <td>{product.total}</td> */}
                                                                     {totalProduct !== 0 &&
                                                                         <Fragment>
                                                                             <td rowspan={totalProduct}>{`${order.flat_add}, ${order.street_add}, ${order.city}`}</td>
-                                                                            {/* <td rowspan={totalProduct}>{order.total}</td> */}
-                                                                            {inputs.orderStatus == 1 && <td rowspan={totalProduct}><a href="" onClick={()=>{proceedToDelivered(order.id)}}>Click to delivered</a></td>}
                                                                         </Fragment>
                                                                     }   
                                                                     <div style={{display:'none'}}>{totalProduct = 0}</div>
@@ -166,21 +153,6 @@ export default function ViewOrder() {
 						</div>
                     
                 </div>
-					{/* <div className="row mt-5">
-						<div className="col text-center">
-							<div className="block-27">
-							<ul>
-								<li><a href="#">&lt;</a></li>
-								<li className="active"><span>1</span></li>
-								<li><a href="#">2</a></li>
-								<li><a href="#">3</a></li>
-								<li><a href="#">4</a></li>
-								<li><a href="#">5</a></li>
-								<li><a href="#">&gt;</a></li>
-							</ul>
-							</div>
-						</div>
-					</div> */}
     </section>
 		<Footer />
 	</Fragment>

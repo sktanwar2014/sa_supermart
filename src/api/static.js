@@ -35,4 +35,15 @@ export default {
     }
   },
 
+  getOrderStatusList:async () => {
+    const URL = `${c.API_CONSUMER}/staticrecords/getOrderStatusList`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'GET' })));
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
 };
