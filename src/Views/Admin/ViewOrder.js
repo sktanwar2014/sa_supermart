@@ -1,4 +1,5 @@
 import React, {useState, useEffect, Fragment} from 'react';
+import {Link} from  'react-router-dom';
 
 //Components 
 import Header from '../Partials/Header.js';
@@ -15,7 +16,8 @@ const RESET_VALUES = {
 }
 
 
-export default function ViewOrder() {
+export default function ViewOrder(props) {
+    console.log(props)
 
     const [inputs, setInputs] =  useState(RESET_VALUES);
 	const [orderList, setOrderList] = useState([]);
@@ -56,17 +58,18 @@ export default function ViewOrder() {
     }
 
 
-    const proceedToDelivered = async (orderId) => {
-        try{
-            const result = await OrderAPI.proceedToDelivered({
-                orderId : orderId,
-                order_status : inputs.orderStatus,
-            });
-            setOrderList(result.orderList);
-            setOrderedProductList(result.orderedProducts);            
-        }catch(e){
-            console.log('Error...',e);
-        }
+    const proceedToDelivered = async (order) => {
+        console.log(order)
+        // try{
+        //     const result = await OrderAPI.proceedToDelivered({
+        //         orderId : orderId,
+        //         order_status : inputs.orderStatus,
+        //     });
+        //     setOrderList(result.orderList);
+        //     setOrderedProductList(result.orderedProducts);            
+        // }catch(e){
+        //     console.log('Error...',e);
+        // }
     }
 
     return(
@@ -146,7 +149,9 @@ export default function ViewOrder() {
                                                                         <Fragment>
                                                                             <td rowspan={totalProduct}>{`${order.flat_add}, ${order.street_add}, ${order.city}`}</td>
                                                                             {/* <td rowspan={totalProduct}>{order.total}</td> */}
-                                                                            {inputs.orderStatus == 1 && <td rowspan={totalProduct}><a href="" onClick={()=>{proceedToDelivered(order.id)}}>Click to delivered</a></td>}
+                                                                            {inputs.orderStatus == 1 && <td rowspan={totalProduct}>
+                                                                                <Link to={{pathname :'/delivery-form', state : order}}>Click to delivered</Link>
+                                                                            </td>}
                                                                         </Fragment>
                                                                     }   
                                                                     <div style={{display:'none'}}>{totalProduct = 0}</div>

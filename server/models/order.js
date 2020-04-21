@@ -23,6 +23,15 @@ const Order = function (params) {
   this.to_date = params.to_date;
   this.from_date = params.from_date;
   this.date = params.date;
+  this.product_id = params.product_id;
+  this.purchase_date = params.purchase_date;
+  this.required_quantity = params.required_quantity;
+  this.required_unit_id = params.required_unit_id;
+  this.purchased_quantity = params.purchased_quantity;
+  this.purchased_unit_id = params.purchased_unit_id;
+  this.cost = params.cost;
+  this.order_date = params.order_date;
+  this.formData = params.formData;
 };
 
 
@@ -36,6 +45,73 @@ Order.prototype.proceedToDelivered = function () {
       connection.changeUser({database : dbName});
       connection.query(`UPDATE ordered_product as op INNER JOIN orders as o ON o.id = op.order_id SET op.status = '2', o.status = '2' WHERE o.id = ${that.orderId}`, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
+          resolve(rows);
+      });
+      
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
+
+
+
+Order.prototype.updatePurchaseRegister = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+      
+      Object.values(that.formData).map((data, index) => {
+        connection.query('UPDATE purchase_register SET status = 3 WHERE product_id = "'+data.product_id+'" AND (DATE_FORMAT(purchase_date, \'%Y-%m-%d\') = "'+data.order_date+'")', function (error, rows, fields) {
+          if (error) {  console.log("Error...", error); reject(error);  }
+          resolve(rows);
+        });
+      })
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
+
+
+
+Order.prototype.submitDeliveryDetails = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+      
+      Object.values(that.formData).map((data, index) => {
+        connection.query(`INSERT INTO delivered_product(ordered_id, product_id, order_date, delivery_date, paid_quantity, unit_id, price, is_active, created_by) VALUES (?) `, [[data.ordered_id, data.product_id, data.order_date, data.delivery_date,  data.paid_quantity, data.unit_id, data.price, 1, data.created_by]], function (error, rows, fields) {
+          if (error) {  console.log("Error...", error); reject(error);  }
+          resolve(rows);
+        });
+      })
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
+
+
+Order.prototype.fetchDeliveryFormData = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+      let Query = `SELECT SUM(dp.paid_quantity) AS paid_quantity,  op.id, p.product_name, unit.unit_name as ordered_unit_name, op.product_id, op.quantity, op.unit_id,  op.status, pr.purchased_quantity, pr.purchased_unit_id, pr.cost, unit2.unit_name as purchased_unit_name FROM ordered_product as op INNER JOIN products as p ON p.id = op.product_id  INNER JOIN unit_records as unit ON unit.id = op.unit_id LEFT JOIN purchase_register as pr ON pr.product_id  = op.product_id AND pr.is_active =  1 AND (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d') = '${that.order_date}')  INNER JOIN unit_records as unit2 ON pr.purchased_unit_id = unit2.id LEFT JOIN delivered_product as dp ON op.product_id = dp.product_id  AND (DATE_FORMAT(dp.order_date, '%Y-%m-%d') = '${that.order_date}') WHERE op.order_id = ${that.orderId} GROUP BY op.product_id`
+      connection.query(Query, function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);
       });
         connection.release();
@@ -44,7 +120,32 @@ Order.prototype.proceedToDelivered = function () {
   });
 } 
 
-
+Order.prototype.handlePurchasedRecord = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+      connection.query(`SELECT * FROM purchase_register WHERE product_id = ${that.product_id} AND purchase_date = '${that.purchase_date}' AND is_active = 1`, function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        if(rows.length > 0){
+          connection.query(`UPDATE purchase_register SET is_active = 0, status = 2, updated_by = ${that.createdBy},  updated_at = now() WHERE id = ${rows[0].id}`, function (error, updateResult, fields) {
+            if (error) {  console.log("Error...", error); reject(error);  }
+          });
+        }
+      });
+      let insertValues = [that.product_id, that.purchase_date, that.required_quantity, that.required_unit_id, that.purchased_quantity, that.purchased_unit_id, that.cost, 1, 1, that.createdBy]
+      connection.query(`INSERT INTO purchase_register(product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, status, is_active, created_by) VALUES (?)`, [insertValues], function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(rows.insertId)
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
 
 
 
@@ -390,7 +491,7 @@ Order.prototype.getOrderedProductListSingleDay = function () {
         throw error;
       }
       connection.changeUser({database : dbName});
-      let Query = `SELECT op.id, op.user_id, op.order_id, op.tracking_id, op.product_id, op.quantity, op.unit_id, op.status, op.is_active, p.product_name, p.main_unit_id, unit.unit_name, unit.id as unit_table_id, unit.equal_value_of_parent, pm.unit_value, pm.price, pm.is_packet, pm.packet_weight, pm.packet_unit_id from ordered_product as op INNER JOIN products AS p ON p.id = op.product_id INNER JOIN unit_records as unit ON unit.id = p.main_unit_id INNER JOIN products_measurement as pm ON pm.product_id = op.product_id AND pm.unit_id = op.unit_id WHERE op.order_id IN(SELECT id FROM orders WHERE is_active = 1 AND status = 1 AND (DATE_FORMAT(order_date, '%Y-%m-%d')  = '${that.date}'))`;
+      let Query = `SELECT op.id, op.user_id, op.order_id, op.tracking_id, op.product_id, op.quantity, op.unit_id, op.status, op.is_active, p.product_name, p.main_unit_id, unit.unit_name, unit.id as unit_table_id, unit.equal_value_of_parent, pm.unit_value, pm.price, pm.is_packet, pm.packet_weight, pm.packet_unit_id from ordered_product as op INNER JOIN products AS p ON p.id = op.product_id INNER JOIN unit_records as unit ON unit.id = p.main_unit_id INNER JOIN products_measurement as pm ON pm.product_id = op.product_id AND pm.unit_id = op.unit_id WHERE op.order_id IN(SELECT id FROM orders WHERE is_active = 1 AND (DATE_FORMAT(order_date, '%Y-%m-%d')  = '${that.date}'))`;
       connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);
@@ -402,5 +503,26 @@ Order.prototype.getOrderedProductListSingleDay = function () {
 }
 
 
+
+
+Order.prototype.getDailyPurchaseRecords = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+      let Query = `SELECT id, product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, status, is_active FROM purchase_register WHERE is_active = 1 AND product_id IN(${that.product_id}) AND (DATE_FORMAT(purchase_date, '%Y-%m-%d')  = '${that.date}')`;
+      // console.log(Query)
+      connection.query(Query, function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(rows);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+}
 
 module.exports = Order;

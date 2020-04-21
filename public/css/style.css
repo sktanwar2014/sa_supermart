@@ -10535,3 +10535,26 @@ textarea.form-control {
   font-size: 1rem;
   line-height: 1.5;
 }
+
+.alter-purchase-record {
+    background: none!important;
+    border: none;
+    font-family: arial, sans-serif;
+    color: #82ae46;
+    cursor: pointer;
+}
+
+.delivery-unit-select
+{
+  height: 39px;
+  background: #fff !important;
+  color: #000000 !important;
+  font-size: 15px;
+  border-radius: 0px;
+  border: 0px;
+  -webkit-box-shadow: none !important;
+  box-shadow: none !important;
+  align-self: center;
+  font-weight: 400;
+  width: 50%;
+}

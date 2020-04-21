@@ -187,7 +187,7 @@ export default function AddProduct(props) {
                     <div class="row justify-content-center">
                         <div class="col-xl-12 ftco-animate fadeInUp ftco-animated">
                             <h3 class="mb-4 billing-heading">Add New Product</h3>
-                            <form onSubmit={handleSubmit} name="mainForm" class="p-5 bg-light">
+                            <form onSubmit={handleSubmit} name="mainForm" class="p-5 bg-light b-top-dark">
                                     <div class="row align-items-end">
                                         <div class="col-md-6">
                                             <div class="form-group">

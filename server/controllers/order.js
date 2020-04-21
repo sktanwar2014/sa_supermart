@@ -146,6 +146,58 @@ const removeSelectedAddress = async function (req, res, next) {
 
 
 
+const fetchDeliveryFormData = async function (req, res, next) {    
+    const params = {
+       orderId : req.body.orderId, 
+       order_date : req.body.order_date,
+    }
+    try {
+        const Model = new Order(params);
+        const result = await Model.fetchDeliveryFormData();
+        let isAllAvailable =  true;
+
+        if(result !==  undefined && result !== null && result.length > 0){
+            result.map(data => {
+                if(data.purchased_quantity  === "" || data.cost === "" || data.purchased_quantity  === null || data.cost === null){
+                    isAllAvailable = false;
+                }
+                let available = (data.paid_quantity !== null && data.paid_quantity !== undefined && data.paid_quantity !== "") ? (data.purchased_quantity - data.paid_quantity) : data.purchased_quantity ;
+                if( available <= 0){
+                    isAllAvailable = false;
+                }
+            })
+        }
+        if(isAllAvailable === true){
+            res.send({deliveryFormData : result});
+        }else{
+            res.send({deliveryFormData: []});
+        }
+    } catch (err) {
+        next(err);
+    }
+}
+
+const handlePurchasedRecord = async function (req, res, next) {    
+    const params = {
+        product_id : req.body.product_id,
+        purchase_date : req.body.purchase_date,
+        required_quantity : req.body.required_quantity,
+        required_unit_id : req.body.required_unit_id,
+        purchased_quantity : req.body.purchased_quantity,
+        purchased_unit_id : req.body.purchased_unit_id,
+        cost : req.body.cost,
+        createdBy : req.body.created_by,
+    }
+    try {
+        const Model = new Order(params);
+        const result = await Model.handlePurchasedRecord();
+
+        res.send({result});
+    } catch (err) {
+        next(err);
+    }
+}
+
 
 const getOrderedProductListSingleDay = async function (req, res, next) {    
     const params = {
@@ -154,10 +206,31 @@ const getOrderedProductListSingleDay = async function (req, res, next) {
     try {
         const Model = new Order(params);
         const result = await Model.getOrderedProductListSingleDay();
-
         const calculatedResult = await calculateProductTotalQuantity(result);
         
-        // console.log(calculatedResult);
+        let purchaseRecord =  [];
+
+        if(result.length > 0){
+            const prodIds = [...new Set(result.map(dist => dist.product_id))];
+            Model.product_id = String(prodIds.toString());
+            purchaseRecord = await Model.getDailyPurchaseRecords();
+        }
+    
+        // console.log(calculatedResult, purchaseRecord)
+            (calculatedResult.length > 0 ? calculatedResult : []).map(data => {
+               const found = purchaseRecord.find(ele => {return ele.product_id === data.id})
+                if(found !== undefined && found !== null && found !== ""){
+                    data.purchased_quantity = found.purchased_quantity;
+                    data.purchased_unit_id = found.purchased_unit_id;
+                    data.cost = found.cost;
+                    data.purchased_status = found.status;
+                }else{
+                    data.purchased_quantity = '';
+                    data.purchased_unit_id = '';
+                    data.cost = '';
+                    data.purchased_status = '';
+                }
+            })
         res.send({orderedProductListSingleDay: calculatedResult});
     } catch (err) {
         next(err);
@@ -175,12 +248,35 @@ const getOrderedProductList = async function (req, res, next) {
 
         const calculatedResult = await calculateProductTotalQuantity(result);
         
-        // console.log(calculatedResult);
         res.send({orderedProductList: calculatedResult});
     } catch (err) {
         next(err);
     }
 }
+
+
+
+
+const submitDeliveryDetails = async function (req, res, next) {  
+    const params = {
+        formData : req.body.productData,
+        orderId : req.body.orderId,
+    }
+    try {
+        const Model = new Order(params);
+        const submit = await Model.proceedToDelivered();
+        const update = await Model.updatePurchaseRegister();
+        const result = await Model.submitDeliveryDetails();
+        if(result !== "" && result !== null && result !== undefined){
+            res.send(true);
+        }else{
+            res.send(false);
+        }
+    } catch (err) {
+        next(err);
+    }
+}
+
 
 
 
@@ -251,31 +347,7 @@ async function calculateProductTotalQuantity(products){
             main_unit_id: product.main_unit_id,
             unit_name: product.unit_name,
         });
-
-        // console.log('units',units);
-
-        // let weight = 0;
-        // units.map(data => {
-        //     if(data.id === product.main_unit_id){
-        //         weight =  weight + data.weight;
-        //     }else{
-        //         let a= true;
-        //         let unit_id = data.id;
-        //         let inChild = false;
-        //         while(a){                    
-        //             const result = await check(data, unitList, unit_id, product.main_unit_id, inChild);
-        //             if(result.is_targeted === 1){
-        //                 weight = weight + result.weight;
-        //                 a = false;
-        //             }else{
-
-        //             }
-        //         }
-               
-        //     }
-        // })
-        // console.log('weight',weight);
-    })  
+    })
     return returnValues;
 }
 
@@ -322,4 +394,7 @@ module.exports = {
     getOrderedProductList: getOrderedProductList,
     getOrderedProductListSingleDay: getOrderedProductListSingleDay,
     getOrderListOfSingleDay : getOrderListOfSingleDay,
+    handlePurchasedRecord: handlePurchasedRecord,
+    fetchDeliveryFormData : fetchDeliveryFormData,
+    submitDeliveryDetails : submitDeliveryDetails,
 };

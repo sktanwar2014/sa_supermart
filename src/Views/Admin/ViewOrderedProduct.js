@@ -4,7 +4,10 @@ import React, {useState, useEffect, Fragment} from 'react';
 import Header from '../Partials/Header.js';
 import Footer from '../Partials/Footer.js';
 import OrderAPI from '../../api/order.js';
+import {APP_TOKEN} from '../../api/config/Constants.js';
+
 import {getDateInDDMMYYYY, getDate} from '../../common/moment.js';
+
 
 const RESET_VALUES = {
     date : new Date(),
@@ -15,7 +18,7 @@ export default function ViewOrderedProduct() {
 
     const [inputs, setInputs] =  useState(RESET_VALUES);
     const [orderedProductList, setOrderedProductList] = useState([]);
-    
+    const userId = APP_TOKEN.get().userId;
 
     useEffect(()=>{
 		getOrderedProductListSingleDay();		
@@ -24,6 +27,7 @@ export default function ViewOrderedProduct() {
 
     
 	const  handleInputChange = (e) => {
+        // console.log(e.target.name , e.target.value)
 		setInputs({...inputs, [e.target.name]: e.target.value});
 	}
 
@@ -32,12 +36,39 @@ export default function ViewOrderedProduct() {
             const result = await OrderAPI.getOrderedProductListSingleDay({
                 date : getDate(inputs.date),
             });
-            setOrderedProductList(result.orderedProductListSingleDay);            
+            setOrderedProductList(result.orderedProductListSingleDay);   
+            // console.log(result)         
         }catch(e){
             console.log('Error...',e);
         }
     }
 
+    const handlePurchasedRecord = async (data) => {
+        let purchasedQuantity  = document.getElementById('purchasedQuantity-'+data.id).value;
+        let productCost  = document.getElementById('productCost-'+data.id).value;
+
+        if(purchasedQuantity !== "" && productCost!== ""){
+            try{
+                const result = await OrderAPI.handlePurchasedRecord({
+                    product_id : data.id,
+                    purchase_date : getDate(inputs.date),
+                    required_quantity : data.weight,
+                    required_unit_id : data.main_unit_id,
+                    purchased_quantity : purchasedQuantity,
+                    purchased_unit_id : data.main_unit_id,
+                    cost : productCost,
+                    created_by : userId,
+                });
+                if(result !== "" && result !== null && result !== undefined){
+                    alert('Data update successfully.');
+                }
+            }catch(e){
+                console.log(e);
+            }
+        }else{
+            alert('fill the fields');
+        }
+    }
 
     return(
 		<Fragment>
@@ -95,18 +126,21 @@ export default function ViewOrderedProduct() {
                                                             <td>{data.weight+ ' ' + data.unit_name}</td>
                                                             <td>
                                                                 <div class="d-flex justify-content-center">
-                                                                    <input type="number" name="purchasedQuantity" class="cost-input" id="purchasedQuantity" min="1" />
-                                                                    <p class="cost-input-adoptment"> KG </p>
+                                                                    <input type="number" name={"purchasedQuantity-"+data.id} class="cost-input" id={"purchasedQuantity-"+data.id} defaultValue={data.purchased_quantity}  min="1" disabled={data.purchased_status === 3} />
+                                                                    <p class="cost-input-adoptment"> {data.unit_name} </p>
                                                                 </div>
                                                             </td>
                                                             <td>
                                                                 <div class="d-flex justify-content-center">
                                                                     <p class="cost-input-adoptment"> $ </p>
-                                                                    <input type="number" name="purchasedQuantity" class="cost-input" id="purchasedQuantity" min="1" />
+                                                                    <input type="number" name={"productCost-"+data.id} class="cost-input" id={"productCost-"+data.id} defaultValue={data.cost} min="1"  disabled={data.purchased_status === 3} />
                                                                 </div>
                                                             </td>
-                                                            <td>{
-                                                                }</td>
+                                                            <td>
+                                                                <div>
+                                                                    <button class="alter-purchase-record" type="submit" onClick={()=>{handlePurchasedRecord(data)}} disabled={data.purchased_status === 3}> Update</button>
+                                                                </div>
+                                                                </td>
                                                         </tr>
                                                         )
                                                     })
