@@ -24,6 +24,20 @@ export default {
     }
   },
 
+  orderVerificationByCustomer:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/order/orderVerificationByCustomer`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
 
   fetchDeliveryFormData:async ({...payload }) => {
     const URL = `${c.API_CONSUMER}/order/fetchDeliveryFormData`;

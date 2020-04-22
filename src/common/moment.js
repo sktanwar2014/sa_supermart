@@ -70,8 +70,8 @@ export function checkFutureDate(date) {
 }
 
 export function isSameDate(payment_date, settlement_date) {
-  console.log(payment_date === settlement_date, payment_date, settlement_date)
-  console.log(moment(payment_date) > moment(settlement_date), moment(payment_date) < moment(settlement_date))
+  // console.log(payment_date === settlement_date, payment_date, settlement_date)
+  // console.log(moment(payment_date) > moment(settlement_date), moment(payment_date) < moment(settlement_date))
   return payment_date === settlement_date;
 }
 

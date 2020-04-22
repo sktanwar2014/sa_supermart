@@ -8,7 +8,6 @@ import CategoriesAPI from '../../../api/categories.js';
 
 
 export default function AddUpdateCategoriesDialog({open, setCategoryDialogOpen, setCategoryList, setSubCategory, setDefaultCategoryId, setDefaultSubCategoryId,  props}) {
-  console.log(props)
     
   const handleSubmit = async (e) => {
     e.preventDefault();

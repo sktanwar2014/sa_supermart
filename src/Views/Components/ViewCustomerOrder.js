@@ -3,24 +3,44 @@ import React, {useState, useEffect, Fragment} from 'react';
 //Components 
 import Header from '../Partials/Header.js';
 import Footer from '../Partials/Footer.js';
+import StaticAPI from '../../api/static.js';
 import OrderAPI from '../../api/order.js';
-import {getDateInDDMMYYYY} from '../../common/moment.js';
 import {APP_TOKEN} from  '../../api/config/Constants.js'
+import {getDateInDDMMYYYY, getDate} from '../../common/moment.js';
+
+const RESET_VALUES = {
+    toDate : new Date(),
+    fromDate : new Date(),
+    orderStatus : '1',
+}
+
 
 export default function ViewCustomerOrder() {
 
+    const [inputs, setInputs] =  useState(RESET_VALUES);
 	const [orderList, setOrderList] = useState([]);
     const [orderedProductList, setOrderedProductList] = useState([]);
-    const [tabValue, setTabValue] = useState(1);
+    const [orderStatusList, setOrderStatusList]  = useState([]);
+    const [orderStatus, setOrderStatus] = useState(1);
 
     useEffect(()=>{
-		getOrderList();		
-    },[tabValue]);
+		getCustomerOrderList();		
+		getOrderStatusList();		
+    },[]);
 
-    const getOrderList = async () => {
+
+    
+	const  handleInputChange = (e) => {
+		setInputs({...inputs, [e.target.name]: e.target.value});
+	}
+
+    const getCustomerOrderList = async () => {
+        setOrderStatus(inputs.orderStatus);
         try{
             const result = await OrderAPI.getCustomerOrderList({
-                order_status : tabValue,
+                order_status : inputs.orderStatus,
+                from_date : getDate(inputs.fromDate),
+                to_date : getDate(inputs.toDate),
                 createdBy : APP_TOKEN.get().userId,
             });
             setOrderList(result.orderList);            
@@ -31,10 +51,29 @@ export default function ViewCustomerOrder() {
     }
 
 
+    const getOrderStatusList = async () => {
+        try{
+            const result = await StaticAPI.getOrderStatusList({});
+            setOrderStatusList(result.orderStatusList);
+        }catch(e){
+            console.log('Error...',e);
+        }
+    }
 
-    
-    const handleTabChange = (index) =>{
-        setTabValue(index)        
+    const handleOrderVerification = async (data) => {
+        try{
+            const result = await OrderAPI.orderVerificationByCustomer({
+                order_status : inputs.orderStatus,
+                from_date : getDate(inputs.fromDate),
+                to_date : getDate(inputs.toDate),
+                createdBy : APP_TOKEN.get().userId,
+                orderId : data.id,
+            });
+            setOrderList(result.orderList);
+            setOrderedProductList(result.orderedProducts);
+        }catch(e){
+            console.log('Error...',e);
+        }
     }
 
 
@@ -43,37 +82,61 @@ export default function ViewCustomerOrder() {
 			<Header />
 			<section className="ftco-section">
                 <div class="container">
-                    <div class="row justify-content-center">
+                <h3>My Orders</h3>
+                <div class="row justify-content-center p-bottom-30">
                         <div class="col-xl-12 ftco-animate fadeInUp ftco-animated">
-                            <h3 class="mb-4 billing-heading">Order List</h3>
-                                <div id="exTab2" class="container">	
-                                    <ul class="tab-panel tab-panel-tabs">
-                                        <li class="active">
-                                            <a onClick={() => {handleTabChange(1)}} href="" data-toggle="tab">Undelivered</a>
-                                        </li>
-                                        <li>
-                                            <a onClick={() => {handleTabChange(2)}} href="" data-toggle="tab">Delivered</a>
-                                        </li>                                        
-                                    </ul>
-                                    <div class="tab-content p-5 bg-light">
-                                        <div class="tab-pane active">
-                                        <table className="table">
-						                    <thead>
-						                        <tr class="text-center">
-                                                    <th>#</th>
-                                                    <th>Order Date</th>
-                                                    <th>Order Id</th>
-                                                    <th>Customer</th>
-                                                    <th>Product</th>
-                                                    {/* <th>Price</th> */}
-                                                    <th>Quantity</th>
-                                                    {/* <th>Total</th> */}
-                                                    <th>Address</th>
-                                                    {/* <th>Total</th> */}
-                    					        </tr>
-						                    </thead>
-						                    <tbody>
-                                                {(orderList.length>0 ? orderList :[]).map((order, index) => {                                                    
+                            <div class="p-5 bg-light b-top-dark">
+                                    <div class="row align-items-end">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="fromDate">From * </label>
+                                                <input id="fromDate" name="fromDate" type="date" value={getDate(inputs.fromDate)} class="form-control"  onChange={handleInputChange} />
+                                            </div>
+                                        </div>   
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="toDate">To * </label>
+                                                <input id="toDate" name="toDate" type="date" value={getDate(inputs.toDate)} class="form-control" onChange={handleInputChange} />
+                                            </div>
+                                        </div>  
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="orderStatus">Status * </label>
+                                                <select id="orderStatus" name="orderStatus" value={inputs.orderStatus} class="form-control" onChange={handleInputChange}>
+                                                    {(orderStatusList.length > 0 ? orderStatusList : [] ).map((data, index)=>{
+                                                        return(
+                                                           <option id={data.id} value={data.id} >{data.order_status}</option>
+                                                        )
+                                                        })
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div> 
+                                        <div class="col-md-12 m-bottom-20">
+                                            <div class="form-group">
+                                                <div class="d-flex f-right">
+                                                <button class="btn btn-primary px-4" onClick={getCustomerOrderList}> Click to view</button>
+                                                </div>
+                                            </div>
+                                        </div> 
+                                        <div class="w-100">
+                                            <table className="unit-array-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Order Date</th>
+                                                        <th>Order Id</th>
+                                                        <th>Customer</th>
+                                                        <th>Product</th>
+                                                        <th>Quantity</th>
+                                                        {orderStatus != 1 && <th>Price</th> }
+                                                        <th>Address</th>
+                                                        {orderStatus != 1 && <th>Delivery Date</th> }
+                                                        {orderStatus == 2 && <th>Action</th> }
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {(orderList.length>0 ? orderList :[]).map((order, index) => {                                                    
                                                     let totalProduct = orderedProductList.filter(pro => pro.order_id === order.id).length;                                                    
                                                     return(
                                                         (orderedProductList.length >0 ? orderedProductList :[]).map((product) =>  {
@@ -89,13 +152,16 @@ export default function ViewCustomerOrder() {
                                                                         </Fragment>
                                                                     }
                                                                     <td>{product.product_name}</td>
-                                                                    {/* <td>{`$${product.price}/${product.unit_name}`}</td> */}
-                                                                    <td>{`${product.quantity}/${product.ordered_unit_name}`}</td>
-                                                                    {/* <td>{product.total}</td> */}
+                                                                    <td>{`${product.quantity}  ${product.ordered_unit_name}`}</td>
+                                                                    {orderStatus != 1 &&  <td>{`${product.price}`}</td>}
                                                                     {totalProduct !== 0 &&
                                                                         <Fragment>
                                                                             <td rowspan={totalProduct}>{`${order.flat_add}, ${order.street_add}, ${order.city}`}</td>
-                                                                            {/* <td rowspan={totalProduct}>{order.total}</td> */}
+                                                                            {orderStatus != 1 && <td rowspan={totalProduct}>{getDateInDDMMYYYY(order.delivery_date)}</td> }
+                                                                            {orderStatus == 2 && <td rowspan={totalProduct}>
+                                                                                    <button class="alter-purchase-record" type="submit" onClick={()=>{handleOrderVerification(order)}} >Click to verify</button>
+                                                                                </td>
+                                                                            }
                                                                         </Fragment>
                                                                     }   
                                                                     <div style={{display:'none'}}>{totalProduct = 0}</div>
@@ -105,30 +171,16 @@ export default function ViewCustomerOrder() {
                                                             })
                                                         )
                                                     })
-                                                }						                       
-                						    </tbody>
-						                </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-					{/* <div className="row mt-5">
-						<div className="col text-center">
-							<div className="block-27">
-							<ul>
-								<li><a href="#">&lt;</a></li>
-								<li className="active"><span>1</span></li>
-								<li><a href="#">2</a></li>
-								<li><a href="#">3</a></li>
-								<li><a href="#">4</a></li>
-								<li><a href="#">5</a></li>
-								<li><a href="#">&gt;</a></li>
-							</ul>
+                                                }	
+                                                </tbody>
+                                            </table>
+                                        </div>
+									</div>
+								</div>
 							</div>
 						</div>
-					</div> */}
+                    
+                </div>
     </section>
 		<Footer />
 	</Fragment>

@@ -27,7 +27,6 @@ export default function ViewOrderedProduct() {
 
     
 	const  handleInputChange = (e) => {
-        // console.log(e.target.name , e.target.value)
 		setInputs({...inputs, [e.target.name]: e.target.value});
 	}
 
@@ -37,7 +36,6 @@ export default function ViewOrderedProduct() {
                 date : getDate(inputs.date),
             });
             setOrderedProductList(result.orderedProductListSingleDay);   
-            // console.log(result)         
         }catch(e){
             console.log('Error...',e);
         }
@@ -111,7 +109,7 @@ export default function ViewOrderedProduct() {
                                                     <tr>
                                                         <th>#</th>
                                                         <th>Products</th>
-                                                        <th>Total Quantity</th>
+                                                        <th>Ordered Quantity</th>
                                                         <th>Purchased Quantity</th>
                                                         <th>Cost</th>
                                                         <th>Actions</th>
@@ -138,7 +136,7 @@ export default function ViewOrderedProduct() {
                                                             </td>
                                                             <td>
                                                                 <div>
-                                                                    <button class="alter-purchase-record" type="submit" onClick={()=>{handlePurchasedRecord(data)}} disabled={data.purchased_status === 3}> Update</button>
+                                                                    <button class={data.purchased_status === 3 ?  "alter-purchase-record btn-disabled" : "alter-purchase-record" }type="submit" onClick={()=>{handlePurchasedRecord(data)}} disabled={data.purchased_status === 3}> Update</button>
                                                                 </div>
                                                                 </td>
                                                         </tr>

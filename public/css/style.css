@@ -10544,6 +10544,12 @@ textarea.form-control {
     cursor: pointer;
 }
 
+
+.btn-disabled {
+  color: #000000;
+  cursor: default;
+}
+
 .delivery-unit-select
 {
   height: 39px;

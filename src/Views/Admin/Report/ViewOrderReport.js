@@ -21,6 +21,7 @@ export default function ViewOrder() {
 	const [orderList, setOrderList] = useState([]);
     const [orderedProductList, setOrderedProductList] = useState([]);
     const [orderStatusList, setOrderStatusList]  = useState([]);
+    const [orderStatus, setOrderStatus] = useState(1);
 
     useEffect(()=>{
 		getOrderList();		
@@ -34,6 +35,7 @@ export default function ViewOrder() {
 	}
 
     const getOrderList = async () => {
+        setOrderStatus(inputs.orderStatus);
         try{
             const result = await OrderAPI.getOrderList({
                 order_status : inputs.orderStatus,
@@ -110,7 +112,9 @@ export default function ViewOrder() {
                                                         <th>Customer</th>
                                                         <th>Product</th>
                                                         <th>Quantity</th>
+                                                        {orderStatus != 1 && <th>Price</th> }
                                                         <th>Address</th>
+                                                        {orderStatus != 1 && <th>Delivery Date</th> }
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -131,9 +135,11 @@ export default function ViewOrder() {
                                                                     }
                                                                     <td>{product.product_name}</td>
                                                                     <td>{`${product.quantity}  ${product.ordered_unit_name}`}</td>
+                                                                    {orderStatus != 1 &&  <td>{`${product.price}`}</td>}
                                                                     {totalProduct !== 0 &&
                                                                         <Fragment>
                                                                             <td rowspan={totalProduct}>{`${order.flat_add}, ${order.street_add}, ${order.city}`}</td>
+                                                                            {orderStatus != 1 && <td rowspan={totalProduct}>{getDateInDDMMYYYY(order.delivery_date)}</td> }
                                                                         </Fragment>
                                                                     }   
                                                                     <div style={{display:'none'}}>{totalProduct = 0}</div>

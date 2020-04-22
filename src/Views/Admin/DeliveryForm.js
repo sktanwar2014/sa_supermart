@@ -42,14 +42,13 @@ export default function DeliveryForm(props) {
         }
     }
 
-    // console.log(productList)
     const handleQuantityChange = (e) => {
         let id =  (e.target.name).split('-')[1];
         let quantity = e.target.value;
         const found = productList.find(ele  => {return ele.id == id});
 
-        let available = (found.paid_quantity !== null && found.paid_quantity !== undefined && found.paid_quantity !== "") ? (found.purchased_quantity - found.paid_quantity) : found.purchased_quantity ;
-        if(available < quantity){
+        let available = (found.paid_quantity !== null && found.paid_quantity !== undefined && found.paid_quantity !== "") ? Number(found.purchased_quantity - found.paid_quantity).toFixed(3) : Number(found.purchased_quantity).toFixed(3) ;
+        if(Number(available) < Number(quantity)){
             document.getElementById('provideQuantity-'+id).value = '';            
             alert('input quantity is out of stock');
         }else{
@@ -158,7 +157,7 @@ export default function DeliveryForm(props) {
                                                             <td>{data.quantity+ ' ' + data.ordered_unit_name}</td>
                                                             <td>{
                                                                 (data.paid_quantity !== null && data.paid_quantity !== undefined && data.paid_quantity !== "") ?
-                                                                (data.purchased_quantity - data.paid_quantity) + ' ' + data.purchased_unit_name : data.purchased_quantity  + ' ' + data.purchased_unit_name
+                                                                Number(data.purchased_quantity - data.paid_quantity).toFixed(3) + ' ' + data.purchased_unit_name : Number(data.purchased_quantity).toFixed(3)  + ' ' + data.purchased_unit_name
                                                             }</td>
                                                             <td>
                                                                 <div class="d-flex justify-content-center">

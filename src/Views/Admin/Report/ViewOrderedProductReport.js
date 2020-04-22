@@ -34,7 +34,6 @@ export default function ViewOrderedProduct() {
                 from_date : getDate(inputs.fromDate),
                 to_date : getDate(inputs.toDate),
             });
-            // console.log(result)
             setOrderedProductList(result.orderedProductList);            
         }catch(e){
             console.log('Error...',e);

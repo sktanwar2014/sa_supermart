@@ -16,6 +16,7 @@ Router.route("/getOrderListOfSingleDay").post(Order.getOrderListOfSingleDay);
 Router.route("/handlePurchasedRecord").post(Order.handlePurchasedRecord);
 Router.route("/fetchDeliveryFormData").post(Order.fetchDeliveryFormData);
 Router.route("/submitDeliveryDetails").post(Order.submitDeliveryDetails);
+Router.route("/orderVerificationByCustomer").post(Order.orderVerificationByCustomer);
 
 
 

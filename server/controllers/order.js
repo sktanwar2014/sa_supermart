@@ -7,6 +7,7 @@ const getOrderList = async function (req, res, next) {
         order_status: req.body.order_status,
         from_date :  req.body.from_date,
         to_date :  req.body.to_date,
+        is_date_range : 1,
     }
     try {
         const Model = new Order(params);
@@ -23,6 +24,7 @@ const getOrderListOfSingleDay = async function (req, res, next) {
     const params = {
         order_status: req.body.order_status,
         date :  req.body.date,
+        is_date_range : 0,
     }
     try {
         const Model = new Order(params);
@@ -39,9 +41,35 @@ const getCustomerOrderList = async function (req, res, next) {
     const params = {
         order_status: req.body.order_status,
         createdBy : req.body.createdBy,
+        from_date :  req.body.from_date,
+        to_date :  req.body.to_date,
+        is_date_range : 1,
     }
     try {
         const Model = new Order(params);
+        const orderList = await Model.getCustomerOrderList();
+        const orderedProducts = await Model.getCustomerOrderedProduct();
+        res.send({ orderList: orderList, orderedProducts: orderedProducts});
+    } catch (err) {
+        next(err);
+    }
+}
+
+
+
+
+const orderVerificationByCustomer = async function (req, res, next) {    
+    const params = {
+        order_status: req.body.order_status,
+        createdBy : req.body.createdBy,
+        from_date :  req.body.from_date,
+        to_date :  req.body.to_date,
+        is_date_range : 1,
+        orderId : req.body.orderId,
+    }
+    try {
+        const Model = new Order(params);
+        await Model.orderVerificationByCustomer();
         const orderList = await Model.getCustomerOrderList();
         const orderedProducts = await Model.getCustomerOrderedProduct();
         res.send({ orderList: orderList, orderedProducts: orderedProducts});
@@ -397,4 +425,5 @@ module.exports = {
     handlePurchasedRecord: handlePurchasedRecord,
     fetchDeliveryFormData : fetchDeliveryFormData,
     submitDeliveryDetails : submitDeliveryDetails,
+    orderVerificationByCustomer: orderVerificationByCustomer,
 };

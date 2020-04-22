@@ -17,12 +17,12 @@ const RESET_VALUES = {
 
 
 export default function ViewOrder(props) {
-    console.log(props)
 
     const [inputs, setInputs] =  useState(RESET_VALUES);
 	const [orderList, setOrderList] = useState([]);
     const [orderedProductList, setOrderedProductList] = useState([]);
     const [orderStatusList, setOrderStatusList]  = useState([]);
+    const [orderStatus, setOrderStatus] = useState(1);
 
     useEffect(()=>{
         getOrderListOfSingleDay();
@@ -36,6 +36,8 @@ export default function ViewOrder(props) {
 	}
 
     const getOrderListOfSingleDay = async () => {
+        setOrderStatus(inputs.orderStatus);
+
         try{
             const result = await OrderAPI.getOrderListOfSingleDay({
                 order_status : inputs.orderStatus,
@@ -57,19 +59,9 @@ export default function ViewOrder(props) {
         }
     }
 
-
-    const proceedToDelivered = async (order) => {
-        console.log(order)
-        // try{
-        //     const result = await OrderAPI.proceedToDelivered({
-        //         orderId : orderId,
-        //         order_status : inputs.orderStatus,
-        //     });
-        //     setOrderList(result.orderList);
-        //     setOrderedProductList(result.orderedProducts);            
-        // }catch(e){
-        //     console.log('Error...',e);
-        // }
+    const handleGenerateInvoice = async (data) =>{
+        // console.log(data);
+        alert('Work in Progress')
     }
 
     return(
@@ -117,12 +109,11 @@ export default function ViewOrder(props) {
                                                         <th>Order Id</th>
                                                         <th>Customer</th>
                                                         <th>Product</th>
-                                                        {/* <th>Price</th> */}
                                                         <th>Quantity</th>
-                                                        {/* <th>Total</th> */}
+                                                        {orderStatus != 1 && <th>Price</th> }
                                                         <th>Address</th>
-                                                        {/* <th>Total</th> */}
-                                                        {inputs.orderStatus == 1 && <th>Action</th>}
+                                                        {orderStatus != 1 && <th>Delivery Date</th> }
+                                                        <th>Action</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -133,7 +124,7 @@ export default function ViewOrder(props) {
                                                             if(product.order_id === order.id){
                                                             return(
                                                                 <tr class="text-center">
-                                                                    {totalProduct !== 0 &&                                                                    
+                                                                    {totalProduct !== 0 &&
                                                                         <Fragment>                                                                            
                                                                             <td rowspan={totalProduct}>{index + 1}</td>
                                                                             <td rowspan={totalProduct}>{getDateInDDMMYYYY(order.order_date)}</td>
@@ -142,16 +133,18 @@ export default function ViewOrder(props) {
                                                                         </Fragment>
                                                                     }
                                                                     <td>{product.product_name}</td>
-                                                                    {/* <td>{`$${product.price}/${product.unit_name}`}</td> */}
                                                                     <td>{`${product.quantity}  ${product.ordered_unit_name}`}</td>
-                                                                    {/* <td>{product.total}</td> */}
+                                                                    {orderStatus != 1 &&  <td>{`${product.price}`}</td>}
                                                                     {totalProduct !== 0 &&
                                                                         <Fragment>
                                                                             <td rowspan={totalProduct}>{`${order.flat_add}, ${order.street_add}, ${order.city}`}</td>
-                                                                            {/* <td rowspan={totalProduct}>{order.total}</td> */}
-                                                                            {inputs.orderStatus == 1 && <td rowspan={totalProduct}>
-                                                                                <Link to={{pathname :'/delivery-form', state : order}}>Click to delivered</Link>
-                                                                            </td>}
+                                                                            {orderStatus != 1 && <td rowspan={totalProduct}>{getDateInDDMMYYYY(order.delivery_date)}</td> }
+                                                                            <td rowspan={totalProduct}>
+                                                                                {orderStatus  == 1 ? <Link to={{pathname :'/delivery-form', state : order}}>Click to delivered</Link>
+                                                                                    : 
+                                                                                    <button class={order.status === 3 ?  "alter-purchase-record" : "alter-purchase-record btn-disabled" }type="submit" onClick={()=>{handleGenerateInvoice(order)}} disabled={order.status != 3}> Generate Invoice</button>
+                                                                                }
+                                                                            </td>
                                                                         </Fragment>
                                                                     }   
                                                                     <div style={{display:'none'}}>{totalProduct = 0}</div>
@@ -171,21 +164,6 @@ export default function ViewOrder(props) {
 						</div>
                     
                 </div>
-					{/* <div className="row mt-5">
-						<div className="col text-center">
-							<div className="block-27">
-							<ul>
-								<li><a href="#">&lt;</a></li>
-								<li className="active"><span>1</span></li>
-								<li><a href="#">2</a></li>
-								<li><a href="#">3</a></li>
-								<li><a href="#">4</a></li>
-								<li><a href="#">5</a></li>
-								<li><a href="#">&gt;</a></li>
-							</ul>
-							</div>
-						</div>
-					</div> */}
     </section>
 		<Footer />
 	</Fragment>
