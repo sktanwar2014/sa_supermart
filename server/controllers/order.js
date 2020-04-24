@@ -43,7 +43,6 @@ const getCustomerOrderList = async function (req, res, next) {
         createdBy : req.body.createdBy,
         from_date :  req.body.from_date,
         to_date :  req.body.to_date,
-        is_date_range : 1,
     }
     try {
         const Model = new Order(params);
@@ -60,41 +59,21 @@ const getCustomerOrderList = async function (req, res, next) {
 
 const orderVerificationByCustomer = async function (req, res, next) {    
     const params = {
-        order_status: req.body.order_status,
-        createdBy : req.body.createdBy,
-        from_date :  req.body.from_date,
-        to_date :  req.body.to_date,
-        is_date_range : 1,
+        formData : req.body.productData,
         orderId : req.body.orderId,
     }
     try {
         const Model = new Order(params);
-        await Model.orderVerificationByCustomer();
-        const orderList = await Model.getCustomerOrderList();
-        const orderedProducts = await Model.getCustomerOrderedProduct();
-        res.send({ orderList: orderList, orderedProducts: orderedProducts});
+        const result = await Model.orderVerificationByCustomer();
+        if(result !== "" && result !== null && result !== undefined){
+            res.send(true);
+        }else{
+            res.send(false);
+        }
     } catch (err) {
         next(err);
     }
 }
-
-
-const proceedToDelivered = async function (req, res, next) {    
-    const params = {
-        order_status: req.body.order_status,
-        orderId : req.body.orderId,
-    }
-    try {
-        const Model = new Order(params);
-        await Model.proceedToDelivered();
-        const orderList = await Model.getOrderList();
-        const orderedProducts = await Model.getOrderedProduct();
-        res.send({ orderList: orderList, orderedProducts: orderedProducts});
-    } catch (err) {
-        next(err);
-    }
-}
-
 
 const addNewOrder = async function (req, res, next) {    
     const params = {
@@ -182,22 +161,24 @@ const fetchDeliveryFormData = async function (req, res, next) {
     try {
         const Model = new Order(params);
         const result = await Model.fetchDeliveryFormData();
-        let isAllAvailable =  true;
+        // let isAllAvailable =  true;
 
         if(result !==  undefined && result !== null && result.length > 0){
-            result.map(data => {
-                if(data.purchased_quantity  === "" || data.cost === "" || data.purchased_quantity  === null || data.cost === null){
-                    isAllAvailable = false;
-                }
-                let available = (data.paid_quantity !== null && data.paid_quantity !== undefined && data.paid_quantity !== "") ? (data.purchased_quantity - data.paid_quantity) : data.purchased_quantity ;
-                if( available <= 0){
-                    isAllAvailable = false;
-                }
-            })
-        }
-        if(isAllAvailable === true){
             res.send({deliveryFormData : result});
-        }else{
+            // result.map(data => {
+            //     if(data.purchased_quantity  === "" || data.cost === "" || data.purchased_quantity  === null || data.cost === null){
+            //         isAllAvailable = false;
+            //     }
+            //     let available = (data.paid_quantity !== null && data.paid_quantity !== undefined && data.paid_quantity !== "") ? (data.purchased_quantity - data.paid_quantity) : data.purchased_quantity ;
+            //     if( available <= 0){
+            //         isAllAvailable = false;
+            //     }
+            // })
+        }
+        // if(isAllAvailable === true){
+        //     res.send({deliveryFormData : result});
+        // }
+        else{
             res.send({deliveryFormData: []});
         }
     } catch (err) {
@@ -308,6 +289,26 @@ const submitDeliveryDetails = async function (req, res, next) {
 
 
 
+
+const handleOrderConfirmation = async function (req, res, next) {  
+    const params = {
+        order_status : req.body.order_status,
+        orderId : req.body.orderId,
+        date :  req.body.date,
+        is_date_range : 0,
+    }
+    try {
+        const Model = new Order(params);
+        const result = await Model.handleOrderConfirmation();
+        const orderList = await Model.getOrderListOfSingleDay();
+        const orderedProducts = await Model.getOrderedProduct();
+        res.send({ orderList: orderList, orderedProducts: orderedProducts});
+    } catch (err) {
+        next(err);
+    }
+}
+
+
 async function calculateProductTotalQuantity(products){
 
     const prodIds = [...new Set(products.map(dist => dist.product_id))];
@@ -415,7 +416,6 @@ async function calculateProductTotalQuantity(products){
 module.exports = {    
     getOrderList: getOrderList,
     getCustomerOrderList: getCustomerOrderList,
-    proceedToDelivered: proceedToDelivered,
     addNewOrder: addNewOrder,
     fetchPreviousBillingAddresss: fetchPreviousBillingAddresss,
     removeSelectedAddress: removeSelectedAddress,
@@ -426,4 +426,5 @@ module.exports = {
     fetchDeliveryFormData : fetchDeliveryFormData,
     submitDeliveryDetails : submitDeliveryDetails,
     orderVerificationByCustomer: orderVerificationByCustomer,
+    handleOrderConfirmation: handleOrderConfirmation
 };

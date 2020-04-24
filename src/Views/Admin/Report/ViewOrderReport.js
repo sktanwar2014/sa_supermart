@@ -88,7 +88,7 @@ export default function ViewOrder() {
                                                 <select id="orderStatus" name="orderStatus" value={inputs.orderStatus} class="form-control" onChange={handleInputChange}>
                                                     {(orderStatusList.length > 0 ? orderStatusList : [] ).map((data, index)=>{
                                                         return(
-                                                            <option id={data.id} value={data.id} >{data.order_status}</option>
+                                                            (data.id !== 4 && data.id !== 5 ) ?  <option id={data.id} value={data.id} >{data.order_status}</option> : null
                                                         )
                                                         })
                                                     }

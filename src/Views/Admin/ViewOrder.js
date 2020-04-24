@@ -59,9 +59,21 @@ export default function ViewOrder(props) {
         }
     }
 
+
     const handleGenerateInvoice = async (data) =>{
         // console.log(data);
         alert('Work in Progress')
+    }
+
+    
+    const handleOrderConfirmation = async (data, status) =>{
+        try{
+            const result = await OrderAPI.handleOrderConfirmation({orderId: data.id, order_status : status, date : getDate(inputs.date),});
+            setOrderList(result.orderList);            
+            setOrderedProductList(result.orderedProducts);           
+        }catch(e){
+            console.log('Error...',e);
+        }
     }
 
     return(
@@ -86,7 +98,7 @@ export default function ViewOrder(props) {
                                                 <select id="orderStatus" name="orderStatus" value={inputs.orderStatus} class="form-control" onChange={handleInputChange}>
                                                     {(orderStatusList.length > 0 ? orderStatusList : [] ).map((data, index)=>{
                                                         return(
-                                                            <option id={data.id} value={data.id} >{data.order_status}</option>
+                                                          (data.id !== 4 && data.id !== 5 ) ?  <option id={data.id} value={data.id} >{data.order_status}</option>: null
                                                         )
                                                         })
                                                     }
@@ -113,15 +125,15 @@ export default function ViewOrder(props) {
                                                         {orderStatus != 1 && <th>Price</th> }
                                                         <th>Address</th>
                                                         {orderStatus != 1 && <th>Delivery Date</th> }
-                                                        <th>Action</th>
+                                                        {orderStatus != 2 && <th>Action</th> }
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {(orderList.length>0 ? orderList :[]).map((order, index) => {                                                    
-                                                    let totalProduct = orderedProductList.filter(pro => pro.order_id === order.id).length;                                                    
+                                                    {(orderList.length>0 ? orderList :[]).map((order, index) => {
+                                                    let products = orderedProductList.filter(pro => pro.order_id === order.id);                                                    
+                                                    let totalProduct = products.length;                                                    
                                                     return(
-                                                        (orderedProductList.length >0 ? orderedProductList :[]).map((product) =>  {
-                                                            if(product.order_id === order.id){
+                                                        (products.length >0 ? products :[]).map((product) =>  {
                                                             return(
                                                                 <tr class="text-center">
                                                                     {totalProduct !== 0 &&
@@ -140,17 +152,24 @@ export default function ViewOrder(props) {
                                                                             <td rowspan={totalProduct}>{`${order.flat_add}, ${order.street_add}, ${order.city}`}</td>
                                                                             {orderStatus != 1 && <td rowspan={totalProduct}>{getDateInDDMMYYYY(order.delivery_date)}</td> }
                                                                             <td rowspan={totalProduct}>
-                                                                                {orderStatus  == 1 ? <Link to={{pathname :'/delivery-form', state : order}}>Click to delivered</Link>
-                                                                                    : 
-                                                                                    <button class={order.status === 3 ?  "alter-purchase-record" : "alter-purchase-record btn-disabled" }type="submit" onClick={()=>{handleGenerateInvoice(order)}} disabled={order.status != 3}> Generate Invoice</button>
+                                                                                {orderStatus  == 1 ? <Link to={{pathname :'/delivery-form', state : {order: order, products: products}}}>Click to delivered</Link> :
+                                                                                 orderStatus  == 3 ?
+                                                                                    order.status == 3 ?
+                                                                                    <Fragment>
+                                                                                        <button class={ "alter-purchase-record"} type="submit" onClick={()=>{handleOrderConfirmation(order, 4)}}> Accept </button>
+                                                                                        <button class={ "alter-purchase-record"} type="submit" onClick={()=>{handleOrderConfirmation(order, 5)}}> Reject </button>
+                                                                                    </Fragment> :
+                                                                                    (order.status  == 4 || order.status  == 5) ?
+                                                                                   <button class="alter-purchase-record" type="submit" onClick={()=>{handleGenerateInvoice(order)}}> Generate Invoice </button> : ''
+                                                                                   :''
                                                                                 }
+                                                                                
                                                                             </td>
                                                                         </Fragment>
                                                                     }   
                                                                     <div style={{display:'none'}}>{totalProduct = 0}</div>
                                                                 </tr>
                                                                 )
-                                                            }
                                                             })
                                                         )
                                                     })

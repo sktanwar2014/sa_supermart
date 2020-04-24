@@ -18,27 +18,15 @@ const ProceedToCheckout = lazy(()=> import('./Views/Components/ProceedToCheckout
 const ViewOrderReport = lazy(()=> import('./Views/Admin/Report/ViewOrderReport.js'));
 const ViewOrderedProductReport = lazy(()=> import('./Views/Admin/Report/ViewOrderedProductReport.js'));
 const DeliveryForm = lazy(()=> import('./Views/Admin/DeliveryForm.js'));
+const ProductVerification = lazy(()=> import('./Views/Components/ProductVerification.js'));
 
 
 
 function App() {
- 
   return (
           <Router>
             <Suspense fallback={<PageLoader />}>
               <Switch>
-                {/* <Route exact path="/" component={Index} />
-                <Route exact path="/editor"  render={props => { return <Editor {...props.location.state} /> }}  />
-                <Route exact path="/OurTechnology" component={OurTechnology} />
-                <Route exact path="/Services" component={Services} />
-                <Route exact path="/Contact" component={Contact} />
-                <Route exact path="/About" component={About} />
-                <Route exact path="/WhyUs" component={WhyUs} />
-                <Route exact path="/OurGoals" component={OurGoals} />
-                <Route exact path="/OurPartners" component={OurPartners} />
-                <Route exact path="/Portfolio" component={Portfolio} />                
-                <Route exact path="/login" render={props => { return <Login {...props} /> }}   />      */}
-                
                 <Route 
                   exact 
                   path="/"
@@ -47,7 +35,8 @@ function App() {
                     ? <Redirect to="/login" />
                     : (APP_TOKEN.isAdmin)
                     ? <Redirect to="/view-added-product" />
-                    : <Home {...props} /> }}
+                    : <Home {...props} /> 
+                  }}
                 />
                 <Route 
                   exact 
@@ -57,7 +46,8 @@ function App() {
                     ? <Redirect to="/login" />
                     : (APP_TOKEN.isAdmin)
                     ? <Redirect to="/view-added-product" />
-                    : <CartList {...props} /> }}                    
+                    : <CartList {...props} /> 
+                  }}                    
                 />
                 <Route 
                   exact 
@@ -67,7 +57,8 @@ function App() {
                     ? <Redirect to="/login" />
                     : (APP_TOKEN.isAdmin)
                     ? <Redirect to="/view-added-product" />
-                    : <ProceedToCheckout {...props} /> }}
+                    : <ProceedToCheckout {...props} />
+                  }}
                 />
                 <Route 
                   exact 
@@ -77,7 +68,8 @@ function App() {
                     ? <Redirect to="/login" />
                     : (APP_TOKEN.isAdmin)
                     ? <AddProduct {...props} />
-                    : <Redirect to="/" /> }}                    
+                    : <Redirect to="/" /> 
+                  }}                    
                 />
                 <Route 
                   exact 
@@ -97,7 +89,8 @@ function App() {
                     ? <Redirect to="/login" />
                     : (APP_TOKEN.isAdmin)
                     ? <ViewProduct {...props} />
-                    : <Redirect to="/" /> }}                    
+                    : <Redirect to="/" /> 
+                  }}                    
                 />
                 <Route 
                   exact 
@@ -107,7 +100,8 @@ function App() {
                     ? <Redirect to="/login" />
                     : (APP_TOKEN.isAdmin)
                     ? <ViewOrder {...props} />
-                    : <Redirect to="/" /> }}                    
+                    : <Redirect to="/" />
+                  }}                    
                 />
                  <Route 
                   exact 
@@ -117,7 +111,8 @@ function App() {
                     ? <Redirect to="/login" />
                     : (APP_TOKEN.isAdmin)
                     ? <ViewOrderedProduct {...props} />
-                    : <Redirect to="/" /> }}                    
+                    : <Redirect to="/" />
+                  }}                    
                 />
                <Route 
                   exact 
@@ -127,7 +122,8 @@ function App() {
                     ? <Redirect to="/login" />
                     : (APP_TOKEN.isAdmin)
                     ? <ViewOrderReport {...props} />
-                    : <Redirect to="/" /> }}                    
+                    : <Redirect to="/" />
+                  }}                    
                 />
                  <Route 
                   exact 
@@ -137,7 +133,8 @@ function App() {
                     ? <Redirect to="/login" />
                     : (APP_TOKEN.isAdmin)
                     ? <ViewOrderedProductReport {...props} />
-                    : <Redirect to="/" /> }}                    
+                    : <Redirect to="/" /> 
+                  }}                    
                 />
                 <Route 
                   exact 
@@ -147,7 +144,19 @@ function App() {
                     ? <Redirect to="/login" />
                     : (APP_TOKEN.isAdmin)
                     ? <DeliveryForm {...props} />
-                    : <Redirect to="/" /> }}                    
+                    : <Redirect to="/" /> 
+                  }}                    
+                />
+                <Route 
+                  exact 
+                  path="/verify-delivered-product" 
+                  render = { props => {
+                    return (!APP_TOKEN.notEmpty)
+                    ? <Redirect to="/login" />
+                    : (APP_TOKEN.isAdmin)
+                    ? <Redirect to="/view-added-product" />
+                    : <ProductVerification  {...props} /> 
+                  }}                    
                 />
                
                 <Route exact path="/login"  render={props =>  <Login {...props} /> } />

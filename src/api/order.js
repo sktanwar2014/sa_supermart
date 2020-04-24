@@ -10,6 +10,21 @@ const PARAMS = ({ methodType = 'GET' }) => ({
 
 export default {
 
+  handleOrderConfirmation:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/order/handleOrderConfirmation`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
+
   submitDeliveryDetails:async ({...payload }) => {
     const URL = `${c.API_CONSUMER}/order/submitDeliveryDetails`;
     try {
@@ -170,19 +185,6 @@ export default {
     }
   },
 
-  proceedToDelivered:async ({...payload }) => {
-    const URL = `${c.API_CONSUMER}/order/proceedToDelivered`;
-    try {
-      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
-        data: payload,
-      }),
-    );
-      return data;
-    } catch (error) {
-      checkError(error);
-      throw error;
-    }
-  },
 
   addNewOrder:async ({...payload }) => {
     const URL = `${c.API_CONSUMER}/order/addNewOrder`;

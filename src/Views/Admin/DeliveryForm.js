@@ -1,24 +1,19 @@
 import React, {useState, useEffect, Fragment} from 'react';
 
 //Components 
-import CategoriesAPI from '../../api/categories.js';
 import {APP_TOKEN} from '../../api/config/Constants.js';
-import StaticAPI from '../../api/static.js';
 import OrderAPI from '../../api/order.js';
 import Header from '../Partials/Header.js';
 import Footer from '../Partials/Footer.js';
-import AddUpdateCategoriesDialog from './Components/AddUpdateCategoriesDialog.js';
 
 import {getDate, getDateInDDMMYYYY} from '../../common/moment.js';
 
 export default function DeliveryForm(props) {
     
     const userId = APP_TOKEN.get().userId;
-    const [order, setOrder]  = useState(props.location.state);
+    const [order, setOrder]  = useState(props.location.state.order);
     const [productList, setProductList] = useState([]);
-   
-    
-    const [productUnitBio, setProductUnitBio] = useState([]);
+    const [noOneAvailable, setNoOneAvailable] = useState([]);
 
 
     useEffect(()=>{
@@ -62,18 +57,19 @@ export default function DeliveryForm(props) {
         try{     
             let productData = [];
             productList.map((data, index)=> {
-                productData.push({
-                    ordered_id : data.id,
-                    product_id : data.product_id,
-                    delivery_date : getDate(new Date()),
-                    order_date : getDate(order.order_date),
-                    paid_quantity : document.getElementById('provideQuantity-'+data.id).value,
-                    unit_id : data.purchased_unit_id,
-                    price : document.getElementById('productPrice-'+data.id).textContent,
-                    created_by : userId,
-                })
+                if(data.purchased_quantity  !== null){
+                    productData.push({
+                        ordered_id : data.id,
+                        product_id : data.product_id,
+                        delivery_date : getDate(new Date()),
+                        order_date : getDate(order.order_date),
+                        paid_quantity : document.getElementById('provideQuantity-'+data.id).value,
+                        unit_id : data.purchased_unit_id,
+                        price : document.getElementById('productPrice-'+data.id).textContent,
+                        created_by : userId,
+                    })
+                }
             })
-
             const result = await OrderAPI.submitDeliveryDetails({productData: productData, orderId : order.id});
             if(result === true){    // true = inserted
                 window.location.pathname = '/view-order-list';
@@ -150,19 +146,26 @@ export default function DeliveryForm(props) {
                                                 </tr>
                                             </thead>
                                                 <tbody>
-                                                    {(productList.length >0 ? productList :[]).map((data, index) => {                                                    
+                                                    {(productList.length >0 ? productList :[]).map((data, index) => {    
+                                                        let available =  
+                                                            (data.purchased_quantity  === null) ? 0.00 : 
+                                                            (data.paid_quantity !== null && data.paid_quantity !== undefined && data.paid_quantity !== "") ?
+                                                            Number(data.purchased_quantity - data.paid_quantity).toFixed(3) : Number(data.purchased_quantity).toFixed(3)
                                                     return(
                                                         <tr>
                                                             <td>{data.product_name}</td>
                                                             <td>{data.quantity+ ' ' + data.ordered_unit_name}</td>
                                                             <td>{
-                                                                (data.paid_quantity !== null && data.paid_quantity !== undefined && data.paid_quantity !== "") ?
-                                                                Number(data.purchased_quantity - data.paid_quantity).toFixed(3) + ' ' + data.purchased_unit_name : Number(data.purchased_quantity).toFixed(3)  + ' ' + data.purchased_unit_name
+                                                                (available > 0 )  ? available + " " + data.purchased_unit_name
+                                                                : "Not available"
+                                                                // (data.purchased_quantity  === null) ? "Not available" :
+                                                                // (data.paid_quantity !== null && data.paid_quantity !== undefined && data.paid_quantity !== "") ?
+                                                                // Number(data.purchased_quantity - data.paid_quantity).toFixed(3) + ' ' + data.purchased_unit_name : Number(data.purchased_quantity).toFixed(3)  + ' ' + data.purchased_unit_name
                                                             }</td>
                                                             <td>
                                                                 <div class="d-flex justify-content-center">
-                                                                    <input type="number" name={"provideQuantity-"+data.id} class="cost-input" id={"provideQuantity-"+data.id} min="0" step="0.01" onChange={handleQuantityChange} required/>
-                                                                    <p class="cost-input-adoptment"> {data.purchased_unit_name} </p>
+                                                                    <input type="number" name={"provideQuantity-"+data.id} class="cost-input" id={"provideQuantity-"+data.id} min="0" step="0.01" onChange={handleQuantityChange} required disabled={(available <= 0) }/>
+                                                                    {(available > 0) ? <p class="cost-input-adoptment"> {data.purchased_unit_name} </p> :''}
                                                                     {/* <p class="cost-input-adoptment"> {data.ordered_unit_name} </p> */}
                                                                     {/* <select id="provideUnit"  class="delivery-unit-select" defaultValue={data.unit_id}  required>
                                                                         <option  value = {data.purchased_unit_id}>{data.purchased_unit_name}</option>
@@ -176,9 +179,9 @@ export default function DeliveryForm(props) {
                                                 }
                                                 </tbody>
                                             </table>
-                                        <div class="form-group p-4">
-                                            <input type="submit" value="Submit" class="btn  px-4 btn-primary" />
-                                        </div>
+                                            <div class="form-group p-4">
+                                                <input type="submit" value="Submit" class="btn  px-4 btn-primary" disabled= {(productList.find(ele => {return ele.purchased_quantity !== null && (ele.purchased_quantity - ele.paid_quantity > 0)})) ===  undefined  } />
+                                            </div>
                                     </div>
                                 </form>
                             </div>

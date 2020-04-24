@@ -1,4 +1,5 @@
 import React, {useState, useEffect, Fragment} from 'react';
+import {Link} from 'react-router-dom';
 
 //Components 
 import Header from '../Partials/Header.js';
@@ -60,22 +61,6 @@ export default function ViewCustomerOrder() {
         }
     }
 
-    const handleOrderVerification = async (data) => {
-        try{
-            const result = await OrderAPI.orderVerificationByCustomer({
-                order_status : inputs.orderStatus,
-                from_date : getDate(inputs.fromDate),
-                to_date : getDate(inputs.toDate),
-                createdBy : APP_TOKEN.get().userId,
-                orderId : data.id,
-            });
-            setOrderList(result.orderList);
-            setOrderedProductList(result.orderedProducts);
-        }catch(e){
-            console.log('Error...',e);
-        }
-    }
-
 
     return(
 		<Fragment>
@@ -105,7 +90,7 @@ export default function ViewCustomerOrder() {
                                                 <select id="orderStatus" name="orderStatus" value={inputs.orderStatus} class="form-control" onChange={handleInputChange}>
                                                     {(orderStatusList.length > 0 ? orderStatusList : [] ).map((data, index)=>{
                                                         return(
-                                                           <option id={data.id} value={data.id} >{data.order_status}</option>
+                                                            (data.id !== 4 && data.id !== 5 ) ?   <option id={data.id} value={data.id} >{data.order_status}</option> : null
                                                         )
                                                         })
                                                     }
@@ -128,8 +113,7 @@ export default function ViewCustomerOrder() {
                                                         <th>Order Id</th>
                                                         <th>Customer</th>
                                                         <th>Product</th>
-                                                        <th>Quantity</th>
-                                                        {orderStatus != 1 && <th>Price</th> }
+                                                        {orderStatus == 1 && <th>Quantity</th> }
                                                         <th>Address</th>
                                                         {orderStatus != 1 && <th>Delivery Date</th> }
                                                         {orderStatus == 2 && <th>Action</th> }
@@ -137,10 +121,10 @@ export default function ViewCustomerOrder() {
                                                 </thead>
                                                 <tbody>
                                                     {(orderList.length>0 ? orderList :[]).map((order, index) => {                                                    
-                                                    let totalProduct = orderedProductList.filter(pro => pro.order_id === order.id).length;                                                    
+                                                    let products = orderedProductList.filter(pro => pro.order_id === order.id);
+                                                    let totalProduct = products.length;
                                                     return(
-                                                        (orderedProductList.length >0 ? orderedProductList :[]).map((product) =>  {
-                                                            if(product.order_id === order.id){
+                                                        (products.length >0 ? products :[]).map((product) =>  {
                                                             return(
                                                                 <tr class="text-center">
                                                                     {totalProduct !== 0 &&                                                                    
@@ -152,22 +136,21 @@ export default function ViewCustomerOrder() {
                                                                         </Fragment>
                                                                     }
                                                                     <td>{product.product_name}</td>
-                                                                    <td>{`${product.quantity}  ${product.ordered_unit_name}`}</td>
-                                                                    {orderStatus != 1 &&  <td>{`${product.price}`}</td>}
+                                                                    {orderStatus == 1 &&  <td>{`${product.quantity}  ${product.ordered_unit_name}`}</td> }
                                                                     {totalProduct !== 0 &&
                                                                         <Fragment>
                                                                             <td rowspan={totalProduct}>{`${order.flat_add}, ${order.street_add}, ${order.city}`}</td>
                                                                             {orderStatus != 1 && <td rowspan={totalProduct}>{getDateInDDMMYYYY(order.delivery_date)}</td> }
                                                                             {orderStatus == 2 && <td rowspan={totalProduct}>
-                                                                                    <button class="alter-purchase-record" type="submit" onClick={()=>{handleOrderVerification(order)}} >Click to verify</button>
+                                                                                <Link to={{pathname :'/verify-delivered-product', state : {order: order, product: products}}}>Click to verify</Link>
+                                                                                    {/* <button class="alter-purchase-record" type="submit" onClick={()=>{handleOrderVerification(order)}} >Click to verify</button> */}
                                                                                 </td>
                                                                             }
                                                                         </Fragment>
-                                                                    }   
+                                                                    }
                                                                     <div style={{display:'none'}}>{totalProduct = 0}</div>
                                                                 </tr>
                                                                 )
-                                                            }
                                                             })
                                                         )
                                                     })
