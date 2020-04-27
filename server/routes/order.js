@@ -17,6 +17,7 @@ Router.route("/fetchDeliveryFormData").post(Order.fetchDeliveryFormData);
 Router.route("/submitDeliveryDetails").post(Order.submitDeliveryDetails);
 Router.route("/handleOrderConfirmation").post(Order.handleOrderConfirmation);
 Router.route("/orderVerificationByCustomer").post(Order.orderVerificationByCustomer);
+Router.route("/generateInvoice").post(Order.generateInvoice);
 
 
 

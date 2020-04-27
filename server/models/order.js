@@ -36,6 +36,46 @@ const Order = function (params) {
 };
 
 
+Order.prototype.getInvoiceDetails = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+
+      connection.query(`SELECT first_name, email, mobile, address, city, postcode FROM profile WHERE user_id = 1 AND is_active = 1`, function (error, companyDetail, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        connection.query(`SELECT o.order_id, o.order_date, sd.full_name,  sd.mobile, sd.email, sd.pincode, sd.flat_add, sd.street_add, sd.city, sd.state, dp.delivery_date FROM orders AS o INNER JOIN shipping_details AS sd ON sd.id = o.shipping_id LEFT JOIN ordered_product as op ON o.id = op.order_id LEFT JOIN delivered_product as dp ON dp.ordered_id = op.id  WHERE o.id = ${that.orderId} GROUP BY op.order_id`, function (error, shippingDetail, fields) {
+          if (error) {  console.log("Error...", error); reject(error);  }
+          let Query = ``;
+          if(that.order_status == 4){
+            Query = `SELECT vp.quantity, ur.unit_name, p.product_name, dp.price FROM verified_product AS vp INNER JOIN ordered_product as op ON op.id = vp.ordered_id INNER JOIN products as p ON p.id = vp.product_id INNER JOIN unit_records as ur ON ur.id = vp.unit_id LEFT JOIN delivered_product as dp ON dp.id = vp.delivered_id WHERE op.order_id = ${that.orderId}`;
+          }else if(that.order_status  == 5){
+            Query = `SELECT dp.paid_quantity as quantity, dp.price, ur.unit_name, p.product_name FROM delivered_product AS dp INNER JOIN ordered_product as op ON op.id = dp.ordered_id  INNER JOIN products as p ON p.id = dp.product_id INNER JOIN unit_records as ur ON ur.id = dp.unit_id WHERE op.order_id = ${that.orderId}`;
+          }
+            connection.query(Query, function (error, productDetails, fields) {
+              if (error) {  console.log("Error...", error); reject(error);  }
+                resolve({companyDetail: companyDetail, shippingDetail: shippingDetail, productDetails: productDetails});
+            });
+        });
+      });
+
+      // Object.values(that.formData).map((data, index) => {
+      //   connection.query(`UPDATE ordered_product SET status = '2' WHERE id = ${data.ordered_id}`, function (error, rows, fields) {
+      //     if (error) {  console.log("Error...", error); reject(error);  }
+      //     resolve(rows);
+      //   });
+      // })
+      
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
+
+
 Order.prototype.proceedToDelivered = function () {
   const that = this;
   return new Promise(function (resolve, reject) {

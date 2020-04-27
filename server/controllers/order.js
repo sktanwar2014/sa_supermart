@@ -2,6 +2,27 @@ const Order = require('../models/order.js');
 const {isEmpty} = require('../utils/conditionChecker.js');
 const Static = require('../models/static.js')
 
+const invoiceReport  = require('../reports/generateInvoice.js')
+
+const generateInvoice = async function (req, res, next) {
+    const params = {
+        order_status: req.body.order_status,
+        orderId : req.body.orderId,
+    }
+
+    try {
+        const Model = new Order(params);
+        const result = await Model.getInvoiceDetails();
+        // console.log(result)
+      
+        let DD = invoiceReport(result);
+        res.send(DD);
+    } catch (err) {
+        next(err);
+    }
+}
+
+
 const getOrderList = async function (req, res, next) {    
     const params = {
         order_status: req.body.order_status,
@@ -426,5 +447,6 @@ module.exports = {
     fetchDeliveryFormData : fetchDeliveryFormData,
     submitDeliveryDetails : submitDeliveryDetails,
     orderVerificationByCustomer: orderVerificationByCustomer,
-    handleOrderConfirmation: handleOrderConfirmation
+    handleOrderConfirmation: handleOrderConfirmation,
+    generateInvoice: generateInvoice,
 };

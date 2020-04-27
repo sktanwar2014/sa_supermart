@@ -1,5 +1,7 @@
 import React, {useState, useEffect, Fragment} from 'react';
 import {Link} from  'react-router-dom';
+import pdfmake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
 
 //Components 
 import Header from '../Partials/Header.js';
@@ -61,8 +63,15 @@ export default function ViewOrder(props) {
 
 
     const handleGenerateInvoice = async (data) =>{
-        // console.log(data);
-        alert('Work in Progress')
+        pdfmake.vfs = pdfFonts.pdfMake.vfs;
+        try{
+            const result = await OrderAPI.generateInvoice({orderId : data.id, order_status: data.status});
+            console.log(result)
+            pdfmake.createPdf(result).download();
+            // setOrderStatusList(result.orderStatusList);
+        }catch(e){
+            console.log('Error...',e);
+        }
     }
 
     
