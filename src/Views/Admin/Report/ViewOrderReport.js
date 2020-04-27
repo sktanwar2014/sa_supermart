@@ -5,6 +5,7 @@ import Header from '../../Partials/Header.js';
 import Footer from '../../Partials/Footer.js';
 import StaticAPI from '../../../api/static.js';
 import OrderAPI from '../../../api/order.js';
+import OrderAcceptRejectDialog from '../Components/OrderAcceptRejectDialog.js';
 
 import {getDateInDDMMYYYY, getDate} from '../../../common/moment.js';
 
@@ -22,6 +23,9 @@ export default function ViewOrder() {
     const [orderedProductList, setOrderedProductList] = useState([]);
     const [orderStatusList, setOrderStatusList]  = useState([]);
     const [orderStatus, setOrderStatus] = useState(1);
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [orderProps, setOrderProps] = useState({});
+
 
     useEffect(()=>{
 		getOrderList();		
@@ -57,6 +61,16 @@ export default function ViewOrder() {
         }catch(e){
             console.log('Error...',e);
         }
+    }
+
+      
+    const handleOrderConfirmation = async (data, products) =>{
+        setOrderProps({
+            order_id: data.id,
+            order_date : getDate(inputs.date),
+            products: products
+        });
+        setDialogOpen(true);
     }
 
 
@@ -110,19 +124,20 @@ export default function ViewOrder() {
                                                         <th>Order Date</th>
                                                         <th>Order Id</th>
                                                         <th>Customer</th>
-                                                        <th>Product</th>
-                                                        <th>Quantity</th>
-                                                        {orderStatus != 1 && <th>Price</th> }
+                                                        {(orderStatus == 2 || orderStatus  == 1) && <th>Product</th> }
+                                                        {(orderStatus == 2 || orderStatus  == 1) && <th>Quantity</th> }
+                                                        {orderStatus == 2 && <th>Price</th> }
                                                         <th>Address</th>
                                                         {orderStatus != 1 && <th>Delivery Date</th> }
+                                                        {(orderStatus != 1 && orderStatus != 2)  && <th>Actions</th> }
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {(orderList.length>0 ? orderList :[]).map((order, index) => {                                                    
-                                                    let totalProduct = orderedProductList.filter(pro => pro.order_id === order.id).length;                                                    
+                                                    {(orderList.length>0 ? orderList :[]).map((order, index) => {    
+                                                        let products = orderedProductList.filter(pro => pro.order_id === order.id);                                                    
+                                                        let totalProduct = products.length;                                                     
                                                     return(
-                                                        (orderedProductList.length >0 ? orderedProductList :[]).map((product) =>  {
-                                                            if(product.order_id === order.id){
+                                                        (products.length >0 ? products :[]).map((product) =>  {
                                                             return(
                                                                 <tr class="text-center">
                                                                     {totalProduct !== 0 &&                                                                    
@@ -133,19 +148,21 @@ export default function ViewOrder() {
                                                                             <td rowspan={totalProduct}>{order.full_name}</td>
                                                                         </Fragment>
                                                                     }
-                                                                    <td>{product.product_name}</td>
-                                                                    <td>{`${product.quantity}  ${product.ordered_unit_name}`}</td>
-                                                                    {orderStatus != 1 &&  <td>{`${product.price}`}</td>}
+                                                                    {(orderStatus == 2 || orderStatus  == 1) && <td>{product.product_name}</td> }
+                                                                    {(orderStatus == 2 || orderStatus  == 1) && <td>{`${product.quantity}  ${product.ordered_unit_name}`}</td> }
+                                                                    {orderStatus == 2 &&  <td>{`${product.price}`}</td>}
                                                                     {totalProduct !== 0 &&
                                                                         <Fragment>
                                                                             <td rowspan={totalProduct}>{`${order.flat_add}, ${order.street_add}, ${order.city}`}</td>
                                                                             {orderStatus != 1 && <td rowspan={totalProduct}>{getDateInDDMMYYYY(order.delivery_date)}</td> }
+                                                                            {(orderStatus != 1 && orderStatus != 2)  && <td rowspan={totalProduct}>
+                                                                                    <button class={ "alter-purchase-record"} type="submit" onClick={()=>{handleOrderConfirmation(order, products)}}> Check Product </button>
+                                                                            </td>}
                                                                         </Fragment>
                                                                     }   
                                                                     <div style={{display:'none'}}>{totalProduct = 0}</div>
                                                                 </tr>
                                                                 )
-                                                            }
                                                             })
                                                         )
                                                     })
@@ -161,6 +178,17 @@ export default function ViewOrder() {
                 </div>
     </section>
 		<Footer />
+        { dialogOpen ? 
+            <OrderAcceptRejectDialog 
+                open={dialogOpen} 
+                setDialogOpen = {setDialogOpen} 
+                props = {orderProps} 
+                setOrderList = {setOrderList}
+                setOrderedProductList = {setOrderedProductList}
+                isUpdatable = {0}
+            /> 
+            : null 
+        }
 	</Fragment>
     )
 }

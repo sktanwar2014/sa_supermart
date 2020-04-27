@@ -387,17 +387,24 @@ Order.prototype.getOrderedProduct = function () {
       }
       connection.changeUser({database : dbName});
       let Query = ``;
-      if(that.order_status ==  1 && that.is_date_range === 1){
-        Query  = `SELECT op.id, op.user_id, op.order_id, p.product_name, unit.unit_name as ordered_unit_name, op.tracking_id, op.product_id, op.quantity, op.unit_id,  op.status FROM ordered_product as op INNER JOIN products as p ON p.id = op.product_id  INNER JOIN unit_records as unit ON unit.id = op.unit_id WHERE op.order_id IN(SELECT id from orders WHERE is_active = 1 AND status = ${that.order_status} AND (DATE_FORMAT(order_date, '%Y-%m-%d') BETWEEN '${that.from_date}' AND '${that.to_date}'))`;
-      }else if (that.order_status != 1 && that.is_date_range === 1){
-        Query = `SELECT op.order_id, op.user_id, dp.product_id, dp.paid_quantity as quantity, dp.unit_id, dp.price, p.product_name, unit.unit_name as ordered_unit_name FROM delivered_product as dp INNER JOIN ordered_product as op on op.id = dp.ordered_id INNER JOIN products as p ON p.id = op.product_id  INNER JOIN unit_records as unit ON unit.id = dp.unit_id WHERE op.order_id IN(SELECT id from orders WHERE is_active = 1 AND status != 1 AND (DATE_FORMAT(order_date, '%Y-%m-%d') BETWEEN '${that.from_date}' AND '${that.to_date}'))`
+      if(that.is_date_range === 1){
+        if(that.order_status ==  1){
+          Query  = `SELECT op.id, op.user_id, op.order_id, p.product_name, unit.unit_name as ordered_unit_name, op.tracking_id, op.product_id, op.quantity, op.unit_id,  op.status FROM ordered_product as op INNER JOIN products as p ON p.id = op.product_id  INNER JOIN unit_records as unit ON unit.id = op.unit_id WHERE op.order_id IN(SELECT id from orders WHERE is_active = 1 AND status = ${that.order_status} AND (DATE_FORMAT(order_date, '%Y-%m-%d') BETWEEN '${that.from_date}' AND '${that.to_date}'))`;
+        }else if (that.order_status == 2){
+          Query = `SELECT op.order_id, op.user_id, dp.product_id, dp.paid_quantity as quantity, dp.unit_id, dp.price, p.product_name, unit.unit_name as ordered_unit_name FROM delivered_product as dp INNER JOIN ordered_product as op on op.id = dp.ordered_id INNER JOIN products as p ON p.id = op.product_id  INNER JOIN unit_records as unit ON unit.id = dp.unit_id WHERE op.order_id IN(SELECT id from orders WHERE is_active = 1 AND status != 1 AND (DATE_FORMAT(order_date, '%Y-%m-%d') BETWEEN '${that.from_date}' AND '${that.to_date}'))`
+        }else {
+          Query = `SELECT op.order_id, op.user_id, dp.product_id, dp.paid_quantity as quantity, dp.unit_id, dp.price, p.product_name, unit.unit_name as ordered_unit_name, vp.quantity as verified_quantity, ur.unit_name as verified_unit_name, vp.unit_id as verified_unit_id FROM delivered_product as dp INNER JOIN ordered_product as op on op.id = dp.ordered_id INNER JOIN products as p ON p.id = op.product_id  INNER JOIN unit_records as unit ON unit.id = dp.unit_id LEFT JOIN verified_product as vp ON vp.delivered_id = dp.id AND vp.ordered_id = op.id INNER JOIN unit_records as ur ON ur.id = vp.unit_id WHERE op.order_id IN(SELECT id from orders WHERE is_active = 1 AND status != 1 AND (DATE_FORMAT(order_date, '%Y-%m-%d') BETWEEN '${that.from_date}' AND '${that.to_date}'))`
+        }
       }
-      else if(that.order_status ==  1 && that.is_date_range === 0){
-        Query  = `SELECT op.id, op.user_id, op.order_id, p.product_name, unit.unit_name as ordered_unit_name, op.tracking_id, op.product_id, op.quantity, op.unit_id,  op.status FROM ordered_product as op INNER JOIN products as p ON p.id = op.product_id  INNER JOIN unit_records as unit ON unit.id = op.unit_id WHERE op.order_id IN(SELECT id from orders WHERE is_active = 1 AND status = ${that.order_status} AND  (DATE_FORMAT(order_date, '%Y-%m-%d') = '${that.date}'))`;
-      }else if (that.order_status !=  1 && that.is_date_range === 0){
-        Query = `SELECT op.order_id, op.user_id, dp.product_id, dp.paid_quantity as quantity, dp.unit_id, dp.price, p.product_name, unit.unit_name as ordered_unit_name FROM delivered_product as dp INNER JOIN ordered_product as op on op.id = dp.ordered_id INNER JOIN products as p ON p.id = op.product_id  INNER JOIN unit_records as unit ON unit.id = dp.unit_id WHERE op.order_id IN(SELECT id from orders WHERE is_active = 1 AND status != 1 AND  (DATE_FORMAT(order_date, '%Y-%m-%d') = '${that.date}'))`
+      else if(that.is_date_range === 0){
+        if(that.order_status ==  1 ){
+          Query  = `SELECT op.id, op.user_id, op.order_id, p.product_name, unit.unit_name as ordered_unit_name, op.tracking_id, op.product_id, op.quantity, op.unit_id,  op.status FROM ordered_product as op INNER JOIN products as p ON p.id = op.product_id  INNER JOIN unit_records as unit ON unit.id = op.unit_id WHERE op.order_id IN(SELECT id from orders WHERE is_active = 1 AND status = ${that.order_status} AND  (DATE_FORMAT(order_date, '%Y-%m-%d') = '${that.date}'))`;
+        }else if (that.order_status ==  2){
+          Query = `SELECT op.order_id, op.user_id, dp.product_id, dp.paid_quantity as quantity, dp.unit_id, dp.price, p.product_name, unit.unit_name as ordered_unit_name FROM delivered_product as dp INNER JOIN ordered_product as op on op.id = dp.ordered_id INNER JOIN products as p ON p.id = op.product_id  INNER JOIN unit_records as unit ON unit.id = dp.unit_id WHERE op.order_id IN(SELECT id from orders WHERE is_active = 1 AND status != 1 AND  (DATE_FORMAT(order_date, '%Y-%m-%d') = '${that.date}'))`
+        }else{
+          Query = `SELECT op.order_id, op.user_id, dp.product_id, dp.paid_quantity as quantity, dp.unit_id, dp.price, p.product_name, unit.unit_name as ordered_unit_name, vp.quantity as verified_quantity, ur.unit_name as verified_unit_name, vp.unit_id as verified_unit_id FROM delivered_product as dp INNER JOIN ordered_product as op on op.id = dp.ordered_id INNER JOIN products as p ON p.id = op.product_id  INNER JOIN unit_records as unit ON unit.id = dp.unit_id LEFT JOIN verified_product as vp ON vp.delivered_id = dp.id AND vp.ordered_id = op.id INNER JOIN unit_records as ur ON ur.id = vp.unit_id WHERE op.order_id IN(SELECT id from orders WHERE is_active = 1 AND status != 1 AND  (DATE_FORMAT(order_date, '%Y-%m-%d') = '${that.date}'))`
+        }
       }
-
       connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);
