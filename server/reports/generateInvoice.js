@@ -80,7 +80,7 @@ module.exports = function generateInvoice(params) {
           { 
             columns: [
               [
-                { text: 'VEGEFOODS' , style: styles.Header1},
+                { text: 'SA SUPERMART' , style: styles.Header1},
                 { text: [
                      { text: '\n' + company.address + ', ', style: styles.Header1Child,  bold: true },
                      { text: company.city + ' - ' + company.postcode, style: styles.Header1Child, bold: true },

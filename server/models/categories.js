@@ -41,24 +41,25 @@ Categories.prototype.getCategoryList = function () {
   });
 } 
 
-// Categories.prototype.getAllCategoryTableRecords = function () {
-//   const that = this;
-//   return new Promise(function (resolve, reject) {
-//     connection.getConnection(function (error, connection) {
-//       if (error) {
-//         throw error;
-//       }
-//       connection.changeUser({database : dbName});
-//       connection.query(`SELECT * FROM categories where is_active = 1`, function (error, rows, fields) {
-//         if (error) {  console.log("Error...", error); reject(error);  }
-//         resolve(rows);
-//       });
-//         connection.release();
-//         console.log('Process Complete %d', connection.threadId);
-//     });
-//   });
-// } 
 
+
+Categories.prototype.getAllMainCategories = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+      connection.query(`SELECT * FROM categories WHERE type = 1 ORDER BY category_name`, function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(rows);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
 
 Categories.prototype.getProductList = function () {
   const that = this;
@@ -87,46 +88,6 @@ Categories.prototype.getProductList = function () {
     });
   });
 } 
-
-
-Categories.prototype.getMainCategoryList = function () {
-  const that = this;
-  return new Promise(function (resolve, reject) {
-    connection.getConnection(function (error, connection) {
-      if (error) {
-        throw error;
-      }
-      connection.changeUser({database : dbName});
-      connection.query(`SELECT * FROM categories WHERE type = 1 AND parent_id = 0 AND is_active = 1 ORDER BY category_name`, function (error, rows, fields) {
-        if (error) {  console.log("Error...", error); reject(error);  }
-        resolve(rows);
-      });
-        connection.release();
-        console.log('Process Complete %d', connection.threadId);
-    });
-  });
-} 
-
-
-
-Categories.prototype.getMiddleCategoryList = function () {
-  const that = this;
-  return new Promise(function (resolve, reject) {
-    connection.getConnection(function (error, connection) {
-      if (error) {
-        throw error;
-      }
-      connection.changeUser({database : dbName});
-      connection.query(`SELECT * FROM categories WHERE type = 2 AND parent_id = ${that.mainCategoryId} AND is_active = 1 ORDER BY category_name`, function (error, rows, fields) {
-        if (error) {  console.log("Error...", error); reject(error);  }
-        resolve(rows);
-      });
-        connection.release();
-        console.log('Process Complete %d', connection.threadId);
-    });
-  });
-} 
-
 
 
 Categories.prototype.getSubCategoryList = function () {
@@ -216,27 +177,6 @@ Categories.prototype.getProductUnderMainCategory = function () {
     });
   });
 } 
-
-
-// Categories.prototype.getSingleProduct = function () {
-//   const that = this;
-//   return new Promise(function (resolve, reject) {
-//     connection.getConnection(function (error, connection) {
-//       if (error) {
-//         throw error;
-//       }
-//       connection.changeUser({database : dbName});
-//       let Query = `SELECT p.id, p.main_category_id, p.middle_category_id, p.sub_category_id, p.product_name, p.model_no, p.price, p.description, p.brand_id, p.color_id, p.unit_id, p.is_active, p.status, brand.value as brand_name, color.value as color_name, unit.value as unit_name FROM products as p INNER JOIN static_records_value as brand ON brand.id = p.brand_id INNER JOIN static_records_value as color ON color.id = p.color_id INNER JOIN static_records_value as unit ON unit.id = p.unit_id WHERE p.id = ${that.productId}`;
-//       connection.query(Query, function (error, rows, fields) {
-//         if (error) {  console.log("Error...", error); reject(error);  }
-//         resolve(rows);
-//       });
-//         connection.release();
-//         console.log('Process Complete %d', connection.threadId);
-//     });
-//   });
-// }
-
 
 
 Categories.prototype.addNewCategory = function () {

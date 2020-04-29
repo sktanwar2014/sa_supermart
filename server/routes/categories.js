@@ -5,10 +5,10 @@ const Categories = require('../controllers/categories.js');
 
 Router.route("/getProductPacketInfo").post(Categories.getProductPacketInfo);
 Router.route("/getCategoryList").get(Categories.getCategoryList);
+Router.route("/getAllMainCategories").get(Categories.getAllMainCategories);
+
 Router.route("/getProductList").post(Categories.getProductList);
 
-Router.route("/getMainCategoryList").get(Categories.getMainCategoryList);
-Router.route("/getMiddleCategoryList").post(Categories.getMiddleCategoryList);
 Router.route("/getSubCategoryList").post(Categories.getSubCategoryList);
 Router.route("/insertNewProduct").post(Categories.insertNewProduct);
 

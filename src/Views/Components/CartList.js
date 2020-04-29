@@ -56,7 +56,7 @@ export default function CartList() {
         </div>
         <nav className="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
             <div className="container">
-            <a className="navbar-brand" href="/">Vegefoods</a>
+            <a className="navbar-brand" href="/">SA SUPERMART</a>
             <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
                 <span className="oi oi-menu"></span> Menu
             </button>
@@ -64,7 +64,8 @@ export default function CartList() {
             <div className="collapse navbar-collapse" id="ftco-nav">
                 {/* <li className="nav-item active"><a href="/" className="nav-link">Home</a></li> */}
                 {(userId == 1 && roleId == 1) ?
-                    <ul className="navbar-nav ml-auto">    
+                    <ul className="navbar-nav ml-auto">   
+						<li className="nav-item"><a href="/" className="nav-link">Home</a></li> 
                         <li className="nav-item dropdown">
                             <a className="nav-link dropdown-toggle" href="#" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Products</a>
                             <div className="dropdown-menu" aria-labelledby="dropdown04">
@@ -81,7 +82,8 @@ export default function CartList() {
                         <li className="nav-item"><a href="/logout" className="nav-link">Logout</a></li> 
                     </ul>
                     :
-                    <ul className="navbar-nav ml-auto">    
+                    <ul className="navbar-nav ml-auto">   
+                        <li className="nav-item"><a href="/" className="nav-link">Home</a></li> 
                         <li className="nav-item dropdown">
                             <a className="nav-link dropdown-toggle" href="#" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Orders</a>
                             <div className="dropdown-menu" aria-labelledby="dropdown04">

@@ -5,6 +5,7 @@ import './App.css';
 import {APP_TOKEN} from  './api/config/Constants.js'
 import PageLoader from './Views/Partials/Loader';
 import ViewCustomerOrder from './Views/Components/ViewCustomerOrder';
+import AlterCategories from './Views/Admin/AlterCategories';
 
 const Login = lazy(()=> import('./Views/Auth/login'));
 const AdminHome = lazy(()=> import('./Views/Admin/AdminHome'));
@@ -156,6 +157,18 @@ function App() {
                     : (APP_TOKEN.isAdmin)
                     ? <Redirect to="/view-added-product" />
                     : <ProductVerification  {...props} /> 
+                  }}                    
+                />
+                <Route 
+                  exact 
+                  path="/alter-categories" 
+                  render = { props => {
+                    return (!APP_TOKEN.notEmpty)
+                    ? <Redirect to="/login" />
+                    : (APP_TOKEN.isAdmin)
+                    ? <AlterCategories  {...props} />
+                    : <Redirect to="/" /> 
+ 
                   }}                    
                 />
                

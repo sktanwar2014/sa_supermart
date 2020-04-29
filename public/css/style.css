@@ -8070,7 +8070,7 @@ h1, h2, h3, h4, h5,
     padding-bottom: 1.5rem;
     padding-left: 20px;
     padding-right: 20px;
-    font-weight: 400;
+    font-weight: 500;
     color: #000000;
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -10572,4 +10572,105 @@ textarea.form-control {
   border-radius: 0px;
   box-shadow: none !important;
   padding: 0.375rem 0.75rem;
+}
+
+.login-section {
+  display: flex;
+  flex-direction: column;
+  -webkit-box-pack: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  align-items: center;
+  height: 100vh;
+  background-color: rgb(255, 255, 255);
+}
+
+.login-logo {
+  width: 250px;
+  object-fit: cover;
+  margin-bottom: 30px;
+}
+.login-form {
+  width: 450px;
+  margin: 0 auto;
+  padding: 22.5px 15px;
+  border-radius: 6px;
+  background-color: #fff;
+}
+
+.login-input-div {
+    width: 100%;
+    margin-top: 16px;
+    margin-bottom: 8px;
+    border: 0;
+    margin: 0;
+    display: inline-flex;
+    padding: 0;
+    position: relative;
+    min-width: 0;
+    flex-direction: column;
+    vertical-align: top;
+}
+.login-inputs {
+  font: inherit;
+    color: currentColor;
+    width: 100%;
+    border: 0;
+    height: 1.1875em;
+    margin: 0;
+    display: block;
+    padding: 6px 0 7px;
+    min-width: 0;
+    background: none;
+    box-sizing: content-box;
+    animation-name: MuiInputBase-keyframes-auto-fill-cancel;
+    -webkit-tap-highlight-color: transparent;
+    border-bottom: .5px solid #82ae46;
+    outline: none;
+}
+
+.input-div{
+  position: relative;
+  width: 100%;
+  color: rgba(0, 0, 0, 0.87);
+  cursor: text;
+  display: inline-flex;
+  position: relative;
+  font-size: 1rem;
+  box-sizing: border-box;
+  align-items: center;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  line-height: 1.1875em;
+  margin-bottom: 25px;
+}
+.forgot-password{
+  color: #20a8d8;
+  font-size: 0.75rem;
+  text-align: right;
+}
+
+.powered-by-logo{
+  width: 200px;
+  object-fit: cover;
+}
+
+
+.powered-by-lable{
+  position: fixed;
+  bottom: 10px; 
+  right: 217px;
+}
+
+.powered-by-logo-box{
+  position: fixed;
+  bottom: -5px; 
+  right: 10px;
+}
+
+.login-title{
+  font-weight: 800;
+  font-size: 30px;
+  text-transform: uppercase;
+  margin-bottom: 35px;
+  color: #82ae46;
 }

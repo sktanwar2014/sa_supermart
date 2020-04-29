@@ -4,60 +4,66 @@ import React, {useState} from 'react';
 import {APP_TOKEN} from '../../api/config/Constants';
 import AuthAPI from '../../api/auth.js';
 
+import {SimpleAlert} from  '../../common/Alert.js';
+
 export default function Login(props){
     APP_TOKEN.remove();
     
     const history = props.history;
     const [inputs, setInputs] = useState({username:'', password: ''});
+    const [isInvalideCredentials, setIsInvalideCredentials] = useState(false);
+
 
     const handleChange  = (props) => {
       setInputs({...inputs, [props.target.name]: props.target.value});
+      setIsInvalideCredentials(false);
     }
  
-    const handleLogin = async () => {
-        if(inputs.username !== '' && inputs.password !== ''){
-            try{      
-            const result = await AuthAPI.login({
-                username: inputs.username,
-                password: inputs.password,
-            });
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        try{
+        const result = await AuthAPI.login({
+            username: inputs.username,
+            password: inputs.password,
+        });
             if(result.length !== undefined && result.length >0){
                 APP_TOKEN.set(result[0]);
                 history.push('/');
             }else{
-                alert('Invalid Credentials');
+                setIsInvalideCredentials(true);
             }
         }catch(e){
             console.log('Error...',e);
-            }
-       }else{
-            alert('Fill the details');
         }
     }
 
     return(
-        <section className="login_form_inner">
-            <div className="container">
-                <div className="row">           
-                    <div className="col-md-12">
-                        <h3>Log in to enter</h3>
-                        <div className="bg-white p-5 contact-form">
-                        <div className="form-group">
-                            <input type="text" className="form-control login_form_input" placeholder="Username" name="username" onChange={handleChange} required/>
-                        </div>
-                        <div className="form-group">
-                            <input type="password" className="form-control login_form_input" placeholder="Password" name="password" onChange={handleChange} required/>
-                        </div>
-                        <div className="form-group" style={{marginTop:'30px'}}>
-                            <button type="submit" value="submit" className="btn submit_btn" onClick={handleLogin}>Log In</button>
-                        </div>
-                        {/* <div className="form-group" style={{marginTop:'30px'}}>
-                            <a href="#"  style={{marginTop:'30px'}}>Forgot Password?</a>
-                        </div> */}
+        <section className="login-section">
+            {/* <img src="/images/bg_1.jpg" alt="app logo" class="login-logo"  /> */}
+            <p className="login-title">SA SUPERMART</p>
+                <form className="login-form" onSubmit= {handleLogin}>
+                    <div className="login-input-div">
+                        <div class="input-div">
+                            <input type="text" className="login-inputs" placeholder="Username" name="username" onChange={handleChange} required/>
                         </div>
                     </div>
+                    <div className="login-input-div">
+                        <div class="input-div">
+                            <input type="password" className="login-inputs" placeholder="Password" name="password" onChange={handleChange} required/>
+                        </div>
+                    </div>
+                    <div className="login-input-div" >
+                        {/* <p class="forgot-password">
+                            <a href="/forgotPassword">Forgot Password?</a>
+                            </p> */}
+                        <button type="submit" className="btn submit_btn">Log In</button>
+                    </div>
+                    {isInvalideCredentials ? <SimpleAlert message="Invalide Credentials !" variant="danger" /> : ""}
+                </form>
+                <div class="powered-by-lable"> Powered by: </div>
+                <div class="powered-by-logo-box">
+                    <img src="/static/images/A1AbilitiesLogo.jpeg" alt="A1abilities" class="powered-by-logo" />
                 </div>
-            </div>
         </section>
     )
 }

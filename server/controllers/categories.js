@@ -1,18 +1,20 @@
 const Categories = require('../models/categories.js');
 const {isEmpty} = require('../utils/conditionChecker.js');
 
-// const getAllCategoryTableRecords = async function (req, res, next) {    
-//     try {
-//         const allCategoryTableRecords = await new Categories({}).getAllCategoryTableRecords();        
-//         res.send({ allCategoryTableRecords: allCategoryTableRecords});
-//     } catch (err) {
-//         next(err);
-//     }
-// }
-
 const getCategoryList = async function (req, res, next) {    
     try {
         const categoryList = await new Categories({}).getCategoryList();        
+        res.send({ categoryList: categoryList});
+    } catch (err) {
+        next(err);
+    }
+}
+
+
+
+const getAllMainCategories = async function (req, res, next) {    
+    try {
+        const categoryList = await new Categories({}).getAllMainCategories();        
         res.send({ categoryList: categoryList});
     } catch (err) {
         next(err);
@@ -48,31 +50,6 @@ const getProductUnderMainCategory = async function (req, res, next) {
     }
 }
 
-
-
-
-const getMainCategoryList = async function (req, res, next) {
-    try {
-        const mainCategoriesList = await new Categories({}).getMainCategoryList();        
-        res.send({ mainCategoriesList: mainCategoriesList});
-    } catch (err) {
-        next(err);
-    }
-}
-
-
-
-const getMiddleCategoryList = async function (req, res, next) {
-    const params = {
-        mainCategoryId : req.body.mainCategoryId,
-    };
-    try {
-        const middleCategoriesList = await new Categories(params).getMiddleCategoryList();        
-        res.send({ middleCategoriesList: middleCategoriesList});
-    } catch (err) {
-        next(err);
-    }
-}
 
 
 const getSubCategoryList = async function (req, res, next) {
@@ -171,11 +148,9 @@ const getProductPacketInfo = async function (req, res, next) {
 
 
 module.exports = {    
-    // getAllCategoryTableRecords : getAllCategoryTableRecords,
     getCategoryList: getCategoryList,
+    getAllMainCategories : getAllMainCategories,
     getProductList : getProductList,
-    getMainCategoryList : getMainCategoryList,
-    getMiddleCategoryList : getMiddleCategoryList,
     getSubCategoryList : getSubCategoryList,
     insertNewProduct : insertNewProduct,
 
