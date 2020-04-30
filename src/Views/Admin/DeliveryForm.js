@@ -52,6 +52,9 @@ export default function DeliveryForm(props) {
         }
     }
 
+    const handleGoBack = (e) => {
+        window.location.pathname = '/view-order-list';
+    }
     const handleSubmit = async (e) => {
         e.preventDefault();
         try{     
@@ -180,7 +183,10 @@ export default function DeliveryForm(props) {
                                                 </tbody>
                                             </table>
                                             <div class="form-group p-4">
-                                                <input type="submit" value="Submit" class="btn  px-4 btn-primary" disabled= {(productList.find(ele => {return ele.purchased_quantity !== null && (ele.purchased_quantity - ele.paid_quantity > 0)})) ===  undefined  } />
+                                                {((productList.find(ele => {return ele.purchased_quantity !== null && (ele.purchased_quantity - ele.paid_quantity > 0)})) ===  undefined) 
+                                                    ?   <input type="button" value="Go Back" class="btn  px-4 btn-primary" onClick={handleGoBack}/>
+                                                    :   <input type="submit" value="Submit" class="btn  px-4 btn-primary" />
+                                                }
                                             </div>
                                     </div>
                                 </form>

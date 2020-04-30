@@ -29,7 +29,7 @@ export default function ViewOrder(props) {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [orderProps, setOrderProps] = useState({});
 
-        useEffect(()=>{
+    useEffect(()=>{
         getOrderListOfSingleDay();
         getOrderStatusList();
     },[]);
@@ -66,13 +66,14 @@ export default function ViewOrder(props) {
 
 
     const handleGenerateInvoice = async (data) =>{
-        pdfmake.vfs = pdfFonts.pdfMake.vfs;
-        try{
-            const result = await OrderAPI.generateInvoice({orderId : data.id, order_status: data.status});
-            pdfmake.createPdf(result).download();
-        }catch(e){
-            console.log('Error...',e);
-        }
+        alert('Development under process !')
+        // pdfmake.vfs = pdfFonts.pdfMake.vfs;
+        // try{
+        //     const result = await OrderAPI.generateInvoice({orderId : data.id, order_status: data.status});
+        //     pdfmake.createPdf(result).download();
+        // }catch(e){
+        //     console.log('Error...',e);
+        // }
     }
 
     
@@ -107,7 +108,7 @@ export default function ViewOrder(props) {
                                                 <select id="orderStatus" name="orderStatus" value={inputs.orderStatus} class="form-control" onChange={handleInputChange}>
                                                     {(orderStatusList.length > 0 ? orderStatusList : [] ).map((data, index)=>{
                                                         return(
-                                                          (data.id !== 4 && data.id !== 5 ) ?  <option id={data.id} value={data.id} >{data.order_status}</option>: null
+                                                          (data.id !== 4 ) ?  <option id={data.id} value={data.id} >{data.order_status}</option>: null
                                                         )
                                                         })
                                                     }
@@ -164,13 +165,12 @@ export default function ViewOrder(props) {
                                                                                 {orderStatus  == 1 ? <Link to={{pathname :'/delivery-form', state : {order: order, products: products}}}>Click to delivered</Link> :
                                                                                  orderStatus  == 3 ?
                                                                                     order.status == 3 ?
-                                                                                    <button class={ "alter-purchase-record"} type="submit" onClick={()=>{handleOrderConfirmation(order, products)}}> Check Product </button>
+                                                                                    <button class={ "alter-purchase-record"} type="submit" onClick={()=>{handleOrderConfirmation(order, products)}}> See Info </button>
                                                                                    :
-                                                                                    (order.status  == 4 || order.status  == 5) ?
-                                                                                    <button class="alter-purchase-record" type="submit" onClick={()=>{handleGenerateInvoice(order)}}> Generate Invoice </button> : ''
+                                                                                    (order.status  == 4) ?
+                                                                                    <button class="alter-purchase-record" type="submit" onClick={()=>{handleGenerateInvoice(order)}}> See Invoice </button> : ''
                                                                                    :''
                                                                                 }
-                                                                                
                                                                             </td>
                                                                         </Fragment>
                                                                     }   

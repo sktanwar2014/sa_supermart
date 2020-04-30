@@ -10,11 +10,22 @@ import OrderAPI from '../../../api/order.js';
 export default function OrderAcceptRejectDialog({open, setDialogOpen, props, setOrderList, setOrderedProductList, isUpdatable}) {
 
   const [products, setProducts] = useState(props.products);
-  console.log(props, products)
+  const prodIds = [...new Set(products.map(dist => dist.ordered_id))];
+  console.log(props, products, prodIds, prodIds.join())
     
-  const handleOrderConfirmation = async (status) =>{
+  const handleOrderConfirmation = async (e) =>{
+    e.preventDefault();
     try{
-        const result = await OrderAPI.handleOrderConfirmation({orderId: props.order_id, order_status : status, date : props.order_date});
+        let productData  = [];
+          products.map((data)=> {
+            productData.push({
+                ordered_id : data.ordered_id,
+                product_id : data.product_id,
+                status :  document.querySelector(`input[name="action-${data.ordered_id}"]:checked`).value,
+            });
+          });
+        const result = await OrderAPI.handleOrderConfirmation({orderId: props.order_id, productData: productData, date : props.order_date, order_status : 3});
+
         setOrderList(result.orderList);            
         setOrderedProductList(result.orderedProducts);
         setDialogOpen(false);
@@ -30,8 +41,9 @@ export default function OrderAcceptRejectDialog({open, setDialogOpen, props, set
               Product Verification
           </Modal.Title>
         </Modal.Header>
+        <form onSubmit={handleOrderConfirmation}>
         <Modal.Body>
-          <div class="w-100">
+          <div class="w-100">            
             <table className="unit-array-table">
               <thead>
                 <tr>
@@ -40,6 +52,7 @@ export default function OrderAcceptRejectDialog({open, setDialogOpen, props, set
                   <th>Delivered Quantity</th>
                   <th>Price</th>
                   <th>Verified Quantity</th>
+                  {isUpdatable === 1 && <th>Action</th> }
                 </tr>
               </thead>
               <tbody>
@@ -51,6 +64,13 @@ export default function OrderAcceptRejectDialog({open, setDialogOpen, props, set
                         <td>{product.quantity + ' ' + product.ordered_unit_name}</td>
                         <td>{product.price}</td>
                         <td>{product.verified_quantity + ' ' + product.verified_unit_name}</td>
+                        {isUpdatable === 1 && <td>
+                              <div class="radio">
+                                <label style={{ paddingRight: '15px'}}><input type="radio" name={"action-"+product.ordered_id} value="5" class="mr-1" required/>Accept</label>
+                                <label><input type="radio" name={"action-"+product.ordered_id} value="6" class="mr-1" required/> Reject</label>
+                              </div>
+                        </td>
+                        }
                       </tr>
                     )
                 })}	
@@ -59,14 +79,17 @@ export default function OrderAcceptRejectDialog({open, setDialogOpen, props, set
           </div>
         </Modal.Body>
         <Modal.Footer>
-          {isUpdatable === 0  ?  
+          {isUpdatable === 0  ?
             <Button className="br-none" onClick={()=>{setDialogOpen(false)}}>Close</Button>
             : isUpdatable === 1 ?
-              <Fragment>
-                <Button className="br-none" onClick={()=>{handleOrderConfirmation(4)}}>Accept</Button>
-                <Button className="br-none" onClick={()=>{handleOrderConfirmation(5)}}>Reject</Button>
-              </Fragment> :  ''}
+              // <Fragment>
+                // <Button className="br-none" onClick={()=>{handleOrderConfirmation(4)}}>Accept</Button>
+                // <Button className="br-none" onClick={()=>{handleOrderConfirmation(5)}}>Reject</Button>
+                <Button type="submit" className="br-none">Submit</Button>
+              // </Fragment> 
+              :  ''}
         </Modal.Footer>
+        </form>
       </Modal>
     );
   }

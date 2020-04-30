@@ -102,7 +102,7 @@ export default function ViewOrder() {
                                                 <select id="orderStatus" name="orderStatus" value={inputs.orderStatus} class="form-control" onChange={handleInputChange}>
                                                     {(orderStatusList.length > 0 ? orderStatusList : [] ).map((data, index)=>{
                                                         return(
-                                                            (data.id !== 4 && data.id !== 5 ) ?  <option id={data.id} value={data.id} >{data.order_status}</option> : null
+                                                            (data.id !== 4 ) ?  <option id={data.id} value={data.id} >{data.order_status}</option> : null
                                                         )
                                                         })
                                                     }
@@ -156,7 +156,7 @@ export default function ViewOrder() {
                                                                             <td rowspan={totalProduct}>{`${order.flat_add}, ${order.street_add}, ${order.city}`}</td>
                                                                             {orderStatus != 1 && <td rowspan={totalProduct}>{getDateInDDMMYYYY(order.delivery_date)}</td> }
                                                                             {(orderStatus != 1 && orderStatus != 2)  && <td rowspan={totalProduct}>
-                                                                                    <button class={ "alter-purchase-record"} type="submit" onClick={()=>{handleOrderConfirmation(order, products)}}> Check Product </button>
+                                                                                    <button class={ "alter-purchase-record"} type="submit" onClick={()=>{handleOrderConfirmation(order, products)}}> See Info </button>
                                                                             </td>}
                                                                         </Fragment>
                                                                     }   

@@ -37,7 +37,6 @@ export default function DeliveryForm(props) {
             let productData = [];
             productList.map((data)=> {
                 productData.push({
-                    user_id : userId,
                     delivered_id : data.delivered_id,
                     ordered_id : data.id,
                     product_id : data.product_id,

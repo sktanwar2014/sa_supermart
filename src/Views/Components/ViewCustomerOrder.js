@@ -1,5 +1,7 @@
 import React, {useState, useEffect, Fragment} from 'react';
 import {Link} from 'react-router-dom';
+import pdfmake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
 
 //Components 
 import Header from '../Partials/Header.js';
@@ -61,6 +63,17 @@ export default function ViewCustomerOrder() {
         }
     }
 
+    
+    const handleGenerateInvoice = async (data) =>{
+        alert('Development under process !')
+        // pdfmake.vfs = pdfFonts.pdfMake.vfs;
+        // try{
+        //     const result = await OrderAPI.generateInvoice({orderId : data.id, order_status: data.status});
+        //     pdfmake.createPdf(result).download();
+        // }catch(e){
+        //     console.log('Error...',e);
+        // }
+    }
 
     return(
 		<Fragment>
@@ -90,7 +103,7 @@ export default function ViewCustomerOrder() {
                                                 <select id="orderStatus" name="orderStatus" value={inputs.orderStatus} class="form-control" onChange={handleInputChange}>
                                                     {(orderStatusList.length > 0 ? orderStatusList : [] ).map((data, index)=>{
                                                         return(
-                                                            (data.id !== 4 && data.id !== 5 ) ?   <option id={data.id} value={data.id} >{data.order_status}</option> : null
+                                                            (data.id !== 4 ) ?   <option id={data.id} value={data.id} >{data.order_status}</option> : null
                                                         )
                                                         })
                                                     }
@@ -116,7 +129,7 @@ export default function ViewCustomerOrder() {
                                                         {orderStatus == 1 && <th>Quantity</th> }
                                                         <th>Address</th>
                                                         {orderStatus != 1 && <th>Delivery Date</th> }
-                                                        {orderStatus == 2 && <th>Action</th> }
+                                                        {(orderStatus == 2 || orderStatus ==  3) && <th>Action</th> }
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -141,9 +154,11 @@ export default function ViewCustomerOrder() {
                                                                         <Fragment>
                                                                             <td rowspan={totalProduct}>{`${order.flat_add}, ${order.street_add}, ${order.city}`}</td>
                                                                             {orderStatus != 1 && <td rowspan={totalProduct}>{getDateInDDMMYYYY(order.delivery_date)}</td> }
-                                                                            {orderStatus == 2 && <td rowspan={totalProduct}>
-                                                                                <Link to={{pathname :'/verify-delivered-product', state : {order: order, product: products}}}>Click to verify</Link>
-                                                                                    {/* <button class="alter-purchase-record" type="submit" onClick={()=>{handleOrderVerification(order)}} >Click to verify</button> */}
+                                                                            {(orderStatus == 2 || orderStatus == 3) && <td rowspan={totalProduct}>
+                                                                                {orderStatus == 2 && <Link to={{pathname :'/verify-delivered-product', state : {order: order, product: products}}}>Click to verify</Link>}
+                                                                                {(orderStatus == 3 && order.status  == 4) && 
+                                                                                    <button class="alter-purchase-record" type="submit" onClick={()=>{handleGenerateInvoice(order)}}> See Invoice </button>
+                                                                                }
                                                                                 </td>
                                                                             }
                                                                         </Fragment>

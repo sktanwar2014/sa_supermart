@@ -314,6 +314,7 @@ const submitDeliveryDetails = async function (req, res, next) {
 const handleOrderConfirmation = async function (req, res, next) {  
     const params = {
         order_status : req.body.order_status,
+        formData : req.body.productData,
         orderId : req.body.orderId,
         date :  req.body.date,
         is_date_range : 0,
@@ -321,6 +322,7 @@ const handleOrderConfirmation = async function (req, res, next) {
     try {
         const Model = new Order(params);
         const result = await Model.handleOrderConfirmation();
+        
         const orderList = await Model.getOrderListOfSingleDay();
         const orderedProducts = await Model.getOrderedProduct();
         res.send({ orderList: orderList, orderedProducts: orderedProducts});
