@@ -41,6 +41,8 @@ function buildProductRecordTable(data, columns, valueKeys){
         dataRow.push({ text: (index + 1), style: styles.productTableHeader  },);
       }else if(columnIndex === 2){
         dataRow.push({ text: row[column.toLowerCase()] + ' ' + row['unit_name'], style: styles.productTableHeader  },);
+      }else if(columnIndex === 3) {
+        dataRow.push({ text: (row[column]).toFixed(2), style: styles.productTableHeader  },);
       }else{
         dataRow.push({ text: row[column.toLowerCase()], style: styles.productTableHeader  },);
       }
@@ -68,9 +70,9 @@ module.exports = function generateInvoice(params) {
   const shipping = params.shippingDetail[0];
   const products = params.productDetails;
 
-  console.log(company);
-  console.log(shipping);
-  console.log(products);
+  // console.log(company);
+  // console.log(shipping);
+  // console.log(products);
 
  
 

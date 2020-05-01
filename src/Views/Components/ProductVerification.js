@@ -10,7 +10,7 @@ import Footer from '../Partials/Footer.js';
 import {getDate, getDateInDDMMYYYY} from '../../common/moment.js';
 
 export default function DeliveryForm(props) {
-    console.log(props)
+    // console.log(props)
 
     const userId = APP_TOKEN.get().userId;
     const [order, setOrder]  = useState(props.location.state.order);
@@ -41,7 +41,7 @@ export default function DeliveryForm(props) {
                     ordered_id : data.id,
                     product_id : data.product_id,
                     quantity : document.getElementById('provideQuantity-'+data.product_id).value,
-                    unit_id : document.getElementById('productUnit-'+data.product_id).value,
+                    unit_id : data.unit_id,
                 })
             })
 
@@ -123,7 +123,7 @@ export default function DeliveryForm(props) {
                                                 <tr>
                                                     <th>Product</th>
                                                     <th>Received Quantity</th>
-                                                    <th>Unit</th>
+                                                    {/* <th>Unit</th> */}
                                                 </tr>
                                             </thead>
                                                 <tbody>
@@ -134,10 +134,10 @@ export default function DeliveryForm(props) {
                                                             <td>
                                                                 <div class="d-flex justify-content-center">
                                                                     <input type="number" name={"provideQuantity-"+data.product_id} class="cost-input" id={"provideQuantity-"+data.product_id} min="0" step="0.01" required/>
-                                                                    {/* <p class="cost-input-adoptment"> {data.purchased_unit_name} </p> */}
+                                                                    <p class="cost-input-adoptment"> {data.delivered_unit_name} </p>
                                                                 </div>
                                                             </td>
-                                                            <td>
+                                                            {/* <td>
                                                                 <select id={"productUnit-"+data.product_id} class="select-verified-product" required>
                                                                     <option  value = "">Select any one</option>
                                                                     {(productUnitList.length > 0 ? productUnitList : [] ).map((data)=>{
@@ -147,7 +147,7 @@ export default function DeliveryForm(props) {
                                                                     })
                                                                     }
                                                                 </select>
-                                                            </td>
+                                                            </td> */}
                                                         </tr>
                                                         )
                                                     })

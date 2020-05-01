@@ -65,14 +65,14 @@ export default function ViewCustomerOrder() {
 
     
     const handleGenerateInvoice = async (data) =>{
-        alert('Development under process !')
-        // pdfmake.vfs = pdfFonts.pdfMake.vfs;
-        // try{
-        //     const result = await OrderAPI.generateInvoice({orderId : data.id, order_status: data.status});
-        //     pdfmake.createPdf(result).download();
-        // }catch(e){
-        //     console.log('Error...',e);
-        // }
+        // alert('Development under process !')
+        pdfmake.vfs = pdfFonts.pdfMake.vfs;
+        try{
+            const result = await OrderAPI.generateInvoice({orderId : data.id});
+            pdfmake.createPdf(result).open();
+        }catch(e){
+            console.log('Error...',e);
+        }
     }
 
     return(

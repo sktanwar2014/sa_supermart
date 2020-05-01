@@ -6,7 +6,6 @@ const invoiceReport  = require('../reports/generateInvoice.js')
 
 const generateInvoice = async function (req, res, next) {
     const params = {
-        order_status: req.body.order_status,
         orderId : req.body.orderId,
     }
 
@@ -14,7 +13,7 @@ const generateInvoice = async function (req, res, next) {
         const Model = new Order(params);
         const result = await Model.getInvoiceDetails();
         // console.log(result)
-      
+
         let DD = invoiceReport(result);
         res.send(DD);
     } catch (err) {
