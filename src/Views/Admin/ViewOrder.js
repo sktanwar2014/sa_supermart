@@ -9,6 +9,7 @@ import Footer from '../Partials/Footer.js';
 import OrderAPI from '../../api/order.js';
 import StaticAPI from '../../api/static.js';
 import OrderAcceptRejectDialog from './Components/OrderAcceptRejectDialog.js';
+import CallLoader from '../../common/Loader.js';
 
 
 import {getDateInDDMMYYYY, getDate} from '../../common/moment.js';
@@ -28,6 +29,8 @@ export default function ViewOrder(props) {
     const [orderStatus, setOrderStatus] = useState(1);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [orderProps, setOrderProps] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
+
 
     useEffect(()=>{
         getOrderListOfSingleDay();
@@ -42,6 +45,7 @@ export default function ViewOrder(props) {
 
     const getOrderListOfSingleDay = async () => {
         setOrderStatus(inputs.orderStatus);
+        setIsLoading(true);
 
         try{
             const result = await OrderAPI.getOrderListOfSingleDay({
@@ -49,7 +53,9 @@ export default function ViewOrder(props) {
                 date : getDate(inputs.date),
             });
             setOrderList(result.orderList);            
-            setOrderedProductList(result.orderedProducts);            
+            setOrderedProductList(result.orderedProducts); 
+            setIsLoading(false);
+
         }catch(e){
             console.log('Error...',e);
         }
@@ -66,12 +72,14 @@ export default function ViewOrder(props) {
 
 
     const handleGenerateInvoice = async (data) =>{
-        // alert('Development under process !')
+        setIsLoading(true);
+
         pdfmake.vfs = pdfFonts.pdfMake.vfs;
         try{
             const result = await OrderAPI.generateInvoice({orderId : data.id});
-            // console.log(result)
             pdfmake.createPdf(result).open();
+            setIsLoading(false);
+
         }catch(e){
             console.log('Error...',e);
         }
@@ -204,6 +212,7 @@ export default function ViewOrder(props) {
                 /> 
                 : null 
             }
+            {isLoading ?   <CallLoader />   : null  }
 	</Fragment>
     )
 }

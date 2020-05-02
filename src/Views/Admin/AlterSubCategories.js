@@ -1,14 +1,18 @@
 import React, {useState, useEffect, Fragment} from 'react';
-import {Link} from 'react-router-dom';
+
 //Components 
 import CategoriesAPI from '../../api/categories.js';
 import Header from '../Partials/Header.js';
 import Footer from '../Partials/Footer.js';
 import AddUpdateCategoriesDialog from './Components/AddUpdateCategoriesDialog.js';
-
 import CallLoader from '../../common/Loader.js';
 
-export default function AlterCategories(props) {
+
+export default function AlterSubCategories(props) {
+    
+    const categoryId = props.location.state.categoryId;
+    const categoryName = props.location.state.categoryName;
+    
 
     const [subCategory, setSubCategory] = useState([]);
     const [categoryList, setCategoryList] = useState([]);
@@ -17,33 +21,32 @@ export default function AlterCategories(props) {
     const [categoryDialogProps, setCategoryDialogProps] = useState({});
     const [defaultCategoryId, setDefaultCategoryId] = useState("");
     const [defaultSubCategoryId, setDefaultSubCategoryId] = useState("");
- 
+
     const [isLoading, setIsLoading] = useState(false);
 
 
-
     useEffect(()=>{
-        getAllMainCategories();
+        getAllSubCategories();
     },[]);
 
     
-    const getAllMainCategories = async () => {
+    const getAllSubCategories = async () => {
         setIsLoading(true);
         try{
-            const result = await CategoriesAPI.getAllMainCategories();
-            setCategoryList(result.categoryList);
-            setIsLoading(false);
+            const result = await CategoriesAPI.getAllSubCategories({categoryId: categoryId});
+            setSubCategory(result.subCategoriesList);     
+            setIsLoading(false);     
         }catch(e){
             console.log('Error...',e);
         }
     }
 
     
-    const handleCategoryActivation = async (data) => {
+    const handleSubCategoryActivation = async (data) => {
         setIsLoading(true);
         try{
-            const result = await CategoriesAPI.handleCategoryActivation({categoryId: data.id, is_active: data.is_active});
-            setCategoryList(result.categoryList);    
+            const result = await CategoriesAPI.handleSubCategoryActivation({categoryId: categoryId, subCategoryId: data.id, is_active: data.is_active});
+            setSubCategory(result.subCategoriesList);
             setIsLoading(false);
         }catch(e){
             console.log('Error...',e);
@@ -51,22 +54,25 @@ export default function AlterCategories(props) {
     }
 
 
-    const addUpdateCategoriesDialog = (data, operation) => {            
-            setCategoryDialogProps({type: 1, operation: operation, id: data.id, value: data.category_name, get: 'all'})
+    const addUpdateCategoriesDialog = (data, operation) => {
+        if(operation === 'add'){
+            setCategoryDialogProps({type: 2, operation: operation, id: categoryId, value: data.category_name,  get: 'all' })
+        }else if(operation === 'update'){
+            setCategoryDialogProps({type: 2, operation: operation, id: data.id, categoryId: categoryId, value: data.category_name, get: 'all' })
+        }
             setCategoryDialogOpen(true);
     }
 
-
     return(
     <Fragment>
-        <Header />       
+        <Header />
             <section class="ftco-section">
                 <div class="container">
                     <div class="row justify-content-center">
                         <div class="col-xl-12 ftco-animate fadeInUp ftco-animated">
                             <div class="row">
                                 <div class="col-md-6 col-lg-6">
-                                    <h3 class="billing-heading">Categories</h3>
+                                    <h3 class="billing-heading">{"Subcategories of " + categoryName}</h3>
                                 </div>
                                 <div class="col-md-6 col-lg-6" >
                                     <input type="button" class="btn btn-primary br-none f-right" onClick={()=>{addUpdateCategoriesDialog({id:'', category_name:''}, 'add')}} value="Add New" />
@@ -74,7 +80,8 @@ export default function AlterCategories(props) {
                             </div>
                             <form class="p-5 bg-light b-top-dark">
                                 <div class="row align-items-end">
-                                    {(categoryList.length > 0 ? categoryList : []).map((data, index) => {
+                                    {(subCategory.length  >  0) ?
+                                     (subCategory.length > 0 ? subCategory : []).map((data, index) => {
                                         return(
                                             <div class="col-md-6 col-lg-4 ftco-animate fadeInUp ftco-animated">
                                                 <div class={ data.is_active === 1 ? "product b-active" : "product b-deactive" }>
@@ -91,17 +98,9 @@ export default function AlterCategories(props) {
                                                                     </div>
                                                                     <div class="col-md-12 col-lg-6">
                                                                         <div class="category-menu">
-                                                                            <button type="button" onClick={()=>{handleCategoryActivation(data)}}>
+                                                                            <button type="button" onClick={()=>{handleSubCategoryActivation(data)}}>
                                                                                 { data.is_active === 1 ? 'Deactive' : 'Active' }
                                                                             </button>
-                                                                        </div>
-                                                                        <hr />
-                                                                    </div>
-                                                                    <div class="col-md-12 col-lg-12">
-                                                                        <div class="category-menu">
-                                                                        <Link to={{pathname :'/alter-categories/subcategory', state : {categoryId: data.id, categoryName: data.category_name}}}>
-                                                                            <button type="button">Subcategories</button>
-                                                                        </Link>
                                                                         </div>
                                                                         <hr />
                                                                     </div>
@@ -110,7 +109,8 @@ export default function AlterCategories(props) {
                                                 </div>
                                             </div>
                                         )
-                                    })}
+                                    })
+                                    : "subcategory is not exist for " + categoryName + ". You can add new subcategory in this category."}
                                 </div>
                             </form>
                         </div>

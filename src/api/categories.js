@@ -49,6 +49,49 @@ export default {
     }
   },
 
+  getAllSubCategories:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/categories/getAllSubCategories`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
+
+  handleCategoryActivation:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/categories/handleCategoryActivation`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
+  handleSubCategoryActivation:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/categories/handleSubCategoryActivation`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
   
   getProductList:async ({...payload }) => {
     const URL = `${c.API_CONSUMER}/categories/getProductList`;
@@ -78,6 +121,22 @@ export default {
     }
   },
  
+  
+  updateCategory:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/categories/updateCategory`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+ 
+
   addNewSubCategory:async ({...payload }) => {
     const URL = `${c.API_CONSUMER}/categories/addNewSubCategory`;
     try {
@@ -92,6 +151,19 @@ export default {
     }
   },
 
+  updateSubCategory:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/categories/updateSubCategory`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
 
   getProductUnderMainCategory:async ({...payload }) => {
     const URL = `${c.API_CONSUMER}/categories/getProductUnderMainCategory`;

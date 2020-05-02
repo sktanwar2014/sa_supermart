@@ -7,6 +7,7 @@ import Header from '../Partials/Header.js';
 import Footer from '../Partials/Footer.js';
 
 import {getDate, getDateInDDMMYYYY} from '../../common/moment.js';
+import CallLoader from '../../common/Loader.js';
 
 export default function DeliveryForm(props) {
     
@@ -14,6 +15,8 @@ export default function DeliveryForm(props) {
     const [order, setOrder]  = useState(props.location.state.order);
     const [productList, setProductList] = useState([]);
     const [noOneAvailable, setNoOneAvailable] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
 
     useEffect(()=>{
@@ -21,6 +24,7 @@ export default function DeliveryForm(props) {
     },[]);
 
     const fetchDeliveryFormData = async () => {
+        setIsLoading(true);
         try{
             const result = await OrderAPI.fetchDeliveryFormData({
                 orderId : order.id,
@@ -32,6 +36,7 @@ export default function DeliveryForm(props) {
                 alert('Product not available in stock !')
                 window.location.pathname = '/view-ordered-product';
             }
+            setIsLoading(false);
         }catch(e){
             console.log('Error...',e);
         }
@@ -55,8 +60,13 @@ export default function DeliveryForm(props) {
     const handleGoBack = (e) => {
         window.location.pathname = '/view-order-list';
     }
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
+        setIsSubmitting(true);
+
         try{     
             let productData = [];
             productList.map((data, index)=> {
@@ -74,11 +84,13 @@ export default function DeliveryForm(props) {
                 }
             })
             const result = await OrderAPI.submitDeliveryDetails({productData: productData, orderId : order.id});
+            setIsLoading(false);            
             if(result === true){    // true = inserted
                 window.location.pathname = '/view-order-list';
             }else{
+                setIsSubmitting(false);
                 alert('Failed Insertion');
-            }
+            } 
         }catch(e){
             console.log('Error...', e);
         }
@@ -185,7 +197,7 @@ export default function DeliveryForm(props) {
                                             <div class="form-group p-4">
                                                 {((productList.find(ele => {return ele.purchased_quantity !== null && (ele.purchased_quantity - ele.paid_quantity > 0)})) ===  undefined) 
                                                     ?   <input type="button" value="Go Back" class="btn  px-4 btn-primary" onClick={handleGoBack}/>
-                                                    :   <input type="submit" value="Submit" class="btn  px-4 btn-primary" />
+                                                    :   <input type="submit" value="Submit" class="btn  px-4 btn-primary" disabled={isSubmitting} />
                                                 }
                                             </div>
                                     </div>
@@ -195,6 +207,7 @@ export default function DeliveryForm(props) {
                     </div>
                 </section>
         <Footer />
+        {isLoading ?   <CallLoader />   : null  }
     </Fragment>
     )
 }

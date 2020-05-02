@@ -8,6 +8,8 @@ import OrderAPI from '../../../api/order.js';
 import OrderAcceptRejectDialog from '../Components/OrderAcceptRejectDialog.js';
 
 import {getDateInDDMMYYYY, getDate} from '../../../common/moment.js';
+import CallLoader from '../../../common/Loader.js';
+
 
 const RESET_VALUES = {
     toDate : new Date(),
@@ -25,7 +27,7 @@ export default function ViewOrder() {
     const [orderStatus, setOrderStatus] = useState(1);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [orderProps, setOrderProps] = useState({});
-
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(()=>{
 		getOrderList();		
@@ -39,6 +41,7 @@ export default function ViewOrder() {
 	}
 
     const getOrderList = async () => {
+        setIsLoading(true);
         setOrderStatus(inputs.orderStatus);
         try{
             const result = await OrderAPI.getOrderList({
@@ -47,7 +50,8 @@ export default function ViewOrder() {
                 to_date : getDate(inputs.toDate),
             });
             setOrderList(result.orderList);            
-            setOrderedProductList(result.orderedProducts);            
+            setOrderedProductList(result.orderedProducts);           
+            setIsLoading(false);
         }catch(e){
             console.log('Error...',e);
         }
@@ -189,6 +193,7 @@ export default function ViewOrder() {
             /> 
             : null 
         }
+        {isLoading ?   <CallLoader />   : null  }
 	</Fragment>
     )
 }

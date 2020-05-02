@@ -8,6 +8,7 @@ import CartAPI from '../../api/cart.js';
 import {CART_TOKEN, APP_TOKEN} from '../../api/config/Constants.js';
 import Footer from '../Partials/Footer.js';
 import Header from '../Partials/Header.js';
+import CallLoader from '../../common/Loader.js';
 
 export default function BrowseProduct(props) {
 	const userId = APP_TOKEN.get().userId;
@@ -19,6 +20,7 @@ export default function BrowseProduct(props) {
     const [subCategory, setSubCategory] = useState([]);
 	
 	const [cartTotal, setCartTotal] = useState(CART_TOKEN.get().cartTotal);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(()=>{		
 		getCategoryList();
@@ -48,10 +50,13 @@ export default function BrowseProduct(props) {
     }
 	
 	const getProductList = async (categoryId = 0, subCategoryId=0) => {
+        setIsLoading(true);
+
         try{
             const result = await CategoriesAPI.getProductList({categoryId: categoryId, subCategoryId: subCategoryId});
 			setProductsList(result.productList);
-        }catch(e){
+      		setIsLoading(false);
+	}catch(e){
             console.log('Error...',e);
         }
 	}
@@ -66,11 +71,15 @@ export default function BrowseProduct(props) {
     }
 
 	const getSubCategoryList = async () => {
+		setIsLoading(true);
+		
         let id = document.getElementById('categoryDropDown').value;
         if(id !== '' && id !== undefined && id !== null){
             try{
                 const result = await CategoriesAPI.getSubCategoryList({categoryId: id});
-                setSubCategory(result.subCategoriesList);
+				setSubCategory(result.subCategoriesList);
+				setIsLoading(false);
+				
             }catch(e){
                 console.log('Error...',e);
 			}
@@ -396,6 +405,8 @@ export default function BrowseProduct(props) {
 		</div>
 	</section>
 	<Footer />
+	{isLoading ?   <CallLoader />   : null  }
+
 	</Fragment>
     )
 }

@@ -10,6 +10,7 @@ import StaticAPI from '../../api/static.js';
 import OrderAPI from '../../api/order.js';
 import {APP_TOKEN} from  '../../api/config/Constants.js'
 import {getDateInDDMMYYYY, getDate} from '../../common/moment.js';
+import CallLoader from '../../common/Loader.js';
 
 const RESET_VALUES = {
     toDate : new Date(),
@@ -25,6 +26,7 @@ export default function ViewCustomerOrder() {
     const [orderedProductList, setOrderedProductList] = useState([]);
     const [orderStatusList, setOrderStatusList]  = useState([]);
     const [orderStatus, setOrderStatus] = useState(1);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(()=>{
 		getCustomerOrderList();		
@@ -38,6 +40,7 @@ export default function ViewCustomerOrder() {
 	}
 
     const getCustomerOrderList = async () => {
+        setIsLoading(true);
         setOrderStatus(inputs.orderStatus);
         try{
             const result = await OrderAPI.getCustomerOrderList({
@@ -47,7 +50,9 @@ export default function ViewCustomerOrder() {
                 createdBy : APP_TOKEN.get().userId,
             });
             setOrderList(result.orderList);            
-            setOrderedProductList(result.orderedProducts);            
+            setOrderedProductList(result.orderedProducts);         
+            setIsLoading(false);
+
         }catch(e){
             console.log('Error...',e);
         }
@@ -65,11 +70,14 @@ export default function ViewCustomerOrder() {
 
     
     const handleGenerateInvoice = async (data) =>{
-        // alert('Development under process !')
+        setIsLoading(true);
+
         pdfmake.vfs = pdfFonts.pdfMake.vfs;
         try{
             const result = await OrderAPI.generateInvoice({orderId : data.id});
             pdfmake.createPdf(result).open();
+            setIsLoading(false);
+
         }catch(e){
             console.log('Error...',e);
         }
@@ -181,6 +189,8 @@ export default function ViewCustomerOrder() {
                 </div>
     </section>
 		<Footer />
+		{isLoading ?   <CallLoader />   : null  }
+
 	</Fragment>
     )
 }

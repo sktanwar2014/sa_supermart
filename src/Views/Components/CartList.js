@@ -22,7 +22,7 @@ export default function CartList() {
 		setTotalInCart(CART_TOKEN.get().cartTotal)
 	}
 
-	useEffect(()=>{		
+	useEffect(()=>{
 		setCartList(CART_TOKEN.get().cart);
 		let cartTotal = 0;
 		CART_TOKEN.get().cart.map(data => {

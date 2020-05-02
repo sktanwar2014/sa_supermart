@@ -5,6 +5,7 @@ import OrderAPI from '../../api/order.js';
 import {CART_TOKEN, APP_TOKEN} from '../../api/config/Constants.js';
 import Footer from '../Partials/Footer.js';
 import Header from '../Partials/Header.js';
+import CallLoader from '../../common/Loader.js';
 
 
 
@@ -27,6 +28,7 @@ export default function ProceedToCheckout(props) {
 	const [cartTotal, setCartTotal] = useState();
 	const [preAddresses,  setPreAddresses] = useState([]);
 	const [inputs, setInputs] = useState(RESET_VALUES);
+    const [isLoading, setIsLoading] = useState(false);
 
 
 	const  handleInputChange = (e) => {
@@ -52,9 +54,13 @@ export default function ProceedToCheckout(props) {
 
 	const handleRemoveAddress = async(id) => {
 		try{
+			setIsLoading(true);
+
 			const result = await OrderAPI.removeSelectedAddress({id: id, userId: APP_TOKEN.get().userId});
 			setPreAddresses(result.billingAddresses);
 			setInputs(RESET_VALUES);
+			setIsLoading(false);
+
 		}catch(e){
 			console.log(e);
 		}
@@ -72,15 +78,20 @@ export default function ProceedToCheckout(props) {
 
 	const fetchPreviousBillingAddresss = async() => {
 		try{
+			setIsLoading(true);
+
 			const result = await OrderAPI.fetchPreviousBillingAddresss({userId: APP_TOKEN.get().userId});
 			setPreAddresses(result.billingAddresses)
+			setIsLoading(false);
+
 		}catch(e){
 			console.log(e);
 		}
 	}
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (e) => {        
+		e.preventDefault();
+		setIsLoading(true);
         try{
             const formData = {
 				shipping_id : inputs.shipping_id,
@@ -100,6 +111,7 @@ export default function ProceedToCheckout(props) {
 			};
 			
 			const result = await OrderAPI.addNewOrder(formData);
+			setIsLoading(false);
 			if(result=== true){
 				CART_TOKEN.removeCart();
 			}
@@ -294,6 +306,8 @@ export default function ProceedToCheckout(props) {
 				</div>
 	    	</section>
 		<Footer />
+		{isLoading ?   <CallLoader />   : null  }
+
 	</Fragment>
     )
 }

@@ -22,6 +22,60 @@ const getAllMainCategories = async function (req, res, next) {
 }
 
 
+
+
+const getAllSubCategories = async function (req, res, next) {
+    const params = {
+        categoryId: req.body.categoryId,
+    }
+    try {
+        const activity = new Categories(params);
+        const subCategoriesList = await activity.getAllSubCategories();  
+        res.send({ subCategoriesList: subCategoriesList});      
+    } catch (err) {
+        next(err);
+    }
+}
+
+
+
+
+const handleCategoryActivation = async function (req, res, next) {    
+    const params = {
+        categoryId: req.body.categoryId,
+        isActive : Number(req.body.is_active) === 1 ? 0 : 1,
+    }
+    try {
+        const activity = new Categories(params);
+        await activity.handleCategoryActivation();        
+
+        const categoryList = await activity.getAllMainCategories();         
+        res.send({ categoryList: categoryList});
+    } catch (err) {
+        next(err);
+    }
+}
+
+
+
+const handleSubCategoryActivation = async function (req, res, next) {    
+    const params = {
+        categoryId: req.body.categoryId,
+        subCategoryId: req.body.subCategoryId,
+        isActive : Number(req.body.is_active) === 1 ? 0 : 1,
+    }
+    try {
+        const activity = new Categories(params);
+        await activity.handleSubCategoryActivation();        
+        
+        const subCategoriesList = await activity.getAllSubCategories();  
+        res.send({ subCategoriesList: subCategoriesList});   
+    } catch (err) {
+        next(err);
+    }
+}
+
+
 const getProductList = async function (req, res, next) {    
     const params = {
         categoryId : Number(req.body.categoryId),
@@ -104,11 +158,20 @@ const insertNewProduct = async function (req, res, next) {
 const addNewCategory = async function (req, res, next) {
     const params = {
         category_name : req.body.category_name,
+        get: req.body.get,
     };
     try {
-        const insertId = await new Categories(params).addNewCategory();
-        const categoryList = await new Categories({}).getCategoryList();        
-        res.send({ categoryList: categoryList, newCategoryId : insertId});
+        const activity  = new Categories(params);
+        const insertId = await activity.addNewCategory();
+       
+        if(params.get ===  'activated'){
+            const categoryList = await activity.getCategoryList();        
+            res.send({ categoryList: categoryList, newCategoryId : insertId});
+        }else{
+            const categoryList = await activity.getAllMainCategories();         
+            res.send({ categoryList: categoryList});
+        }
+        
     } catch (err) {
         next(err);
     }
@@ -116,20 +179,64 @@ const addNewCategory = async function (req, res, next) {
 
 
 
-const addNewSubCategory = async function (req, res, next) {
+const updateCategory = async function (req, res, next) {
     const params = {
         categoryId : req.body.categoryId,
         category_name : req.body.category_name,
     };
     try {
-        const insertId = await new Categories(params).addNewSubCategory();
-        const subCategoriesList = await new Categories(params).getSubCategoryList();
-        res.send({ subCategoriesList: subCategoriesList, newSubCategoryId : insertId});
+        const activity = new Categories(params);
+        const result = await activity.updateCategory();
+        
+        const categoryList = await activity.getAllMainCategories();         
+        res.send({ categoryList: categoryList});
     } catch (err) {
         next(err);
     }
 }
 
+const addNewSubCategory = async function (req, res, next) {
+    const params = {
+        get : req.body.get,
+        categoryId : req.body.categoryId,
+        category_name : req.body.category_name,
+    };
+    try {
+        const activity = new Categories(params);
+        const insertId = await activity.addNewSubCategory();
+        
+        if(params.get ===  'activated'){
+            const subCategoriesList = await activity.getSubCategoryList();
+            res.send({ subCategoriesList: subCategoriesList, newSubCategoryId : insertId});
+        }else{
+            const subCategoriesList = await activity.getAllSubCategories();  
+            res.send({ subCategoriesList: subCategoriesList}); 
+        }
+        
+    } catch (err) {
+        next(err);
+    }
+}
+
+
+
+
+const updateSubCategory = async function (req, res, next) {
+    const params = {
+        subCategoryId : req.body.subCategoryId,
+        category_name : req.body.category_name,
+        categoryId : req.body.categoryId,
+    };
+    try {
+        const activity = new Categories(params);
+        const result = await activity.updateSubCategory();
+        
+        const subCategoriesList = await activity.getAllSubCategories();  
+        res.send({ subCategoriesList: subCategoriesList});      
+    } catch (err) {
+        next(err);
+    }
+}
 
 
 const getProductPacketInfo = async function (req, res, next) {
@@ -150,6 +257,9 @@ const getProductPacketInfo = async function (req, res, next) {
 module.exports = {    
     getCategoryList: getCategoryList,
     getAllMainCategories : getAllMainCategories,
+    getAllSubCategories: getAllSubCategories,
+    handleCategoryActivation: handleCategoryActivation,
+    handleSubCategoryActivation: handleSubCategoryActivation,
     getProductList : getProductList,
     getSubCategoryList : getSubCategoryList,
     insertNewProduct : insertNewProduct,
@@ -158,5 +268,7 @@ module.exports = {
     
     addNewCategory : addNewCategory,
     addNewSubCategory : addNewSubCategory,
+    updateSubCategory: updateSubCategory,
+    updateCategory: updateCategory,
     getProductPacketInfo : getProductPacketInfo,
 };

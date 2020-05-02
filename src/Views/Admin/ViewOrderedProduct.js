@@ -5,6 +5,7 @@ import Header from '../Partials/Header.js';
 import Footer from '../Partials/Footer.js';
 import OrderAPI from '../../api/order.js';
 import {APP_TOKEN} from '../../api/config/Constants.js';
+import CallLoader from '../../common/Loader.js';
 
 import {getDateInDDMMYYYY, getDate} from '../../common/moment.js';
 
@@ -19,6 +20,7 @@ export default function ViewOrderedProduct() {
     const [inputs, setInputs] =  useState(RESET_VALUES);
     const [orderedProductList, setOrderedProductList] = useState([]);
     const userId = APP_TOKEN.get().userId;
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(()=>{
 		getOrderedProductListSingleDay();		
@@ -31,17 +33,23 @@ export default function ViewOrderedProduct() {
 	}
 
     const getOrderedProductListSingleDay = async () => {
+        setIsLoading(true);
+
         try{
             const result = await OrderAPI.getOrderedProductListSingleDay({
                 date : getDate(inputs.date),
             });
             setOrderedProductList(result.orderedProductListSingleDay);   
+            setIsLoading(false);
+
         }catch(e){
             console.log('Error...',e);
         }
     }
 
     const handlePurchasedRecord = async (data) => {
+        setIsLoading(true);
+
         let purchasedQuantity  = document.getElementById('purchasedQuantity-'+data.id).value;
         let productCost  = document.getElementById('productCost-'+data.id).value;
 
@@ -57,6 +65,8 @@ export default function ViewOrderedProduct() {
                     cost : productCost,
                     created_by : userId,
                 });
+               setIsLoading(false);
+
                 if(result !== "" && result !== null && result !== undefined){
                     alert('Data update successfully.');
                 }
@@ -154,6 +164,7 @@ export default function ViewOrderedProduct() {
                 </div>
     </section>
 		<Footer />
+        {isLoading ?   <CallLoader />   : null  }
 	</Fragment>
     )
 }

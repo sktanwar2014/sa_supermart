@@ -6,16 +6,18 @@ import StaticAPI from '../../api/static.js';
 import OrderAPI from '../../api/order.js';
 import Header from '../Partials/Header.js';
 import Footer from '../Partials/Footer.js';
+import CallLoader from '../../common/Loader.js';
 
 import {getDate, getDateInDDMMYYYY} from '../../common/moment.js';
 
 export default function DeliveryForm(props) {
-    // console.log(props)
 
     const userId = APP_TOKEN.get().userId;
     const [order, setOrder]  = useState(props.location.state.order);
     const [productList, setProductList] = useState(props.location.state.product);
     const [productUnitList, setProductUnitList] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
 
     useEffect(()=>{
@@ -33,6 +35,9 @@ export default function DeliveryForm(props) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
+        setIsSubmitting(true);
+
         try{
             let productData = [];
             productList.map((data)=> {
@@ -46,6 +51,8 @@ export default function DeliveryForm(props) {
             })
 
             const result = await OrderAPI.orderVerificationByCustomer({productData: productData, orderId : order.id});
+            setIsLoading(false);
+
             if(result === true){ // true = inserted
                 window.location.pathname = '/view-user-order-list';
             }else{
@@ -155,7 +162,7 @@ export default function DeliveryForm(props) {
                                                 </tbody>
                                             </table>
                                         <div class="form-group p-4">
-                                            <input type="submit" value="Submit" class="btn  px-4 btn-primary" />
+                                            <input type="submit" value="Submit" class="btn  px-4 btn-primary" disabled={isSubmitting} />
                                         </div>
                                     </div>
                                 </form>
@@ -164,6 +171,7 @@ export default function DeliveryForm(props) {
                     </div>
                 </section>
         <Footer />
+        {isLoading ?   <CallLoader />   : null  }
     </Fragment>
     )
 }

@@ -6,12 +6,14 @@ import Header from '../Partials/Header.js';
 import Footer from '../Partials/Footer.js';
 
 import CategoriesAPI from '../../api/categories.js';
+import CallLoader from '../../common/Loader.js';
 
 export default function ViewProduct() {
 
 	const [categoryList, setCategoryList] = useState([]);
     const [productsList, setProductsList] = useState([]);
     const [subCategory, setSubCategory] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 	
 	
 	// useEffect(() => {
@@ -40,20 +42,28 @@ export default function ViewProduct() {
     }
 	
 	const getProductList = async (categoryId = 0, subCategoryId=0) => {
+        setIsLoading(true);
+
         try{
             const result = await CategoriesAPI.getProductList({categoryId: categoryId, subCategoryId: subCategoryId});
-			setProductsList(result.productList);			
+			setProductsList(result.productList);	
+			setIsLoading(false);
+
         }catch(e){
             console.log('Error...',e);
         }
 	}
 
 	const getSubCategoryList = async () => {
+        setIsLoading(true);
+
         let id = document.getElementById('categoryDropDown').value;
         if(id !== '' && id !== undefined && id !== null){
             try{
                 const result = await CategoriesAPI.getSubCategoryList({categoryId: id});
-                setSubCategory(result.subCategoriesList);
+				setSubCategory(result.subCategoriesList);
+				setIsLoading(false);
+				
             }catch(e){
                 console.log('Error...',e);
 			}
@@ -177,6 +187,7 @@ export default function ViewProduct() {
 				</div>
    			</section>
 		<Footer />
+        {isLoading ?   <CallLoader />   : null  }
 	</Fragment>
     )
 }

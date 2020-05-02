@@ -10454,6 +10454,56 @@ textarea.form-control {
   color: #82ae46;
   cursor: pointer;
   margin-bottom: 10px;
+  outline: none;
+}
+
+.category-div {
+  border-bottom: 1px solid;
+  margin: 0px 10px;
+}
+
+.category-div-serial {
+  float: left;
+  margin: -16px;
+  background: antiquewhite;
+  padding: 2px 12px;
+}
+
+.category-name {  
+  margin-top: 20px;
+}
+
+.category-name a{ 
+  font-weight: 700;
+}
+.category-menu {
+  width : 100% !important;
+}
+
+.category-menu button{
+  background: none!important;
+  border: none;
+  font-family: arial, sans-serif;
+  color: darkred;
+  cursor: pointer;
+  /* margin-bottom: 10px; */
+  outline: none;
+}
+
+.category-menu button:hover {
+  color: #000000;
+}
+
+.b-color {
+  border: 1px solid lightgray;
+}
+
+.b-active{
+  border: 2px solid #82ae46;
+}
+
+.b-deactive {
+  border: 2px solid #ff0000;
 }
 
 .inner-form {

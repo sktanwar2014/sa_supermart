@@ -20,6 +20,7 @@ const Categories = function (params) {
   this.category_name = params.category_name;
   this.productUnits = params.productUnits;
   this.mainUnitId = params.mainUnitId;
+  this.isActive = params.isActive;
 };
 
 
@@ -60,6 +61,49 @@ Categories.prototype.getAllMainCategories = function () {
     });
   });
 } 
+
+
+
+
+Categories.prototype.handleCategoryActivation = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+      connection.query(`UPDATE categories SET is_active = ${that.isActive} WHERE id = ${that.categoryId}`, function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(rows);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
+
+
+
+
+Categories.prototype.handleSubCategoryActivation = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+      connection.query(`UPDATE categories SET is_active = ${that.isActive} WHERE id = ${that.subCategoryId}`, function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(rows);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
+
 
 Categories.prototype.getProductList = function () {
   const that = this;
@@ -108,6 +152,24 @@ Categories.prototype.getSubCategoryList = function () {
   });
 } 
 
+
+Categories.prototype.getAllSubCategories = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+      connection.query(`SELECT * FROM categories WHERE type = 2 AND parent_id = ${that.categoryId} ORDER BY category_name` , function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(rows);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
 
 
 
@@ -201,6 +263,44 @@ Categories.prototype.addNewCategory = function () {
 
 
 
+
+
+Categories.prototype.updateCategory = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {     throw error;      }
+      connection.changeUser({database : dbName});
+
+      connection.query(`UPDATE categories SET category_name = '${that.category_name}' WHERE id = ${that.categoryId}`, function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(rows);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+}
+
+
+
+
+Categories.prototype.updateSubCategory = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {     throw error;      }
+      connection.changeUser({database : dbName});
+
+      connection.query(`UPDATE categories SET category_name = '${that.category_name}' WHERE id = ${that.subCategoryId}`, function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(rows);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+}
 
 
 

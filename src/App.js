@@ -6,6 +6,7 @@ import {APP_TOKEN} from  './api/config/Constants.js'
 import PageLoader from './Views/Partials/Loader';
 import ViewCustomerOrder from './Views/Components/ViewCustomerOrder';
 import AlterCategories from './Views/Admin/AlterCategories';
+import AlterSubCategories from './Views/Admin/AlterSubCategories';
 
 const Login = lazy(()=> import('./Views/Auth/login'));
 const AdminHome = lazy(()=> import('./Views/Admin/AdminHome'));
@@ -167,6 +168,18 @@ function App() {
                     ? <Redirect to="/login" />
                     : (APP_TOKEN.isAdmin)
                     ? <AlterCategories  {...props} />
+                    : <Redirect to="/" /> 
+ 
+                  }}                    
+                />
+                <Route 
+                  exact 
+                  path="/alter-categories/subcategory" 
+                  render = { props => {
+                    return (!APP_TOKEN.notEmpty)
+                    ? <Redirect to="/login" />
+                    : (APP_TOKEN.isAdmin)
+                    ? <AlterSubCategories  {...props} />
                     : <Redirect to="/" /> 
  
                   }}                    

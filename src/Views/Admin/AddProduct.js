@@ -8,6 +8,7 @@ import StaticAPI from '../../api/static.js';
 import Header from '../Partials/Header.js';
 import Footer from '../Partials/Footer.js';
 import AddUpdateCategoriesDialog from './Components/AddUpdateCategoriesDialog.js';
+import CallLoader from '../../common/Loader.js';
 
 
 export default function AddProduct(props) {
@@ -25,6 +26,7 @@ export default function AddProduct(props) {
     const [showWeightFields, setShowWeightFields] = useState(0);
     const [productUnitBio, setProductUnitBio] = useState([]);
 
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(()=>{
         getCategoryList();
@@ -54,18 +56,21 @@ export default function AddProduct(props) {
         if (type === 2 && (document.getElementById('categoryDropDown').value === "")) {
             alert('Select Category !');
         }else{
-            setCategoryDialogProps({type: type, operation: 'add', id: document.getElementById('categoryDropDown').value })
+            setCategoryDialogProps({type: type, operation: 'add', id: document.getElementById('categoryDropDown').value, value :'',  get: 'activated' })
             setCategoryDialogOpen(true);
         }
     }
 
 
     const getSubCategoryList = async () => {
+        setIsLoading(true);
+
         let id = document.getElementById('categoryDropDown').value;
         if(id !== '' && id !== undefined && id !== null){
             try{
                 const result = await CategoriesAPI.getSubCategoryList({categoryId: id});
                 setSubCategory(result.subCategoriesList);
+                setIsLoading(false);
             }catch(e){
                 console.log('Error...',e);
             }
@@ -77,6 +82,7 @@ export default function AddProduct(props) {
             setFilteredUnitList([]);
             setSingleUnitList([]);
         }else {
+            setIsLoading(true);
             let unitId = e.target.value;
             const selectedUnit = productUnitList.find(ele => {return ele.id == e.target.value});
             let is_bundle = selectedUnit.is_bundle;
@@ -85,6 +91,7 @@ export default function AddProduct(props) {
                 setFilteredUnitList(result.productUnitList);
                 const singleUnitList = result.productUnitList.filter(ele => {return ele.is_bundle == 0});
                 setSingleUnitList(singleUnitList);
+                setIsLoading(false);
             } catch(e){
                 console.log(e)
             }
@@ -154,6 +161,7 @@ export default function AddProduct(props) {
         e.preventDefault();
         try{            
             if(e.target.name === "mainForm"){
+                setIsLoading(true);
                 if(productUnitBio.length > 0){
                     const formData = {
                         categoryId : document.getElementById('categoryDropDown').value,
@@ -165,6 +173,7 @@ export default function AddProduct(props) {
                         mainUnitId : document.getElementById('productMainUnit').value,
                     };
                     const result = await CategoriesAPI.insertNewProduct(formData);
+                    setIsLoading(false);
                     if(result === true){    // true = inserted
                         props.history.push('/');
                     }else{
@@ -290,7 +299,7 @@ export default function AddProduct(props) {
                                         <div class={showWeightFields  === 0 ? "col-md-6" : "col-md-2"}>
                                             <div class="form-group">
                                                 <label for="productPrice">Price (In $)</label>
-                                                <input id="productPrice" type="text" class="form-control" placeholder=""/>
+                                                <input id="productPrice" type="number" step="0.00" min="0" class="form-control" placeholder=""/>
                                             </div>
                                         </div>
                                         <div class="add-unit">
@@ -358,6 +367,8 @@ export default function AddProduct(props) {
                 /> 
                 : null 
             }
+            {isLoading ?   <CallLoader />   : null  }
+
     </Fragment>
     )
 }

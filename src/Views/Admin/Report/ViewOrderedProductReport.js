@@ -4,7 +4,10 @@ import React, {useState, useEffect, Fragment} from 'react';
 import Header from '../../Partials/Header.js';
 import Footer from '../../Partials/Footer.js';
 import OrderAPI from '../../../api/order.js';
-import {getDateInDDMMYYYY, getDate} from '../../../common/moment.js';
+import {getDate} from '../../../common/moment.js';
+import CallLoader from '../../../common/Loader.js';
+
+
 
 const RESET_VALUES = {
     toDate : new Date(),
@@ -16,6 +19,7 @@ export default function ViewOrderedProduct() {
 
     const [inputs, setInputs] =  useState(RESET_VALUES);
     const [orderedProductList, setOrderedProductList] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
     
 
     useEffect(()=>{
@@ -29,6 +33,7 @@ export default function ViewOrderedProduct() {
 	}
 
     const getOrderedProductList = async () => {
+        setIsLoading(true);
         try{
             const result = await OrderAPI.getOrderedProductList({
                 from_date : getDate(inputs.fromDate),
@@ -38,6 +43,7 @@ export default function ViewOrderedProduct() {
         }catch(e){
             console.log('Error...',e);
         }
+        setIsLoading(false);
     }
 
 
@@ -101,6 +107,7 @@ export default function ViewOrderedProduct() {
                 </div>
     </section>
 		<Footer />
+        {isLoading ?   <CallLoader />   : null  }
 	</Fragment>
     )
 }

@@ -10,11 +10,12 @@ import OrderAPI from '../../../api/order.js';
 export default function OrderAcceptRejectDialog({open, setDialogOpen, props, setOrderList, setOrderedProductList, isUpdatable}) {
 
   const [products, setProducts] = useState(props.products);
-  const prodIds = [...new Set(products.map(dist => dist.ordered_id))];
-  console.log(props, products, prodIds, prodIds.join())
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
     
   const handleOrderConfirmation = async (e) =>{
     e.preventDefault();
+    setIsSubmitting(true);
     try{
         let productData  = [];
           products.map((data)=> {
@@ -29,6 +30,7 @@ export default function OrderAcceptRejectDialog({open, setDialogOpen, props, set
         setOrderList(result.orderList);            
         setOrderedProductList(result.orderedProducts);
         setDialogOpen(false);
+        setIsSubmitting(false);
     }catch(e){
         console.log('Error...',e);
     }
@@ -82,11 +84,7 @@ export default function OrderAcceptRejectDialog({open, setDialogOpen, props, set
           {isUpdatable === 0  ?
             <Button className="br-none" onClick={()=>{setDialogOpen(false)}}>Close</Button>
             : isUpdatable === 1 ?
-              // <Fragment>
-                // <Button className="br-none" onClick={()=>{handleOrderConfirmation(4)}}>Accept</Button>
-                // <Button className="br-none" onClick={()=>{handleOrderConfirmation(5)}}>Reject</Button>
-                <Button type="submit" className="br-none">Submit</Button>
-              // </Fragment> 
+                <Button type="submit" className="br-none" disabled={isSubmitting}>Submit</Button>
               :  ''}
         </Modal.Footer>
         </form>
