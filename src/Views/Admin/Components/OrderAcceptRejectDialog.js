@@ -12,21 +12,29 @@ export default function OrderAcceptRejectDialog({open, setDialogOpen, props, set
   const [products, setProducts] = useState(props.products);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-    
+    // console.log(products);
+
   const handleOrderConfirmation = async (e) =>{
     e.preventDefault();
     setIsSubmitting(true);
     try{
         let productData  = [];
           products.map((data)=> {
+            let isComponentExist = document.querySelector(`input[name="action-${data.ordered_id}"]:checked`);
+            let status = '';
+            if(isComponentExist === null){
+              status = 5;
+            }else if(isComponentExist !== ""){
+              status = isComponentExist.value;
+            }
             productData.push({
                 ordered_id : data.ordered_id,
                 product_id : data.product_id,
-                status :  document.querySelector(`input[name="action-${data.ordered_id}"]:checked`).value,
+                status :  status,
             });
           });
         const result = await OrderAPI.handleOrderConfirmation({orderId: props.order_id, productData: productData, date : props.order_date, order_status : 3});
-
+          // console.log(productData)
         setOrderList(result.orderList);            
         setOrderedProductList(result.orderedProducts);
         setDialogOpen(false);
@@ -59,6 +67,7 @@ export default function OrderAcceptRejectDialog({open, setDialogOpen, props, set
               </thead>
               <tbody>
                 {(products.length > 0 ? Object.values(products) :[]).map((product, index) => {
+                  // console.log(product)
                     return(
                       <tr class="text-center">
                         <td>{index + 1}</td>
@@ -67,10 +76,13 @@ export default function OrderAcceptRejectDialog({open, setDialogOpen, props, set
                         <td>{product.price}</td>
                         <td>{product.verified_quantity + ' ' + product.verified_unit_name}</td>
                         {isUpdatable === 1 && <td>
-                              <div class="radio">
-                                <label style={{ paddingRight: '15px'}}><input type="radio" name={"action-"+product.ordered_id} value="5" class="mr-1" required/>Accept</label>
-                                <label><input type="radio" name={"action-"+product.ordered_id} value="6" class="mr-1" required/> Reject</label>
-                              </div>
+                          {(Number(product.quantity) === Number(product.verified_quantity) && (product.verified_unit_id === product.unit_id)) ? ''
+                           :
+                           <div class="radio">
+                              <label style={{ paddingRight: '15px'}}><input type="radio" name={"action-"+product.ordered_id} value="5" class="mr-1" required/>Accept</label>
+                              <label><input type="radio" name={"action-"+product.ordered_id} value="6" class="mr-1" required/> Reject</label>
+                            </div>
+                          }
                         </td>
                         }
                       </tr>

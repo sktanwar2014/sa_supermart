@@ -1,6 +1,6 @@
 import React, {useState, useEffect, Fragment} from 'react';
 import Table from 'react-bootstrap/Table';
-
+import $ from 'jquery';
 //Components 
 import CategoriesAPI from '../../api/categories.js';
 import {APP_TOKEN} from '../../api/config/Constants.js';
@@ -9,7 +9,7 @@ import Header from '../Partials/Header.js';
 import Footer from '../Partials/Footer.js';
 import AddUpdateCategoriesDialog from './Components/AddUpdateCategoriesDialog.js';
 import CallLoader from '../../common/Loader.js';
-
+import FileReaders from  '../../utils/fileReader.js'
 
 export default function AddProduct(props) {
 
@@ -27,6 +27,29 @@ export default function AddProduct(props) {
     const [productUnitBio, setProductUnitBio] = useState([]);
 
     const [isLoading, setIsLoading] = useState(false);
+
+    const handleFileChange = (e) => {
+        if (window.File && window.FileList && window.FileReader) {
+            let file = e.target.files[0];
+            if(file !== null && file !== undefined && file !== ""){
+                let fileReader = new FileReader();
+                fileReader.onload = (e) => {
+                    document.getElementById("productImageThumb").setAttribute('src',e.target.result);
+                    document.getElementById("productImageThumb").setAttribute('title', "Selected image");
+                }
+                fileReader.readAsDataURL(file);
+            }
+        } else {
+            alert("Your browser doesn't support to File API")
+        }
+    }
+
+    const handleFileRemove = (e) => {
+        document.getElementById("productImageThumb").removeAttribute('src');
+        document.getElementById("productImageThumb").removeAttribute('title');
+        document.getElementById("productImage").value = '';
+    }
+
 
     useEffect(()=>{
         getCategoryList();
@@ -158,12 +181,21 @@ export default function AddProduct(props) {
     }
 
     const handleSubmit = async (e) => {
+        
+//         var selectedFile = this.files[0];
+// var idxDot = selectedFile.name.lastIndexOf(".") + 1;
+// var extFile = selectedFile.name.substr(idxDot, selectedFile.name.length).toLowerCase();
+// if (extFile == "jpg" || extFile == "jpeg" || extFile == "png" || extFile == "svg" || extFile == "gif") {
+//    //do whatever want to do
+// } else {
+//      alert("Only jpg/jpeg, png, gif and svg files are allowed!");
+// }
         e.preventDefault();
         try{            
             if(e.target.name === "mainForm"){
-                setIsLoading(true);
                 if(productUnitBio.length > 0){
-                    const formData = {
+                    setIsLoading(true);
+                    const data = {
                         categoryId : document.getElementById('categoryDropDown').value,
                         subCategoryId : document.getElementById('subCategoryDropDown').value,
                         productName : document.getElementById('productName').value,
@@ -171,8 +203,10 @@ export default function AddProduct(props) {
                         createdBy :  APP_TOKEN.get().userId,
                         productUnits : productUnitBio,
                         mainUnitId : document.getElementById('productMainUnit').value,
+                        document : await FileReaders.toBase64(document.getElementById('productImage').files[0]),
                     };
-                    const result = await CategoriesAPI.insertNewProduct(formData);
+
+                    const result = await CategoriesAPI.insertNewProduct(data);
                     setIsLoading(false);
                     if(result === true){    // true = inserted
                         props.history.push('/');
@@ -338,13 +372,25 @@ export default function AddProduct(props) {
                                             </table>
                                         }
                                         </div>
-                                        <div class="col-md-12">
+                                        <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="description">Description </label>
-                                                <textarea name="" id="productDescription" cols="30" rows="10" class="form-control"></textarea>
+                                                <label for="description">Description *</label>
+                                                <textarea name="" id="productDescription" cols="30" rows="10" class="form-control" required></textarea>
                                             </div>
                                         </div>
-                                        <div class="w-100"></div>
+                                        <div class="col-md-6">                                          
+                                            <div class="form-group">
+                                                <div class="field" align="left">
+                                                    <label for="productImage">Upload product image *</label>
+                                                    <input type="file" class="form-control" id="productImage" name="productImage" accept=".png, .jpg, .jpeg" onChange={handleFileChange} required/>
+                                                </div>
+                                            </div>
+                                            <span>
+                                                <img class="imageThumb" id="productImageThumb" />
+                                                <br/>
+                                                <span class="remove" onClick={handleFileRemove}>Remove image</span>
+                                            </span>
+                                        </div>
                                         <div class="form-group p-4">
                                             <input type="submit" value="Submit" class="btn  px-4 btn-primary" />
                                         </div>

@@ -70,7 +70,7 @@ export default function DeliveryForm(props) {
         try{     
             let productData = [];
             productList.map((data, index)=> {
-                if(data.purchased_quantity  !== null){
+                if(data.purchased_quantity  !== null && data.purchased_quantity !== "" && data.purchased_quantity != 0){
                     productData.push({
                         ordered_id : data.id,
                         product_id : data.product_id,

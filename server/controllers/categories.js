@@ -1,5 +1,6 @@
 const Categories = require('../models/categories.js');
 const {isEmpty} = require('../utils/conditionChecker.js');
+const {uploadDocument} = require('../utils/uploadDocument.js');
 
 const getCategoryList = async function (req, res, next) {    
     try {
@@ -123,6 +124,15 @@ const getSubCategoryList = async function (req, res, next) {
 
 
 const insertNewProduct = async function (req, res, next) {
+    // console.log(req.body);
+    const base64Data = req.body.document.data.split(';base64,').pop();
+    const name = req.body.document.name.split('.')[0] + "_" + Date.now() + '.' + req.body.document.name.split('.')[1];
+
+    await uploadDocument(`./files/productImages/${name}`, base64Data).catch(error => {
+        console.error(error);
+        throw (error);
+    });
+
     const params = {
         categoryId : Number(req.body.categoryId),
         subCategoryId : Number(req.body.subCategoryId),
@@ -131,15 +141,20 @@ const insertNewProduct = async function (req, res, next) {
         createdBy : Number(req.body.createdBy),
         productUnits : req.body.productUnits,
         mainUnitId : Number(req.body.mainUnitId),
+        documentName : name,
     };
+
     try {
         const defineModal = new Categories(params);
         const productInsertId = await defineModal.insertNewProduct();
         defineModal.productId = productInsertId;
-                
+        
+        await defineModal.uploadProductImage();
+
         if(params.productUnits.length > 0){
             const unitsInsertId = await defineModal.insertProductUnits();
         }
+        
 
         if(isEmpty(productInsertId)){
             res.send(true);

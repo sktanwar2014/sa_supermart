@@ -10724,3 +10724,55 @@ textarea.form-control {
   margin-bottom: 35px;
   color: #82ae46;
 }
+
+
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+
+#img-upload{
+    width: 100%;
+}
+
+
+input[type="file"] {
+  display: block;
+}
+.imageThumb {
+  max-height: fit-content;
+  width: 492px;
+  height: 182px;
+  cursor: pointer;
+  border: 1px solid #ced4da;
+  object-fit: contain;
+}
+
+.remove {
+  display: block;
+  background: #444;
+  border: 1px solid black;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 15px;
+}
+.remove:hover {
+  background: white;
+  color: black;
+}

@@ -21,6 +21,7 @@ const Categories = function (params) {
   this.productUnits = params.productUnits;
   this.mainUnitId = params.mainUnitId;
   this.isActive = params.isActive;
+  this.documentName = params.documentName;
 };
 
 
@@ -194,6 +195,29 @@ Categories.prototype.insertNewProduct = function () {
   });
 } 
 
+
+
+
+Categories.prototype.uploadProductImage = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+      const VALUES = [that.productId, 1, that.documentName, 1, 1];
+      
+      let Query = `INSERT INTO product_images(product_id, type, image_name, is_active, created_by) VALUES(?)`;
+      connection.query(Query, [VALUES], function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(rows.insertId);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
 
 
 
