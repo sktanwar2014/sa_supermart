@@ -57,8 +57,7 @@ export const CART_TOKEN = {
             sessionStorage.setItem('cart', JSON.stringify(filtered));
         }else{
             sessionStorage.setItem('cart', JSON.stringify([product]));            
-        }
-            
+        }            
     },
     get: () => ({
         cartTotal: sessionStorage.getItem('cart') !== null && sessionStorage.getItem('cart') !== "" ? JSON.parse(sessionStorage.getItem('cart')).length : 0,

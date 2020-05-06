@@ -24,13 +24,16 @@ const RESET_VALUES = {
 
 export default function ProceedToCheckout(props) {
 	
-    
-	const [cartTotal, setCartTotal] = useState();
 	const [preAddresses,  setPreAddresses] = useState([]);
 	const [inputs, setInputs] = useState(RESET_VALUES);
     const [isLoading, setIsLoading] = useState(false);
 
 
+	
+	useEffect(()=>{
+		fetchPreviousBillingAddresss();
+	},[]);
+	
 	const  handleInputChange = (e) => {
 		setInputs({...inputs, [e.target.name]: e.target.value});
 	}
@@ -66,15 +69,6 @@ export default function ProceedToCheckout(props) {
 		}
 	}
 
-	useEffect(()=>{
-		let cartTotal = 0;
-		CART_TOKEN.get().cart.map(data => {
-			cartTotal = cartTotal + Number(data.total);
-		})
-		setCartTotal(cartTotal);
-
-		fetchPreviousBillingAddresss();
-    },[]);
 
 	const fetchPreviousBillingAddresss = async() => {
 		try{
@@ -106,7 +100,6 @@ export default function ProceedToCheckout(props) {
                 email : inputs.email,
 				createdBy :  APP_TOKEN.get().userId,
 				
-				// itemsTotal: cartTotal,
 				cartItems : CART_TOKEN.get().cart,
 			};
 			
@@ -124,7 +117,7 @@ export default function ProceedToCheckout(props) {
 
     return(
 		<Fragment>
-		<Header />
+			<Header />
         	<section class="ftco-section">
       			<div class="container">
 					<div id="addressList" class="row">
@@ -154,7 +147,6 @@ export default function ProceedToCheckout(props) {
 					<form onSubmit={handleSubmit} class="billing-form">
 						<div class="row justify-content-center">
 							<div class="col-xl-7 ftco-animate fadeInUp ftco-animated">
-								
 									<h3 id="billing-detail-form" class="mb-4 billing-heading">Billing Details</h3>
 										<div class="row align-items-end">
 											<div class="col-md-6">
@@ -169,25 +161,12 @@ export default function ProceedToCheckout(props) {
 													<input type="text" id="lastName" name="lastName" value={inputs.lastName}  onChange={handleInputChange}  class="form-control" placeholder="" required />
 												</div>
 											</div>
-											<div class="w-100"></div>
 											<div class="col-md-12">
 												<div class="form-group">
 													<label for="country">State / Country</label>
 													<input type="text" id="state" name="state" value={inputs.state}  onChange={handleInputChange} class="form-control" placeholder="" required />
-															{/* <div class="select-wrap">
-														<div class="icon"><span class="ion-ios-arrow-down"></span></div>
-														<select name="" id="" class="form-control">
-															<option value="">France</option>
-															<option value="">Italy</option>
-															<option value="">Philippines</option>
-															<option value="">South Korea</option>
-															<option value="">Hongkong</option>
-															<option value="">Japan</option>
-														</select>
-														</div> */}
 												</div>
 											</div>
-											<div class="w-100"></div>
 											<div class="col-md-6">
 												<div class="form-group">
 													<label for="streetaddress">Street Address</label>
@@ -199,7 +178,6 @@ export default function ProceedToCheckout(props) {
 												<input type="text" id="flatAdd" name="flatAdd" class="form-control" value={inputs.flatAdd}  onChange={handleInputChange} placeholder="Appartment, suite, unit etc." required />
 												</div>
 											</div>
-											<div class="w-100"></div>
 											<div class="col-md-6">
 												<div class="form-group">
 													<label for="towncity">Town / City</label>
@@ -212,7 +190,6 @@ export default function ProceedToCheckout(props) {
 													<input type="number" id="postCode" name="postCode" class="form-control" onChange={handleInputChange} value={inputs.postCode} placeholder="" required />
 												</div>
 											</div>
-											<div class="w-100"></div>
 											<div class="col-md-6">
 												<div class="form-group">
 													<label for="phone">Phone</label>
@@ -225,82 +202,18 @@ export default function ProceedToCheckout(props) {
 													<input type="email" id="email" name="email" value={inputs.email} onChange={handleInputChange} class="form-control" placeholder="" required />
 												</div>
 											</div>
-											<div class="w-100"></div>
-											{/* <div class="col-md-12">
-												<div class="form-group mt-4">
-													<div class="radio">
-														<label class="mr-3">
-															<input type="radio" name="optradio" /> Create an Account? 
-														</label>
-														<label>
-															<input type="radio" name="optradio" /> Ship to different address
-														</label>
-													</div>
-												</div>
-											</div> */}
 										</div>	          					
-								</div>
+									</div>
 								<div class="col-xl-5">
 									<div class="row mt-5 pt-3">
-										{/* <div class="col-md-12 d-flex mb-5">
-											<div class="cart-detail cart-total p-3 p-md-4">
-												<h3 class="billing-heading mb-4">Cart Total</h3>
-													<p class="d-flex">
-														<span>Subtotal</span>
-														<span>$20.60</span>
-													</p>
-													<p class="d-flex">
-														<span>Delivery</span>
-														<span>$0.00</span>
-													</p>
-													<p class="d-flex">
-														<span>Discount</span>
-														<span>$3.00</span>
-													</p>
-													<hr />
-													<p class="d-flex total-price">
-														<span>Total</span>
-														<span>{cartTotal}</span>
-													</p>
+										<div class="col-md-12" style={{marginTop:'400px'}}>
+											<div class="cart-detail p-3 p-md-4">
+												<p><input type="submit" value="Place an order" class="btn btn-primary py-3 px-4" /></p>
 											</div>
-										</div> */}
-									<div class="col-md-12" style={{marginTop:'400px'}}>
-										<div class="cart-detail p-3 p-md-4">
-											{/* <h3 class="billing-heading mb-4">Payment Method</h3>
-														<div class="form-group">
-															<div class="col-md-12">
-																<div class="radio">
-																<label><input type="radio" name="optradio" class="mr-2" /> Direct Bank Tranfer</label>
-																</div>
-															</div>
-														</div>
-														<div class="form-group">
-															<div class="col-md-12">
-																<div class="radio">
-																<label><input type="radio" name="optradio" class="mr-2" /> Check Payment</label>
-																</div>
-															</div>
-														</div>
-														<div class="form-group">
-															<div class="col-md-12">
-																<div class="radio">
-																<label><input type="radio" name="optradio" class="mr-2" /> Paypal</label>
-																</div>
-															</div>
-														</div>
-														<div class="form-group">
-															<div class="col-md-12">
-																<div class="checkbox">
-																<label><input type="checkbox" value="" class="mr-2" /> I have read and accept the terms and conditions</label>
-																</div>
-													</div>
-												</div> */}
-											<p><input type="submit" value="Place an order" class="btn btn-primary py-3 px-4" /></p>
 										</div>
 									</div>
 								</div>
 							</div>
-						</div>
 						</form>
 					</div>
 				</div>

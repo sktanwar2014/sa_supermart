@@ -338,7 +338,7 @@ Order.prototype.insertOrderedProduct = function () {
       connection.changeUser({database : dbName});
 
       that.cartItems.map((data, index) => {
-        let product = [that.createdBy, that.order_id, Math.ceil(Math.random() *1000000000), data.id, data.quantity, data.unit_id, 1, 1, that.createdBy]
+        let product = [that.createdBy, that.order_id, Math.ceil(Math.random() *1000000000), data.id, data.quantity, data.selected_unit_id, 1, 1, that.createdBy]
         connection.query('INSERT INTO `ordered_product`( `user_id`, `order_id`, `tracking_id`, `product_id`, `quantity`, `unit_id`, `status`, `is_active`, `created_by`) VALUES (?)', [product], function (error, rows, fields) {
           if (error) {  console.log("Error...", error); reject(error);}
             resolve(rows);

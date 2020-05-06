@@ -7,6 +7,7 @@ import Footer from '../Partials/Footer.js';
 
 import CategoriesAPI from '../../api/categories.js';
 import CallLoader from '../../common/Loader.js';
+import {API_URL} from '../../api/config/Constants.js';
 
 export default function ViewProduct() {
 
@@ -48,6 +49,7 @@ export default function ViewProduct() {
             const result = await CategoriesAPI.getProductList({categoryId: categoryId, subCategoryId: subCategoryId});
 			setProductsList(result.productList);	
 			setIsLoading(false);
+			console.log(result)
 
         }catch(e){
             console.log('Error...',e);
@@ -85,24 +87,18 @@ export default function ViewProduct() {
     return(
 		<Fragment>
 			<Header />
-			<section className="ftco-section">
-				<div className="container">
-					{/* <div className="row justify-content-center">
-						<div className="col-md-10 mb-5 text-center">
-							<ul className="product-category">
-								<li><a href="#" onClick={getProductList} className={"active"}>All</a></li>
-
-								{(categoryList.length > 0 ? categoryList : []).map((data, index) => {
-									return(
-										<li > 
-											<a href="#" onClick={()=>{getProductUnderMainCategory(data.id)}}>{data.category_name}</a>														
-										</li>
-										)
-									}
-								)}
-							</ul>
+				<div class="hero-wrap hero-bread" style={{backgroundImage: `url('images/bg_1.jpg')`}}>
+					<div class="container">
+						<div class="row no-gutters slider-text align-items-center justify-content-center">
+						<div class="col-md-9 ftco-animate text-center fadeInUp ftco-animated">
+							<p class="breadcrumbs"><span class="mr-2"><a href="index.html">Home</a></span> <span>Product</span></p>
+							<h1 class="mb-0 bread">Products</h1>
 						</div>
-					</div> */}
+						</div>
+					</div>
+				</div>
+				<section className="ftco-section">
+					<div className="container">
 					<div class="row justify-content-center p-bottom-30">
                         <div class="col-xl-12 ftco-animate fadeInUp ftco-animated">
                             <div class="p-5 bg-light b-top-dark">
@@ -150,39 +146,30 @@ export default function ViewProduct() {
 							return(
 								<div className="col-md-6 col-lg-3 ftco-animate fadeInUp ftco-animated">
 									<div className="product">
-										<a className="img-prod"><img className="img-fluid" src="images/product-1.jpg" alt="Colorlib Template" />
-											{/* <span className="status">30%</span> */}
+										<a className="img-prod">
+											<img className="product-img-fluid" src={API_URL + "/api/images?path=productImages/" + data.image_name}  alt={data.image_name} />
 											<div className="overlay"></div>
 										</a>
 										<div className="text py-3 pb-4 px-3 text-center">
 											<h3><a>{data.product_name}</a></h3>
-											{/* <div className="d-flex">
-												<div className="pricing">
-													<p className="price">
-														<span>{`$${data.price} / ${data.unit_name}`}</span>
-														<span className="mr-2 price-dc">{`$${data.price}`}</span>
-														<span className="price-sale">$80.00</span>
-													</p> 
+											<hr />
+											<div class="row">
+												<div class="col-md-12 col-lg-6 b-right-light">
+													<div class="category-menu">
+														<button type="button" >Edit</button>
+													</div>
+												</div>
+												<div class="col-md-12 col-lg-6">
+													<div class="category-menu">
+														<button type="button" >View Details</button>
+													</div>
 												</div>
 											</div>
-											<div className="bottom-area d-flex px-3">
-												<div className="m-auto d-flex">
-													<a href="#" className="add-to-cart d-flex justify-content-center align-items-center text-center">
-														<span><i className="ion-ios-menu"></i></span>
-													</a>
-													<p className="price">
-														<span>{`$${data.price} / ${data.unit_name}`}</span>
-														<span className="mr-2 price-dc">{`$${data.price}`}</span>
-														<span className="price-sale">$80.00</span>
-													</p> 
-												</div>
-											</div> */}
 										</div>
 									</div>
 								</div>
 							)
-						})
-					}
+						})}
 					</div>
 				</div>
    			</section>

@@ -5,7 +5,11 @@ export default function Header() {
     const userId = APP_TOKEN.get().userId;
     const roleId = APP_TOKEN.get().role_id;
     const [cartTotal, setCartTotal] = useState(CART_TOKEN.get().cartTotal);
-  
+    
+    useEffect(() => {
+        setCartTotal(CART_TOKEN.get().cartTotal)
+    })
+    
  return(
      <Fragment>
         <div className="py-1 bg-primary">

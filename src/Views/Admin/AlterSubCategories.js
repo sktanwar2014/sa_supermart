@@ -83,7 +83,7 @@ export default function AlterSubCategories(props) {
                                     {(subCategory.length  >  0) ?
                                      (subCategory.length > 0 ? subCategory : []).map((data, index) => {
                                         return(
-                                            <div class="col-md-6 col-lg-4 ftco-animate fadeInUp ftco-animated">
+                                            <div class="col-md-6 col-lg-3 ftco-animate fadeInUp ftco-animated">
                                                 <div class={ data.is_active === 1 ? "product b-active" : "product b-deactive" }>
                                                     <div class="text py-3 pb-4 px-3 text-center">
                                                     <span className="category-div-serial">{index + 1}</span>

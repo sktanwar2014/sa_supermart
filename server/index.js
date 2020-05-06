@@ -47,6 +47,27 @@ app.use('/cart', require('./routes/cart'));
 app.use('/order', require('./routes/order'));
 
 
+
+app.use('/api/images', function (req, res, next) {
+  try {
+    const fileName = (req.query.path).toString().split('/').pop();
+
+    let file = '';
+
+    if(fileName === 'null'){
+        file = `${__dirname}/files/fileNotAvailabe.jpg`;
+    }else{
+        file = `${__dirname}/files/${req.query.path}`;
+    }
+
+    res.download(file); // Set disposition and send it.
+  } catch (error) {
+    next(error);
+  }
+});
+
+
+
 app.use('/',mainRoute);
 
 
