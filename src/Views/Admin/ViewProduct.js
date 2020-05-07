@@ -1,6 +1,9 @@
 import React, {useState, useEffect, Fragment} from 'react';
 import $ from "jquery";
 
+import { makeStyles } from '@material-ui/core/styles';
+import Pagination from '@material-ui/lab/Pagination';
+
 //Components 
 import Header from '../Partials/Header.js';
 import Footer from '../Partials/Footer.js';
@@ -8,26 +11,32 @@ import Footer from '../Partials/Footer.js';
 import CategoriesAPI from '../../api/categories.js';
 import CallLoader from '../../common/Loader.js';
 import {API_URL} from '../../api/config/Constants.js';
+import { Link } from 'react-router-dom';
+
+
+const useStyles = makeStyles((theme) => ({
+	root: {
+	  '& > *': {
+		marginTop: theme.spacing(2),
+	  },
+	},
+  }));
+
 
 export default function ViewProduct() {
 
+	const classes = useStyles();
+	
 	const [categoryList, setCategoryList] = useState([]);
-    const [productsList, setProductsList] = useState([]);
-    const [subCategory, setSubCategory] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
+	const [subCategory, setSubCategory] = useState([]);
+	const [productsList, setProductsList] = useState([]);
+	const [pageCount, setPageCount] = useState(0);
+	const [pageNo, setPageNo] = useState(1);
+	
+    
+	const [isLoading, setIsLoading] = useState(false);
 	
 	
-	// useEffect(() => {
-	// 	$(document).ready(function () {
-    //     	$('.product-category li a').click(function(e) {
-	// 			$('.product-category li a').removeClass('active');
-	// 			var $parent = $(this);
-	// 			$parent.addClass('active');
-	// 			e.preventDefault();
-    //     	});
-	// 	});
-	// })
-
     useEffect(()=>{
 		getCategoryList();
 		getProductList();
@@ -42,15 +51,14 @@ export default function ViewProduct() {
         }
     }
 	
-	const getProductList = async (categoryId = 0, subCategoryId=0) => {
+	const getProductList = async (categoryId = 0, subCategoryId=0, page=1) => {
         setIsLoading(true);
 
         try{
-            const result = await CategoriesAPI.getProductList({categoryId: categoryId, subCategoryId: subCategoryId});
-			setProductsList(result.productList);	
+            const result = await CategoriesAPI.getProductList({categoryId: categoryId, subCategoryId: subCategoryId, pageNo: page});
+			setProductsList(result.productList);
+			setPageCount(result.productListCount);
 			setIsLoading(false);
-			console.log(result)
-
         }catch(e){
             console.log('Error...',e);
         }
@@ -58,8 +66,8 @@ export default function ViewProduct() {
 
 	const getSubCategoryList = async () => {
         setIsLoading(true);
-
-        let id = document.getElementById('categoryDropDown').value;
+		setPageNo(1);
+		let id = document.getElementById('categoryDropDown').value;
         if(id !== '' && id !== undefined && id !== null){
             try{
                 const result = await CategoriesAPI.getSubCategoryList({categoryId: id});
@@ -76,12 +84,20 @@ export default function ViewProduct() {
 		}
     }
 
-	const getProductUnderSubCategoryList = async (id) => {
+	const getProductUnderSubCategoryList = async (id) => {	
         let categoryId = document.getElementById('categoryDropDown').value;		
 		let subCategoryId = document.getElementById('subCategoryDropDown').value;
         if(subCategoryId !== '' && subCategoryId !== undefined && subCategoryId !== null){
+			setPageNo(1);	
 			getProductList(categoryId, subCategoryId);
 		}
+	}
+
+	const handlePagination = (event, page) => {
+		let categoryId = document.getElementById('categoryDropDown').value;
+		let subCategoryId = document.getElementById('subCategoryDropDown').value;
+		setPageNo(page);
+		getProductList(categoryId, subCategoryId, page);
 	}
 
     return(
@@ -141,36 +157,42 @@ export default function ViewProduct() {
 								</div>
 							</div>
 						</div>
-					<div className="row">
-						{(productsList.length > 0 ? productsList : []).map((data, index) => {
-							return(
-								<div className="col-md-6 col-lg-3 ftco-animate fadeInUp ftco-animated">
-									<div className="product">
-										<a className="img-prod">
-											<img className="product-img-fluid" src={API_URL + "/api/images?path=productImages/" + data.image_name}  alt={data.image_name} />
-											<div className="overlay"></div>
-										</a>
-										<div className="text py-3 pb-4 px-3 text-center">
-											<h3><a>{data.product_name}</a></h3>
-											<hr />
-											<div class="row">
-												<div class="col-md-12 col-lg-6 b-right-light">
-													<div class="category-menu">
-														<button type="button" >Edit</button>
+						
+						<div className="row">
+							{(productsList.length > 0 ? productsList : []).map((data, index) => {
+								return(
+									<div className="col-md-6 col-lg-3 ftco-animate fadeInUp ftco-animated">
+										<div className="product">
+											<a className="img-prod">
+												<img className="product-img-fluid" src={API_URL + "/api/images?path=productImages/" + data.image_name}  alt={data.image_name} />
+												<div className="overlay"></div>
+											</a>
+											<div className="text py-3 pb-4 px-3 text-center">
+												<h3><a>{data.product_name}</a></h3>
+												<hr />
+												<div class="row">
+													<div class="col-md-12 col-lg-6 b-right-light">
+														<div class="category-menu">
+															<button type="button" >Edit</button>
+														</div>
 													</div>
-												</div>
-												<div class="col-md-12 col-lg-6">
-													<div class="category-menu">
-														<button type="button" >View Details</button>
+													<div class="col-md-12 col-lg-6">
+														<div class="category-menu">
+															<button type="button" >
+																<Link to={{pathname: '/view-product-details', state:{productDetails: data}}}>View Details</Link>
+															</button>
+														</div>
 													</div>
 												</div>
 											</div>
 										</div>
 									</div>
-								</div>
-							)
-						})}
-					</div>
+								)
+							})}
+						</div>
+						<div  className="row" style={{ justifyContent: 'center'}}>
+							<Pagination count={Math.ceil(pageCount/20)} page={pageNo} showFirstButton showLastButton onChange={handlePagination} />
+						</div>
 				</div>
    			</section>
 		<Footer />

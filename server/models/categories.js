@@ -22,6 +22,7 @@ const Categories = function (params) {
   this.mainUnitId = params.mainUnitId;
   this.isActive = params.isActive;
   this.documentName = params.documentName;
+  this.pageNo = params.pageNo;
 };
 
 
@@ -113,9 +114,39 @@ Categories.prototype.getProductList = function () {
       if (error) {
         throw error;
       }
-      connection.changeUser({database : dbName});         
-      // let Query = `SELECT p.id, p.category_id, p.sub_category_id, p.product_name, p.main_unit_id, p.description, p.is_active, p.status, p.created_at FROM products as p WHERE p.is_active = 1 `;
+      connection.changeUser({database : dbName});
       let Query = `SELECT p.id, p.category_id, p.sub_category_id, p.product_name, p.main_unit_id, p.description, p.is_active, p.status, p.created_at, GROUP_CONCAT(pm.id) AS unit_table_id, GROUP_CONCAT(pm.unit_value) AS unit_value, GROUP_CONCAT(pm.unit_id) AS unit_id, GROUP_CONCAT(pm.price) AS price, GROUP_CONCAT(pm.packet_weight) AS packet_weight, GROUP_CONCAT(pm.is_packet) AS is_packet, GROUP_CONCAT(pm.packet_unit_id) AS packet_unit_id, pi.image_name FROM products as p INNER JOIN products_measurement as pm ON pm.product_id =  p.id LEFT JOIN product_images as pi ON pi.product_id = p.id AND pi.is_active = 1 AND pi.type = 1 WHERE p.is_active = 1 `;
+      if(that.categoryId !== 0){
+        Query = Query + ` AND p.category_id = ${that.categoryId} `;
+      }
+      if(that.subCategoryId !== 0){
+        Query = Query + ` AND p.sub_category_id = ${that.subCategoryId} `;
+      }
+      Query = Query + ` GROUP BY p.id ORDER BY product_name LIMIT ${((that.pageNo * 20) - 20)},20 `;
+
+      // console.log(Query)
+      connection.query(Query, function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(rows);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
+
+
+
+
+Categories.prototype.getProductListCount = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+      let Query = `SELECT p.id FROM products as p INNER JOIN products_measurement as pm ON pm.product_id =  p.id LEFT JOIN product_images as pi ON pi.product_id = p.id AND pi.is_active = 1 AND pi.type = 1 WHERE p.is_active = 1 `;
       if(that.categoryId !== 0){
         Query = Query + ` AND p.category_id = ${that.categoryId} `;
       }
@@ -124,6 +155,7 @@ Categories.prototype.getProductList = function () {
       }
       Query = Query + ` GROUP BY p.id ORDER BY product_name`;
 
+      // console.log(Query)
       connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);

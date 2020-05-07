@@ -81,11 +81,14 @@ const getProductList = async function (req, res, next) {
     const params = {
         categoryId : Number(req.body.categoryId),
         subCategoryId : Number(req.body.subCategoryId),
+        pageNo : Number(req.body.pageNo),
     }
     try {
         const defModal = new Categories(params);
         const productList = await defModal.getProductList();
-        res.send({ productList: productList});
+        const productListCount = await defModal.getProductListCount();
+        
+        res.send({ productList: productList, productListCount: productListCount.length});
     } catch (err) {
         next(err);
     }

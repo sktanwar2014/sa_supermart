@@ -1,4 +1,6 @@
 import React, {useState, useEffect, Fragment} from 'react';
+import { makeStyles } from '@material-ui/core/styles';
+import Pagination from '@material-ui/lab/Pagination';
 
 //Components 
 import CategoriesAPI from '../../api/categories.js';
@@ -8,9 +10,23 @@ import Footer from '../Partials/Footer.js';
 import Header from '../Partials/Header.js';
 import CallLoader from '../../common/Loader.js';
 import {API_URL} from '../../api/config/Constants.js';
+import { Link } from 'react-router-dom';
+
+
+
+const useStyles = makeStyles((theme) => ({
+	root: {
+	  '& > *': {
+		marginTop: theme.spacing(2),
+	  },
+	},
+  }));
 
 
 export default function BrowseProduct(props) {
+
+	const classes = useStyles();
+
 	const userId = APP_TOKEN.get().userId;
 	
 	const [categoryList, setCategoryList] = useState([]);
@@ -18,7 +34,9 @@ export default function BrowseProduct(props) {
     const [subCategory, setSubCategory] = useState([]);
 	const [cartList, setCartList] = useState([]);
 
-    const [isLoading, setIsLoading] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
+	const [pageCount, setPageCount] = useState(0);
+	const [pageNo, setPageNo] = useState(1);
 
     useEffect(()=>{
 		setCartList(CART_TOKEN.get().cart);
@@ -37,12 +55,13 @@ export default function BrowseProduct(props) {
         }
     }
 	
-	const getProductList = async (categoryId = 0, subCategoryId=0) => {
+	const getProductList = async (categoryId = 0, subCategoryId=0, page=1) => {
         setIsLoading(true);
 
         try{
-            const result = await CategoriesAPI.getProductList({categoryId: categoryId, subCategoryId: subCategoryId});
+            const result = await CategoriesAPI.getProductList({categoryId: categoryId, subCategoryId: subCategoryId, pageNo: page});
 			setProductsList(result.productList);
+			setPageCount(result.productListCount);
       		setIsLoading(false);
 	}catch(e){
             console.log('Error...',e);
@@ -52,7 +71,7 @@ export default function BrowseProduct(props) {
 
 	const getSubCategoryList = async () => {
 		setIsLoading(true);
-		
+		setPageNo(1);
         let id = document.getElementById('categoryDropDown').value;
         if(id !== '' && id !== undefined && id !== null){
             try{
@@ -74,9 +93,18 @@ export default function BrowseProduct(props) {
         let categoryId = document.getElementById('categoryDropDown').value;
 		let subCategoryId = document.getElementById('subCategoryDropDown').value;
         if(subCategoryId !== '' && subCategoryId !== undefined && subCategoryId !== null){
+			setPageNo(1);	
 			getProductList(categoryId, subCategoryId);
 		}
 	}
+
+	const handlePagination = (event, page) => {
+		let categoryId = document.getElementById('categoryDropDown').value;
+		let subCategoryId = document.getElementById('subCategoryDropDown').value;
+		setPageNo(page);
+		getProductList(categoryId, subCategoryId, page);
+	}
+
 
 	const addProductInCart =async (prod) => {
 		const product = prod;
@@ -165,7 +193,9 @@ export default function BrowseProduct(props) {
 													</div>
 													<div class="col-md-12 col-lg-6">
 														<div class="category-menu">
-															<button type="button" >View Details</button>
+															<button type="button" >
+																<Link to={{pathname: '/product-details', state:{productDetails: data}}}>View Details</Link>
+															</button>
 														</div>
 													</div>
 												</div>
@@ -174,6 +204,9 @@ export default function BrowseProduct(props) {
 									</div>
 								)
 							})}
+						</div>
+						<div  className="row" style={{ justifyContent: 'center'}}>
+							<Pagination count={Math.ceil(pageCount/20)} page={pageNo} showFirstButton showLastButton onChange={handlePagination} />
 						</div>
 					</div>
 				</section>

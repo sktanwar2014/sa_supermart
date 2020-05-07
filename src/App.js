@@ -7,6 +7,7 @@ import {APP_TOKEN} from  './api/config/Constants.js'
 import PageLoader from './Views/Partials/Loader';
 
 
+
 const Login = lazy(()=> import('./Views/Auth/login'));
 const AdminHome = lazy(()=> import('./Views/Admin/AdminHome'));
 const Home = lazy(()=> import('./Views/Home'));
@@ -23,6 +24,9 @@ const ProductVerification = lazy(()=> import('./Views/Components/ProductVerifica
 const ViewCustomerOrder = lazy(()=> import('./Views/Components/ViewCustomerOrder'));
 const AlterCategories = lazy(()=> import('./Views/Admin/AlterCategories'));
 const AlterSubCategories = lazy(()=> import('./Views/Admin/AlterSubCategories'));
+const ViewProductDetails = lazy(()=> import('./Views/Admin/ViewProductDetails'));
+const ProductDetails = lazy(()=> import('./Views/Components/CustomerViewProductDetails.js'));
+
 
 function App() {
   return (
@@ -184,6 +188,25 @@ function App() {
  
                   }}                    
                 />
+                <Route 
+                  exact 
+                  path="/view-product-details" 
+                  render = { props => {
+                    return (!APP_TOKEN.notEmpty)
+                    ? <Redirect to="/login" />
+                    : <ViewProductDetails {...props} /> 
+                  }}                    
+                />
+                 <Route 
+                  exact 
+                  path="/product-details" 
+                  render = { props => {
+                    return (!APP_TOKEN.notEmpty)
+                    ? <Redirect to="/login" />
+                    : <ProductDetails {...props} /> 
+                  }}                    
+                />
+               
                
                 <Route exact path="/login"  render={props =>  <Login {...props} /> } />
                 <Route exact path="/logout" render={props =>  <Redirect to="/login" /> }/>
