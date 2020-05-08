@@ -85,11 +85,10 @@ export default function AddProduct(props) {
     }
 
 
-    const getSubCategoryList = async () => {
-        setIsLoading(true);
-
+    const getSubCategoryList = async () => { 
         let id = document.getElementById('categoryDropDown').value;
         if(id !== '' && id !== undefined && id !== null){
+            setIsLoading(true);
             try{
                 const result = await CategoriesAPI.getSubCategoryList({categoryId: id});
                 setSubCategory(result.subCategoriesList);
@@ -225,11 +224,21 @@ export default function AddProduct(props) {
     return(
     <Fragment>
         <Header />
+            <div class="hero-wrap hero-bread" style={{backgroundImage: `url('images/bg_1.jpg')`}}>
+                <div class="container">
+                    <div class="row no-gutters slider-text align-items-center justify-content-center">
+                    <div class="col-md-9 ftco-animate text-center fadeInUp ftco-animated">
+                        <p class="breadcrumbs"><span class="mr-2"><a href="index.html">Home</a></span> <span>Product</span></p>
+                        <h1 class="mb-0 bread">Add Product</h1>
+                    </div>
+                    </div>
+                </div>
+            </div>
             <section class="ftco-section">
                 <div class="container">
                     <div class="row justify-content-center">
                         <div class="col-xl-12 ftco-animate fadeInUp ftco-animated">
-                            <h3 class="mb-4 billing-heading">Add New Product</h3>
+                            {/* <h3 class="mb-4 billing-heading">Add New Product</h3> */}
                             <form onSubmit={handleSubmit} name="mainForm" class="p-5 bg-light b-top-dark">
                                     <div class="row align-items-end">
                                         <div class="col-md-6">

@@ -295,7 +295,7 @@ Order.prototype.insertOrderDetails = function () {
         throw error;
       }
         connection.changeUser({database : dbName});
-        const orderDetails=[Math.ceil(Math.random() *1000000000), that.createdBy, that.shipping_id, new Date(), 1, 1, that.createdBy]
+        const orderDetails=[Math.ceil(Math.random() *1000000000), that.createdBy, that.shipping_id, that.order_date, 1, 1, that.createdBy]
         connection.query('INSERT INTO `orders`(`order_id`, `user_id`, `shipping_id`, `order_date`, `status`, `is_active`, `created_by`) VALUES (?)', [orderDetails], function (error, orderResult, fields) {
           if (error) {  console.log("Error...", error); reject(error);  }
           resolve(orderResult.insertId)

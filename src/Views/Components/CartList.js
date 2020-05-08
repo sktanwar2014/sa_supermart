@@ -1,4 +1,5 @@
 import React, {useState, useEffect, Fragment} from 'react';
+import {Link} from  'react-router-dom';
 
 //Components 
 import CategoriesAPI from '../../api/categories.js';
@@ -136,12 +137,14 @@ export default function CartList() {
 													<tr class="text-center">						        
 														<td class="image-prod">
 															<div class="img">
-																<img className="cart-product-img-fluid" src={API_URL + "/api/images?path=productImages/" + data.image_name}  alt={data.image_name} />
+																<Link to={{pathname: '/product-details', state:{productDetails: data}}}>
+																	<img className="cart-product-img-fluid" src={API_URL + "/api/images?path=productImages/" + data.image_name}  alt={data.image_name} />
+																</Link>
 															</div>
 														</td>
 														<td class="product-name">
 															<h3>{data.product_name}</h3>
-															<p>...See Info</p>
+															{/* <p>...See Info</p> */}
 														</td>
 														
 														<td class="quantity">

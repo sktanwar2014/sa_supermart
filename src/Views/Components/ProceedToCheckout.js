@@ -6,8 +6,7 @@ import {CART_TOKEN, APP_TOKEN} from '../../api/config/Constants.js';
 import Footer from '../Partials/Footer.js';
 import Header from '../Partials/Header.js';
 import CallLoader from '../../common/Loader.js';
-
-
+import {getDateInDDMMYYYY, getDate} from '../../common/moment.js';
 
 const RESET_VALUES = {
 	firstName: '',
@@ -18,7 +17,8 @@ const RESET_VALUES = {
 	city: '',
 	postCode: '',
 	phone: '',
-	email: ''
+	email: '',
+	order_date : '',
 }
 
 
@@ -27,9 +27,9 @@ export default function ProceedToCheckout(props) {
 	const [preAddresses,  setPreAddresses] = useState([]);
 	const [inputs, setInputs] = useState(RESET_VALUES);
     const [isLoading, setIsLoading] = useState(false);
-
-
-	
+	let tomorrowDate =  new Date();
+	tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+		
 	useEffect(()=>{
 		fetchPreviousBillingAddresss();
 	},[]);
@@ -38,6 +38,7 @@ export default function ProceedToCheckout(props) {
 		setInputs({...inputs, [e.target.name]: e.target.value});
 	}
 
+	
 	const handlePreAddressSelect = (address) => {
 		let firstName  = address.full_name ? address.full_name.split(' ')[0] : '';
 		let lastName = address.full_name ? address.full_name.split(' ')[1] : '';
@@ -97,7 +98,8 @@ export default function ProceedToCheckout(props) {
                 city : inputs.city,
                 postCode : inputs.postCode,
                 phone : inputs.phone,
-                email : inputs.email,
+				email : inputs.email,
+				order_date : inputs.order_date,
 				createdBy :  APP_TOKEN.get().userId,
 				
 				cartItems : CART_TOKEN.get().cart,
@@ -118,6 +120,16 @@ export default function ProceedToCheckout(props) {
     return(
 		<Fragment>
 			<Header />
+				<div class="hero-wrap hero-bread" style={{backgroundImage: `url('images/category-2.jpg')`}}>
+					<div class="container">
+						<div class="row no-gutters slider-text align-items-center justify-content-center">
+						<div class="col-md-9 ftco-animate text-center fadeInUp ftco-animated">
+							{/* <p class="breadcrumbs"><span class="mr-2"><a href="index.html"></a></span> <span>Product</span></p> */}
+							<h1 class="mb-0 bread">Proceed to Checkout</h1>
+						</div>
+						</div>
+					</div>
+				</div>
         	<section class="ftco-section">
       			<div class="container">
 					<div id="addressList" class="row">
@@ -143,11 +155,12 @@ export default function ProceedToCheckout(props) {
 							)
 						})}
 					</div>
+					<hr />
 					<div className="row">
 					<form onSubmit={handleSubmit} class="billing-form">
 						<div class="row justify-content-center">
 							<div class="col-xl-7 ftco-animate fadeInUp ftco-animated">
-									<h3 id="billing-detail-form" class="mb-4 billing-heading">Billing Details</h3>
+									{/* <h3 id="billing-detail-form" class="mb-4 billing-heading">Billing Details</h3> */}
 										<div class="row align-items-end">
 											<div class="col-md-6">
 												<div class="form-group">
@@ -206,8 +219,12 @@ export default function ProceedToCheckout(props) {
 									</div>
 								<div class="col-xl-5">
 									<div class="row mt-5 pt-3">
-										<div class="col-md-12" style={{marginTop:'400px'}}>
+										<div class="col-md-12" style={{marginTop:'230px'}}>
 											<div class="cart-detail p-3 p-md-4">
+												<div class="form-group">
+													<label for="date">Order for (Date) * </label>
+													<input id="order_date" name="order_date" type="date"class="form-control"  min={getDate(tomorrowDate)} value={getDate(inputs.order_date)} onChange={handleInputChange} required />
+												</div>
 												<p><input type="submit" value="Place an order" class="btn btn-primary py-3 px-4" /></p>
 											</div>
 										</div>

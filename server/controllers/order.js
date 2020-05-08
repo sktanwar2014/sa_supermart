@@ -107,6 +107,7 @@ const addNewOrder = async function (req, res, next) {
         postCode : req.body.postCode,
         phone : req.body.phone,
         email : req.body.email,
+        order_date : req.body.order_date,
         createdBy : req.body.createdBy,
         // itemsTotal: req.body.itemsTotal,
         cartItems : req.body.cartItems,

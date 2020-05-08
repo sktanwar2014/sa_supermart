@@ -72,12 +72,14 @@ export default function CustomerViewProductDetails(props) {
         
         let prod = product;
 
-            prod.user_id = userId;
-            prod.quantity = document.getElementById(`productQuantity`).value;
-            prod.selected_unit_id = document.getElementById(`productUnit`).value;;
+        prod.user_id = userId;
+        prod.quantity = document.getElementById(`productQuantity`).value;
+        prod.selected_unit_id = document.getElementById(`productUnit`).value;;
 
-            CART_TOKEN.set({product : prod});
-            setCartList(CART_TOKEN.get().cart);
+        CART_TOKEN.set({product : prod});
+        setCartList(CART_TOKEN.get().cart);
+
+        window.location.pathname = '/cart-list';
 	}
 
     
@@ -117,7 +119,7 @@ return(
                             <div class="row mt-4">                                
                                 <div class="ol-md-6">
                                     <label for="productQuantityproductQuantity">Quantity</label>
-                                    <input type="number" class="quantity form-control input-number" id="productQuantity" min="0" step="0.1" required />
+                                    <input type="number" class="quantity form-control input-number" defaultValue={ product.quantity } id="productQuantity" min="0" step="0.1" required />
                                 </div>
                                 <div class="col-md-6">
                                     <label for="productUnit">Unit</label>
@@ -129,7 +131,7 @@ return(
                                                     return(
                                                         Object.values(product.unit_id).map(unit_id => {
                                                             return(
-                                                                unit_id == unit.id  ? <option id={unit.id}  value={unit.id}>{unit.unit_name}</option>  : null
+                                                                unit_id == unit.id  ? <option id={unit.id}  value={unit.id}  selected={product.selected_unit_id == unit.id }>{unit.unit_name}</option>  : null
                                                             )
                                                         })
                                                     )
@@ -141,7 +143,7 @@ return(
                                     <p id="unitPackageInfo"></p>
                                 </div>
                                 <div class="col-md-12">
-                                        <p><input type="submit" value="Add to Cart" class="btn btn-primary py-3 px-4" /></p>
+                                        <p><input type="submit" value={product.selected_unit_id ?  "Update to Cart" :"Add to Cart" } class="btn btn-primary py-3 px-4" /></p>
                                 </div>
                             </div>
                     </div>
