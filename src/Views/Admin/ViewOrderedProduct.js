@@ -47,15 +47,15 @@ export default function ViewOrderedProduct() {
         }
     }
 
-    const handlePurchasedRecord = async (data) => {
+    const handlePurchasedRecord = async () => {
         setIsLoading(true);
-
-        let purchasedQuantity  = document.getElementById('purchasedQuantity-'+data.id).value;
-        let productCost  = document.getElementById('productCost-'+data.id).value;
-
-        if(purchasedQuantity !== "" && productCost!== ""){
-            try{
-                const result = await OrderAPI.handlePurchasedRecord({
+        
+        try{
+            let formData = [];
+            (orderedProductList.length > 0 ? orderedProductList : []).map(data => {
+                let purchasedQuantity  = document.getElementById('purchasedQuantity-'+data.id).value;
+                let productCost  = document.getElementById('productCost-'+data.id).value;
+                formData.push({
                     product_id : data.id,
                     purchase_date : getDate(inputs.date),
                     required_quantity : data.weight,
@@ -63,18 +63,18 @@ export default function ViewOrderedProduct() {
                     purchased_quantity : purchasedQuantity,
                     purchased_unit_id : data.main_unit_id,
                     cost : productCost,
-                    created_by : userId,
-                });
-               setIsLoading(false);
-
+                    createdBy : userId,
+                })
+            });
+            if(formData.length > 0){
+                const result = await OrderAPI.handlePurchasedRecord({formData: formData});                
                 if(result !== "" && result !== null && result !== undefined){
                     alert('Data update successfully.');
                 }
-            }catch(e){
-                console.log(e);
             }
-        }else{
-            alert('fill the fields');
+        setIsLoading(false);
+        }catch(e){
+            console.log(e);
         }
     }
 
@@ -122,7 +122,7 @@ export default function ViewOrderedProduct() {
                                                         <th>Ordered Quantity</th>
                                                         <th>Purchased Quantity</th>
                                                         <th>Cost</th>
-                                                        <th>Actions</th>
+                                                        {/* <th>Actions</th> */}
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -134,29 +134,38 @@ export default function ViewOrderedProduct() {
                                                             <td>{data.weight+ ' ' + data.unit_name}</td>
                                                             <td>
                                                                 <div class="d-flex justify-content-center">
-                                                                    <input type="number" name={"purchasedQuantity-"+data.id} class="cost-input" id={"purchasedQuantity-"+data.id} defaultValue={data.purchased_quantity}  min="1" disabled={data.purchased_status === 3} />
+                                                                    <input type="number" name={"purchasedQuantity-"+data.id} class="cost-input" id={"purchasedQuantity-"+data.id} defaultValue={data.purchased_quantity ? data.purchased_quantity : data.weight}  min="1" disabled={data.purchased_status === 3} />
                                                                     <p class="cost-input-adoptment"> {data.unit_name} </p>
                                                                 </div>
                                                             </td>
                                                             <td>
                                                                 <div class="d-flex justify-content-center">
                                                                     <p class="cost-input-adoptment"> $ </p>
-                                                                    <input type="number" name={"productCost-"+data.id} class="cost-input" id={"productCost-"+data.id} defaultValue={data.cost} min="1"  disabled={data.purchased_status === 3} />
+                                                                    <input type="number" name={"productCost-"+data.id} class="cost-input" id={"productCost-"+data.id} defaultValue={data.cost ? data.cost : data.price} min="1"  disabled={data.purchased_status === 3} />
                                                                 </div>
                                                             </td>
-                                                            <td>
+                                                            {/* <td>
                                                                 <div>
                                                                     <button class={data.purchased_status === 3 ?  "alter-purchase-record btn-disabled" : "alter-purchase-record" }type="submit" onClick={()=>{handlePurchasedRecord(data)}} disabled={data.purchased_status === 3}> Update</button>
                                                                 </div>
-                                                                </td>
+                                                                </td> */}
                                                         </tr>
                                                         )
                                                     })
                                                 }
                                                 </tbody>
                                             </table>
-                                        </div>
+                                        </div>                                        
 									</div>
+                                    <div class="row">
+                                        <div class="col-md-12 m-top">
+                                            <div class="form-group">
+                                                <div class="d-flex f-right">
+                                                <button class="btn btn-primary px-4" onClick={handlePurchasedRecord}> Update </button>
+                                                </div>
+                                            </div>
+                                        </div> 
+                                    </div> 
 								</div>
 							</div>
 						</div>

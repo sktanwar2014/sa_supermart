@@ -194,6 +194,8 @@ Order.prototype.fetchDeliveryFormData = function () {
   });
 } 
 
+
+
 Order.prototype.handlePurchasedRecord = function () {
   const that = this;
   return new Promise(function (resolve, reject) {
@@ -202,26 +204,44 @@ Order.prototype.handlePurchasedRecord = function () {
         throw error;
       }
       connection.changeUser({database : dbName});
-      connection.query(`SELECT * FROM purchase_register WHERE product_id = ${that.product_id} AND purchase_date = '${that.purchase_date}' AND is_active = 1`, function (error, rows, fields) {
-        if (error) {  console.log("Error...", error); reject(error);  }
-        if(rows.length > 0){
-          connection.query(`UPDATE purchase_register SET is_active = 0, status = 2, updated_by = ${that.createdBy},  updated_at = now() WHERE id = ${rows[0].id}`, function (error, updateResult, fields) {
-            if (error) {  console.log("Error...", error); reject(error);  }
-          });
-        }
+      
+      
+      Object.values(that.formData).map((data) => {
+
+        connection.query(`SELECT * FROM purchase_register WHERE product_id = ${data.product_id} AND purchase_date = '${data.purchase_date}' AND is_active = 1`, function (error, rows, fields) {
+          if (error) {  console.log("Error...", error); reject(error); }
+          
+          let insertValues = [data.product_id, data.purchase_date, data.required_quantity, data.required_unit_id, data.purchased_quantity, data.purchased_unit_id, data.cost, 1, 1, data.createdBy];
+          const prod = rows[0];
+          
+          if(rows.length > 0){
+            if(prod.purchased_quantity != data.purchased_quantity || prod.cost != data.cost){
+              connection.query(`UPDATE purchase_register SET is_active = 0, status = 2, updated_by = ${data.createdBy},  updated_at = now() WHERE id = ${prod.id}`, function (error, updateResult, fields) {
+                if (error) {  console.log("Error...", error); reject(error);  }
+              });
+
+              
+              connection.query(`INSERT INTO purchase_register(product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, status, is_active, created_by) VALUES (?)`, [insertValues], function (error, rows, fields) {
+                if (error) {  console.log("Error...", error); reject(error);  }
+                resolve(rows.insertId)
+              });
+            }else{
+              resolve()
+            }
+          }else{
+            connection.query(`INSERT INTO purchase_register(product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, status, is_active, created_by) VALUES (?)`, [insertValues], function (error, rows, fields) {
+              if (error) {  console.log("Error...", error); reject(error);  }
+              resolve(rows.insertId)
+            });
+          }
+        });
       });
-      let insertValues = [that.product_id, that.purchase_date, that.required_quantity, that.required_unit_id, that.purchased_quantity, that.purchased_unit_id, that.cost, 1, 1, that.createdBy]
-      connection.query(`INSERT INTO purchase_register(product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, status, is_active, created_by) VALUES (?)`, [insertValues], function (error, rows, fields) {
-        if (error) {  console.log("Error...", error); reject(error);  }
-        resolve(rows.insertId)
-      });
+      
         connection.release();
         console.log('Process Complete %d', connection.threadId);
     });
   });
 } 
-
-
 
 
 

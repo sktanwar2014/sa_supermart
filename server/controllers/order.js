@@ -207,17 +207,11 @@ const fetchDeliveryFormData = async function (req, res, next) {
     }
 }
 
-const handlePurchasedRecord = async function (req, res, next) {    
+const handlePurchasedRecord = async function (req, res, next) {
     const params = {
-        product_id : req.body.product_id,
-        purchase_date : req.body.purchase_date,
-        required_quantity : req.body.required_quantity,
-        required_unit_id : req.body.required_unit_id,
-        purchased_quantity : req.body.purchased_quantity,
-        purchased_unit_id : req.body.purchased_unit_id,
-        cost : req.body.cost,
-        createdBy : req.body.created_by,
+        formData : req.body.formData,
     }
+    
     try {
         const Model = new Order(params);
         const result = await Model.handlePurchasedRecord();
@@ -398,6 +392,7 @@ async function calculateProductTotalQuantity(products){
             weight : weight,
             main_unit_id: product.main_unit_id,
             unit_name: product.unit_name,
+            price : product.price,
         });
     })
     return returnValues;
