@@ -16,7 +16,17 @@ const login = async function (req, res, next) {
 
 
 
+const getUserList = async function (req, res, next) {
+    try {
+        const result = await new Auth({}).getUserList();
+        res.send( {userList: result} );
+    } catch (err) {
+        next(err);
+    }
+}
+
 
 module.exports = {    
-    login : login
+    login : login,
+    getUserList : getUserList,
 };

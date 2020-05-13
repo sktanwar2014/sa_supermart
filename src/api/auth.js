@@ -26,6 +26,20 @@ export default {
     }
   },
 
+  getUserList:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/auth/getUserList`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'GET' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
   addUpdateFormContent:async ({...payload }) => {
     const URL = `${c.API_CONSUMER}/api/addUpdateFormContent`;
     try {

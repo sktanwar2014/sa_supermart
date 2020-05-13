@@ -263,8 +263,8 @@ Categories.prototype.insertProductUnits = function () {
       connection.changeUser({database : dbName});
 
       (that.productUnits.length > 0 ? that.productUnits : []).map((data, index) => {
-        let Values = [that.productId, data.unitValue, data.unitIn, data.price,  data.isPacket,  data.packetWeight, data.packetUnitId, 1];
-        let Query = `INSERT INTO products_measurement(product_id, unit_value, unit_id, price, is_packet, packet_weight, packet_unit_id, is_active) VALUES(?)`;
+        let Values = [that.productId, data.unitValue, data.unitIn, data.price, (Number(data.price) / Number(data.unitValue)),  data.isPacket,  data.packetWeight, data.packetUnitId, 1];
+        let Query = `INSERT INTO products_measurement(product_id, unit_value, unit_id, price, price_per_unit, is_packet, packet_weight, packet_unit_id, is_active) VALUES(?)`;
         connection.query(Query, [Values], function (error, rows, fields) {
           if (error) {  console.log("Error...", error); reject(error);}
             resolve(rows.insertId);

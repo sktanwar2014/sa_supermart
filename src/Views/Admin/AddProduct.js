@@ -324,7 +324,7 @@ export default function AddProduct(props) {
                                                 <div class="form-group">                                                
                                                     <label for="productWeight">Weight *</label>
                                                     <div class="d-flex">  
-                                                        <input id="packetWeight" type="text" class="form-control" placeholder="" required/>
+                                                        <input id="packetWeight" type="number" class="form-control" placeholder="" required/>
                                                         <select id="packetUnitId" class="form-control" required>
                                                             <option  value = "">Select any one</option>
                                                             {(singleUnitList !== undefined && singleUnitList !== null && singleUnitList !== "") && 
@@ -342,7 +342,7 @@ export default function AddProduct(props) {
                                         <div class={showWeightFields  === 0 ? "col-md-6" : "col-md-2"}>
                                             <div class="form-group">
                                                 <label for="productPrice">Price (In $)</label>
-                                                <input id="productPrice" type="number" step="0.00" min="0" class="form-control" placeholder=""/>
+                                                <input id="productPrice" type="number" step="0.01" min="0" class="form-control" placeholder=""/>
                                             </div>
                                         </div>
                                         <div class="add-unit">

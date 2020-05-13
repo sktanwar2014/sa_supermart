@@ -1,6 +1,7 @@
 const Order = require('../models/order.js');
 const {isEmpty} = require('../utils/conditionChecker.js');
 const Static = require('../models/static.js')
+const Auth = require('../models/auth.js')
 
 const invoiceReport  = require('../reports/generateInvoice.js')
 
@@ -265,14 +266,71 @@ const getOrderedProductList = async function (req, res, next) {
     const params = {
         from_date :  req.body.from_date,
         to_date :  req.body.to_date,
+        user_ids : req.body.user_ids,
     }
     try {
         const Model = new Order(params);
+        const staticRecords = await new Static({}).getAllUnitList();
         const result = await Model.getOrderedProductList();
 
-        const calculatedResult = await calculateProductTotalQuantity(result);
+        const prodIds = [...new Set(result.map(dist => dist.product_id))];
+        const userIds = [...new Set(result.map(dist => dist.user_id))];
+        const subCategoryIdList = [...new Set(result.map(dist => dist.sub_category_id))];
+        let returnValues  = [];
+    
+        function calTotalUnit(unitList, unitId, quantity, mainSequence, mainUnitId ){
+            const currUnit = Object.values(unitList).find((unit) => {return unit.id === unitId});
+            const finalResult = unitList.map(data => {
+                if(data.id === currUnit.id){
+                    if(currUnit.sequence ===  mainSequence && unitId === mainUnitId){
+                        return  quantity;
+                    }else if(currUnit.sequence < mainSequence && currUnit.id !== mainUnitId){
+                        let newQuantity = quantity / currUnit.equal_value_of_parent;
+                        return calTotalUnit(unitList, currUnit.parent_id, newQuantity, mainSequence, mainUnitId)
+                    }else if(currUnit.sequence > mainSequence &&  currUnit.id !== mainUnitId ){
+                        const belowUnit = Object.values(unitList).find((unit) => {return unit.parent_id === currUnit.id});
+                        let newQuantity = quantity * belowUnit.equal_value_of_parent;
+                        return calTotalUnit(unitList, belowUnit.id, newQuantity, mainSequence, mainUnitId)
+                    }
+                }
+            });
+            return Object.values(finalResult).find(ele => {return (ele !== undefined && ele !== NaN && ele !== null) });
+        }
+
+    
+        prodIds.map((prodId) => {
+            const mainUnit = Object.values(result).find((prod) => { return prod.product_id === prodId})
+            const unit = Object.values(staticRecords).find((unit) => {return unit.id === mainUnit.main_unit_id});
+            const unitList = Object.values(staticRecords).filter((ele) => {return ele.group_id === unit.group_id})
+            
+            userIds.map((userId) => {
+                let weight =  0;
+                let product = {};
+                Object.values(result).map((prod) => {
+                    if(prodId === prod.product_id && userId  ===  prod.user_id){
+                        product = prod;
+                        let mainWeight =  calTotalUnit(unitList, prod.unit_id, prod.quantity, unit.sequence, mainUnit.main_unit_id);
+                        weight = weight +  mainWeight;
+                    }
+                });
+
+                if(product !== null && product !== undefined && Object.values(product).length > 0){
+                    returnValues.push({
+                        product_id : product.product_id,
+                        user_id : product.user_id,
+                        user_name : product.user_name,
+                        product_name : product.product_name,
+                        quantity : weight,
+                        unit_id: product.main_unit_id,
+                        unit_name: unit.unit_name,
+                        sub_category_id : product.sub_category_id,
+                        sub_category_name: product.sub_category_name,
+                    });
+                }
+            });
+        });
         
-        res.send({orderedProductList: calculatedResult});
+        res.send({orderedProductList: returnValues, userIdList: userIds, subCategoryIdList: subCategoryIdList });
     } catch (err) {
         next(err);
     }
@@ -342,13 +400,13 @@ async function calculateProductTotalQuantity(products){
                 let unit_id = 0;
                 let weight = 0;
                 if(prod.is_packet == 1){
-                    unit_id = prod.packet_unit_id;     weight = prod.packet_weight * prod.quantity;
+                    unit_id = prod.packet_unit_id;     weight = prod.packet_weight * prod.quantity; 
                 }else{
-                    unit_id = prod.unit_id;            weight = prod.quantity;
+                    unit_id = prod.unit_id;            weight = prod.quantity;  
                 }
 
                 if(units.length == 0){
-                    units.push({id: unit_id, weight: weight})
+                    units.push({id: unit_id, weight: weight, price: prod.price})
                 }else{
                     const found = units.find((ele) => {return ele.id == unit_id});
                     if(found){

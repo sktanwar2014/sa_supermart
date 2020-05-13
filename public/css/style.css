@@ -10824,3 +10824,8 @@ input[type="file"] {
 .m-top {
   margin-top: 20px;
 }
+
+.overflow-of-list {
+  overflow-y : scroll;
+  max-height: 400px;
+}

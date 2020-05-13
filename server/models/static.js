@@ -15,7 +15,7 @@ StaticModel.prototype.getProductUnitList = function () {
         throw error;
       }
       connection.changeUser({database : dbName});
-      connection.query(`SELECT * FROM unit_records WHERE is_active = 1`, function (error, rows, fields) {
+      connection.query(`SELECT * FROM unit_records WHERE is_active = 1 ORDER BY  group_id, sequence`, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);
       });
@@ -56,7 +56,8 @@ StaticModel.prototype.getMainUnitRelateRecords = function () {
 
       let Query = ``;
       if(that.is_bundle === 0){
-        Query = `SELECT * FROM unit_records WHERE id = ${that.id} OR parent_id = ${that.id} OR id = (SELECT parent_id FROM unit_records WHERE id = ${that.id}) OR is_bundle = 1`;
+        // Query = `SELECT * FROM unit_records WHERE id = ${that.id} OR parent_id = ${that.id} OR id = (SELECT parent_id FROM unit_records WHERE id = ${that.id}) OR is_bundle = 1`;
+        Query = `SELECT * FROM unit_records WHERE id = ${that.id} OR group_id = (SELECT group_id FROM unit_records WHERE id = ${that.id}) OR is_bundle = 1 ORDER BY sequence DESC`;
       }else if(that.is_bundle === 1){
         Query = `SELECT * FROM unit_records WHERE is_bundle = 0`;
       }
@@ -69,5 +70,31 @@ StaticModel.prototype.getMainUnitRelateRecords = function () {
     });
   });
 } 
+
+
+
+StaticModel.prototype.getAllUnitList = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+
+      let Query = `SELECT * FROM unit_records ORDER BY group_id, sequence`;
+      connection.query(Query, function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(rows);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
+
+
+
+
 
 module.exports = StaticModel;
