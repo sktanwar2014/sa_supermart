@@ -2,9 +2,10 @@ import React, {useState} from 'react';
 import Alert from 'react-bootstrap/Alert';
 
 
-export function SimpleAlert({message, variant}){
+export function SimpleAlert({message, variant, style}){
+    console.log(message,variant,style);
     return(
-        <Alert key="01" variant={variant} style={{padding:'0px', paddingLeft:'10px', marginTop:'10px'}}>
+        <Alert key="01" variant= {variant} style={style}>
             {message}
         </Alert>
     )

@@ -26,6 +26,7 @@ const AlterCategories = lazy(()=> import('./Views/Admin/AlterCategories'));
 const AlterSubCategories = lazy(()=> import('./Views/Admin/AlterSubCategories'));
 const ViewProductDetails = lazy(()=> import('./Views/Admin/ViewProductDetails'));
 const ProductDetails = lazy(()=> import('./Views/Components/CustomerViewProductDetails.js'));
+const AlterUnits = lazy(()=> import('./Views/Admin/AlterUnits.js'));
 
 
 function App() {
@@ -174,7 +175,7 @@ function App() {
                     ? <AlterCategories  {...props} />
                     : <Redirect to="/" /> 
  
-                  }}                    
+                  }}
                 />
                 <Route 
                   exact 
@@ -186,6 +187,17 @@ function App() {
                     ? <AlterSubCategories  {...props} />
                     : <Redirect to="/" /> 
  
+                  }}                    
+                />
+                <Route 
+                  exact 
+                  path="/alter-units" 
+                  render = { props => {
+                    return (!APP_TOKEN.notEmpty)
+                    ? <Redirect to="/login" />
+                    : (APP_TOKEN.isAdmin)
+                    ? <AlterUnits {...props} />
+                    : <Redirect to="/" /> 
                   }}                    
                 />
                 <Route 
@@ -206,6 +218,16 @@ function App() {
                     : <ProductDetails {...props} /> 
                   }}                    
                 />
+                 <Route 
+                  exact 
+                  path="/product-details" 
+                  render = { props => {
+                    return (!APP_TOKEN.notEmpty)
+                    ? <Redirect to="/login" />
+                    : <ProductDetails {...props} /> 
+                  }}                    
+                />
+                
                
                
                 <Route exact path="/login"  render={props =>  <Login {...props} /> } />

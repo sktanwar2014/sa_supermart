@@ -9,7 +9,7 @@ if (env === 'prod') {
   DbName = 'a1abiliti_shopping';
   domainName = 'ordernow.a1abilities.co.nz';
 } else {  
-  DbName = 'shopping'
+  DbName = 'a1abiliti_sa_supermart'
   domainName = 'localhost:5000'
 }
 

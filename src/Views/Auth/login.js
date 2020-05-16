@@ -65,7 +65,7 @@ export default function Login(props){
                                 </p> */}
                             <button type="submit" className="btn submit_btn">Log In</button>
                         </div>
-                        {isInvalideCredentials ? <SimpleAlert message="Invalide Credentials !" variant="danger" /> : ""}
+                        {isInvalideCredentials ? <SimpleAlert message="Invalide Credentials !" variant="danger" style = {{padding:'0px', paddingLeft:'10px', marginTop:'10px'}}/> : ""}
                     </form>
                     <div class="powered-by-lable"> Powered by: </div>
                     <div class="powered-by-logo-box">

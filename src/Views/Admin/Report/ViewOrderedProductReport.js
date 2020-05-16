@@ -135,7 +135,7 @@ export default function ViewOrderedProduct() {
                                                         {(userIdList.length > 0 ? userIdList : []).map(userId => {
                                                             let userName = orderedProductList.find(ele => {return ele.user_id === userId})
                                                             return(
-                                                                userName !== undefined && <th style={{minWidth:'300px'}}>{userName.user_name}</th>
+                                                                userName !== undefined && <th style={{minWidth:'150px'}}>{userName.user_name}</th>
                                                             )
                                                         })}
                                                     </tr>
@@ -153,7 +153,7 @@ export default function ViewOrderedProduct() {
                                                                             <tr>
                                                                                 {rowSpanNo !== 0 && <td rowSpan={rowSpanNo}>{sameCategoryProducts[0].sub_category_name}</td>}
                                                                                 <td>{productRecord[0].product_name}</td>
-                                                                                <td>{totalQuantity + ' ' + productRecord[0].unit_name}</td>
+                                                                                <td>{Number(totalQuantity).toFixed(3) + ' ' + productRecord[0].unit_name}</td>
                                                                                     {(userIdList.length > 0 ? userIdList : []).map((userId) => {
                                                                                         const returnValue = (productRecord.length > 0 ? productRecord :[]).find((data) => { return userId === data.user_id });
                                                                                             return(
