@@ -31,7 +31,7 @@ export default function AlterUnits(props) {
                         <div class="col-xl-12 ftco-animate fadeInUp ftco-animated">
                             <div class="row">
                                 <div class="col-md-6 col-lg-6">
-                                    <h3 class="billing-heading">Units/Measurments</h3>
+                                    <h3 class="billing-heading">Unit Setup</h3>
                                 </div>
                                 {/* <div class="col-md-6 col-lg-6" >
                                     <input type="button" class="btn btn-primary br-none f-right" onClick={()=>{addUpdateCategoriesDialog({id:'', category_name:''}, 'add')}} value="Add New" />

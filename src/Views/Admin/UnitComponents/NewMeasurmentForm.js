@@ -52,7 +52,7 @@ export default function NewMeasurmentForm({setIsLoading}) {
                     </div>
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label for="default_weight">Minimum quantity for this new unit ? *</label>
+                            <label for="default_weight">At what minimum quantity will you determine the price of the goods ? *</label>
                             <input id="default_weight" name="default_weight" type="number" step="0.01" min="1" class="form-control" value={inputs.default_weight} required onChange={handleInputChange} />
                         </div>
                     </div>
