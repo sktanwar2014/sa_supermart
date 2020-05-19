@@ -8,9 +8,10 @@ import PageLoader from './Views/Partials/Loader';
 
 
 
-const Login = lazy(()=> import('./Views/Auth/login'));
-const AdminHome = lazy(()=> import('./Views/Admin/AdminHome'));
-const Home = lazy(()=> import('./Views/Home'));
+const Login = lazy(()=> import('./Views/Auth/login.js'));
+const Signup = lazy(()=> import('./Views/Auth/signup.js'));
+const AdminHome = lazy(()=> import('./Views/Admin/AdminHome.js'));
+const Home = lazy(()=> import('./Views/Home.js'));
 const AddProduct = lazy(()=> import('./Views/Admin/AddProduct.js'));
 const ViewProduct = lazy(()=> import('./Views/Admin/ViewProduct.js'));
 const ViewOrder = lazy(()=> import('./Views/Admin/ViewOrder.js'));
@@ -21,10 +22,10 @@ const ViewOrderReport = lazy(()=> import('./Views/Admin/Report/ViewOrderReport.j
 const ViewOrderedProductReport = lazy(()=> import('./Views/Admin/Report/ViewOrderedProductReport.js'));
 const DeliveryForm = lazy(()=> import('./Views/Admin/DeliveryForm.js'));
 const ProductVerification = lazy(()=> import('./Views/Components/ProductVerification.js'));
-const ViewCustomerOrder = lazy(()=> import('./Views/Components/ViewCustomerOrder'));
-const AlterCategories = lazy(()=> import('./Views/Admin/AlterCategories'));
-const AlterSubCategories = lazy(()=> import('./Views/Admin/AlterSubCategories'));
-const ViewProductDetails = lazy(()=> import('./Views/Admin/ViewProductDetails'));
+const ViewCustomerOrder = lazy(()=> import('./Views/Components/ViewCustomerOrder.js'));
+const AlterCategories = lazy(()=> import('./Views/Admin/AlterCategories.js'));
+const AlterSubCategories = lazy(()=> import('./Views/Admin/AlterSubCategories.js'));
+const ViewProductDetails = lazy(()=> import('./Views/Admin/ViewProductDetails.js'));
 const ProductDetails = lazy(()=> import('./Views/Components/CustomerViewProductDetails.js'));
 const AlterUnits = lazy(()=> import('./Views/Admin/AlterUnits.js'));
 
@@ -231,6 +232,7 @@ function App() {
                
                
                 <Route exact path="/login"  render={props =>  <Login {...props} /> } />
+                <Route exact path="/sign-up"  render={props =>  <Signup {...props} /> } />
                 <Route exact path="/logout" render={props =>  <Redirect to="/login" /> }/>
                 
               </Switch>

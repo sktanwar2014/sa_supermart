@@ -9035,6 +9035,22 @@ h1, h2, h3, h4, h5,
     -moz-appearance: none;
     appearance: none; }
 
+.billing-form .signup-form-control {
+  border: transparent !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  background: transparent !important;
+  font-size: 13px;
+  border-radius: 0px;
+  -webkit-box-shadow: none !important;
+  box-shadow: none !important;
+  width: 100%;
+  padding: 0.375rem 0.75rem;
+  line-height: 1.5;
+  -webkit-transition: border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+  transition: border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+}
 .billing-form .form-control {
   font-weight: 300;
   border: transparent !important;
@@ -10718,6 +10734,12 @@ textarea.form-control {
   color: #20a8d8;
   font-size: 0.75rem;
   text-align: right;
+  margin-top: -20px;
+}
+
+.sign-up{
+  font-size: 0.90rem;
+  text-align: center;
 }
 
 .powered-by-logo{
@@ -10742,7 +10764,7 @@ textarea.form-control {
   font-weight: 800;
   font-size: 30px;
   text-transform: uppercase;
-  margin-bottom: 35px;
+  margin-bottom: 20px;
   color: #82ae46;
 }
 
@@ -10825,7 +10847,81 @@ input[type="file"] {
   margin-top: 20px;
 }
 
+.m-top-15 {
+  margin-top: 15px;
+}
+
 .overflow-of-list {
   overflow-y : scroll;
   max-height: 400px;
+}
+
+.signup-section {
+  display: flex;
+  flex-direction: column;
+  -webkit-box-pack: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  align-items: center;  
+  background-color: rgb(255, 255, 255);
+}
+
+.signup-container {
+  margin: 75px 0px;
+  width: 70%;
+  border: 3px solid #82ae46;
+  display: flex;
+  border-radius: 10px;
+}
+
+.signup-title-div {
+  height: 450px;
+  width: 35%;
+  background: #82ae46;
+  text-align: center;
+  padding: 25% 0;
+}
+
+
+.signup-title{
+  font-weight: 700;
+  font-size: 25px;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.signup-form-div {
+  height: 450px;
+  overflow: overlay;
+  width: 65%;
+  background: #fff;
+  border-bottom-right-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.create-account {
+  text-align: center;
+  margin: 0px;
+}
+
+.margin-top-0{
+  margin-top: 0px;
+}
+
+.m-10{
+  margin: 10px;
+}
+
+.error-msg {
+  font-size: 13px;
+  color: #d62b2b;
+  display: block;
+}
+
+.error-input {
+  border: 0px;
+  background: none;
+  font-size: 12px;
+  padding: 0px 10px;
+  color: red;  
 }

@@ -62,10 +62,15 @@ export default function Login(props){
                         <div className="login-input-div" >
                             {/* <p class="forgot-password">
                                 <a href="/forgotPassword">Forgot Password?</a>
-                                </p> */}
+                            </p> */}
                             <button type="submit" className="btn submit_btn">Log In</button>
                         </div>
                         {isInvalideCredentials ? <SimpleAlert message="Invalide Credentials !" variant="danger" style = {{padding:'0px', paddingLeft:'10px', marginTop:'10px'}}/> : ""}
+                        <div className="m-top-15">
+                            <p class="sign-up"> Don't have an account? <a href="/sign-up">Sign up</a></p>
+                            <hr />
+                        </div>
+                        
                     </form>
                     <div class="powered-by-lable"> Powered by: </div>
                     <div class="powered-by-logo-box">
