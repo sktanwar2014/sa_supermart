@@ -1,6 +1,21 @@
 const jwt = require('jsonwebtoken');
+var fs = require('fs');
+const handlebars = require('handlebars');
 
 module.exports = {
+  readHTMLFile: (path, callback) => {
+    fs.readFile(path, { encoding: 'utf-8' }, function (err, html) {
+      if (err) {
+        console.log(err)
+        throw err;        
+      }
+      else {
+        console.log('all ok');
+        callback(null, html);
+      }
+    });
+  },
+
   randomString: (length) => {
     const chars = '0123456789abcdefghijklmnopqrstuvwxyzDEFGH';
     let result = '';
