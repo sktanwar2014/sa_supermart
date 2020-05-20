@@ -15,4 +15,5 @@ function generateRandomToken(){
       text += possible.charAt(Math.floor(Math.random() * possible.length));
       return text+Math.round(+new Date()/1000);
 }
+
 module.exports={ generateAccountId:generateAccountId, generateRandomToken:generateRandomToken }

@@ -1,5 +1,5 @@
-import React, {useState, Fragment} from 'react';
-
+import React, {useState, useEffect, Fragment} from 'react';
+import axios from 'axios';
 // Components
 import {APP_TOKEN} from '../../api/config/Constants';
 import AuthAPI from '../../api/auth.js';
@@ -10,36 +10,42 @@ import CallLoader from '../../common/Loader.js';
 
 export default function Login(props){
     APP_TOKEN.remove();
+    const isTokenSource = axios.CancelToken.source();
     
     const history = props.history;
     const [inputs, setInputs] = useState({username:'', password: ''});
     const [isInvalideCredentials, setIsInvalideCredentials] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-
+    const [errorMessage, setErrorMessage] = useState('');
+    
 
     const handleChange  = (props) => {
       setInputs({...inputs, [props.target.name]: props.target.value});
       setIsInvalideCredentials(false);
     }
+    
+    // useEffect(()=>{
+    //     isTokenSource.cancel('API Cancel');
+    // },[]);
+    
  
     const handleLogin = async (e) => {
-        setIsLoading(true);
-
-        e.preventDefault();
+            e.preventDefault();
+            setIsLoading(true);
         try{
-        const result = await AuthAPI.login({
-            username: inputs.username,
-            password: inputs.password,
-        });
-        setIsLoading(false);
-            if(result.length !== undefined && result.length >0){
-                APP_TOKEN.set(result[0]);
-                history.push('/');
-            }else{
-                setIsInvalideCredentials(true);
-            }
-        }catch(e){
-            console.log('Error...',e);
+            const result = await AuthAPI.login({
+                cancelToken : isTokenSource.token,
+                username: inputs.username,
+                password: inputs.password,
+            });
+            setIsLoading(false);
+            APP_TOKEN.set(result);
+            history.push('/');
+        }catch(error){
+            const { message, errorCode } = error.response.data;
+            setErrorMessage(message);
+            setIsInvalideCredentials(true);
+            setIsLoading(false);
         }
     }
 
@@ -65,7 +71,7 @@ export default function Login(props){
                             </p> */}
                             <button type="submit" className="btn submit_btn">Log In</button>
                         </div>
-                        {isInvalideCredentials ? <SimpleAlert message="Invalide Credentials !" variant="danger" style = {{padding:'0px', paddingLeft:'10px', marginTop:'10px'}}/> : ""}
+                        {isInvalideCredentials ? <SimpleAlert message={errorMessage} variant="danger" style = {{padding:'0px', paddingLeft:'10px', marginTop:'10px'}}/> : ""}
                         <div className="m-top-15">
                             <p class="sign-up"> Don't have an account? <a href="/sign-up">Sign up</a></p>
                             <hr />

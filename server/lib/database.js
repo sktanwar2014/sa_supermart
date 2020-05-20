@@ -2,6 +2,8 @@ const env = 'local';
 
 let DbName = 'a1abiliti_shopping';
 let domainName = 'ordernow.a1abilities.co.nz';
+let mailPass = 'y&GFhE16U';
+let mailService = 'rentronics.saimrc.com'
 
 console.log('env...', env);
 
@@ -13,4 +15,4 @@ if (env === 'prod') {
   domainName = 'localhost:5000'
 }
 
-module.exports = { dbName: DbName, domainName: domainName, env: env };
+module.exports = { dbName: DbName, domainName: domainName, mailPass: mailPass, mailService: mailService, env: env };

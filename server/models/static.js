@@ -7,7 +7,7 @@ const StaticModel = function (params) {
 };
 
 
-StaticModel.prototype.getProductUnitList = function () {
+StaticModel.prototype.getProductUnitList = function () {  
   const that = this;
   return new Promise(function (resolve, reject) {
     connection.getConnection(function (error, connection) {

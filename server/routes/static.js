@@ -2,10 +2,11 @@ const express = require('express')
 const Router = express.Router();
 const Static = require('../controllers/static.js');
 
+const validateToken = require('../utils/utils.js').validateToken;
 
-Router.route("/getProductUnitList").get(Static.getProductUnitList);
-Router.route("/getOrderStatusList").get(Static.getOrderStatusList);
-Router.route("/getMainUnitRelateRecords").post(Static.getMainUnitRelateRecords);
+Router.route("/getProductUnitList").get(validateToken, Static.getProductUnitList);
+Router.route("/getOrderStatusList").get(validateToken, Static.getOrderStatusList);
+Router.route("/getMainUnitRelateRecords").post(validateToken, Static.getMainUnitRelateRecords);
 
 
 module.exports = Router;

@@ -3,7 +3,6 @@ import Alert from 'react-bootstrap/Alert';
 
 
 export function SimpleAlert({message, variant, style}){
-    console.log(message,variant,style);
     return(
         <Alert key="01" variant= {variant} style={style}>
             {message}

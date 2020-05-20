@@ -1,4 +1,6 @@
 export const validString = /^[a-zA-Z\s]+$/;
+export const validNonSpaceString = /^\S+$/;
+
 export const validNumber = /^[0-9]*$/;
 export const validDecimalNumber = /^\d{0,2}(\.\d{1,2})?$/;
 export const validFullLengthDecimalNumber = /^\d+(\.\d{1,2})?$/;

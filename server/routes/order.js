@@ -2,22 +2,23 @@ const express = require('express')
 const Router = express.Router();
 const Order = require('../controllers/order.js');
 
+const validateToken = require('../utils/utils.js').validateToken;
 
-Router.route("/getOrderList").post(Order.getOrderList);
-Router.route("/getCustomerOrderList").post(Order.getCustomerOrderList);
+Router.route("/getOrderList").post(validateToken, Order.getOrderList);
+Router.route("/getCustomerOrderList").post(validateToken, Order.getCustomerOrderList);
 
-Router.route("/addNewOrder").post(Order.addNewOrder);
-Router.route("/fetchPreviousBillingAddresss").post(Order.fetchPreviousBillingAddresss);
-Router.route("/removeSelectedAddress").post(Order.removeSelectedAddress);
-Router.route("/getOrderedProductList").post(Order.getOrderedProductList);
-Router.route("/getOrderedProductListSingleDay").post(Order.getOrderedProductListSingleDay);
-Router.route("/getOrderListOfSingleDay").post(Order.getOrderListOfSingleDay);
-Router.route("/handlePurchasedRecord").post(Order.handlePurchasedRecord);
-Router.route("/fetchDeliveryFormData").post(Order.fetchDeliveryFormData);
-Router.route("/submitDeliveryDetails").post(Order.submitDeliveryDetails);
-Router.route("/handleOrderConfirmation").post(Order.handleOrderConfirmation);
-Router.route("/orderVerificationByCustomer").post(Order.orderVerificationByCustomer);
-Router.route("/generateInvoice").post(Order.generateInvoice);
+Router.route("/addNewOrder").post(validateToken, Order.addNewOrder);
+Router.route("/fetchPreviousBillingAddresss").post(validateToken, Order.fetchPreviousBillingAddresss);
+Router.route("/removeSelectedAddress").post(validateToken, Order.removeSelectedAddress);
+Router.route("/getOrderedProductList").post(validateToken, Order.getOrderedProductList);
+Router.route("/getOrderedProductListSingleDay").post(validateToken, Order.getOrderedProductListSingleDay);
+Router.route("/getOrderListOfSingleDay").post(validateToken, Order.getOrderListOfSingleDay);
+Router.route("/handlePurchasedRecord").post(validateToken, Order.handlePurchasedRecord);
+Router.route("/fetchDeliveryFormData").post(validateToken, Order.fetchDeliveryFormData);
+Router.route("/submitDeliveryDetails").post(validateToken, Order.submitDeliveryDetails);
+Router.route("/handleOrderConfirmation").post(validateToken, Order.handleOrderConfirmation);
+Router.route("/orderVerificationByCustomer").post(validateToken, Order.orderVerificationByCustomer);
+Router.route("/generateInvoice").post(validateToken, Order.generateInvoice);
 
 
 

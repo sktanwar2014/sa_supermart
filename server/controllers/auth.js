@@ -1,19 +1,101 @@
+const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
+
 const Auth = require('../models/auth.js');
+const Miscellaneious = require('../lib/miscellaneous.js');
+const { trans } = require("../lib/mailtransporter");
+const {domainName} = require("../lib/database");
+
 
 const login = async function (req, res, next) {
     const params = {
         user_id: req.body.username,
-       password: req.body.password,
+        password: req.body.password,
     }
+    
+    let result = {};
+    let status = 200;
+
     try {
         const newActivity = new Auth(params);
-        const result = await newActivity.login();
-        res.send( result );
+        const users = await newActivity.login();
+        const user = users[0];
+        
+        if (users && users.length > 0) {
+            if (user.status === 0) {
+                status = 401;
+                result.errorCode = status;
+                result.message = `Account is not verified`;
+            }else{
+                const payload = { id: user.id, name: user.name, user_id: user.user_id, role: user.role_id, account_id : user.account_id };
+                const options = { expiresIn: '12h', issuer: 'https://sargatechnology.com' };
+                const secret = process.env.JWT_SECRET || 'secret';
+                const token = jwt.sign(payload, secret, options);
+
+                result.token = token;
+                result.status = status;
+                result.id = user.id;
+                result.name = user.name;
+                result.role_id = user.role_id;
+                result.user_id = user.user_id;
+                result.account_id = user.account_id;
+            }
+            res.status(status).send(result);
+        } else {
+            status = 401;
+            result.errorCode = status;
+            result.message = 'User id or password is incorrect.';
+            res.status(status).send(result);
+        }
     } catch (err) {
         next(err);
     }
 }
 
+
+const register = async function (req, res, next) {
+    const params = {
+        firstname : req.body.firstname,
+        lastname : req.body.lastname,
+        mobile : req.body.mobile,
+        email : req.body.email,
+        user_id : req.body.user_id,
+        password : req.body.password,
+        accountId : Miscellaneious.generateAccountId(),
+		token : Miscellaneious.generateRandomToken(),
+    }
+    
+    try {
+        const newActivity = new Auth(params);
+        const result = await newActivity.register();
+
+        if(result !== "" && result !== null && result !== undefined){           
+
+			let url = 'http://' + domainName + '/auth/activateEmail?accountId=' + params.accountId + '&name=' + params.user_id + '&token=' + params.token;
+            const mail = {
+                // from: 'admin@' + domainName,
+                //  to: 'mpurohit88@gmail.com',
+                from : 'sktanwar.2020@gmail.com',
+                to: params.email,
+                subject: 'Please verify your email address',
+                text: 'activate your account ',
+                html: '<strong><a href=' + url + '> Please click on link to ativate your account</a></strong> <br />user Id: ' + params.user_id + '<br />password: ' + params.password,
+            }
+            trans.sendMail(mail, (err, info) => {
+                if (err) {
+                    return console.log(err);
+                }
+                console.log('Message sent: %s', info.messageId);
+                console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+            });
+            res.send( {isRegistered: true} );
+        }else{
+            res.send( {isRegistered: false} );
+        }          
+    } catch (err) {
+        next(err);
+    }
+}
 
 
 const getUserList = async function (req, res, next) {
@@ -26,7 +108,59 @@ const getUserList = async function (req, res, next) {
 }
 
 
-module.exports = {    
+
+const verifyEmail = async function (req, res, next) {
+    try {
+        const result = await new Auth({email : req.body.email}).verifyEmail();
+        if(result !== "" && result.length > 0 && result !== null && result !== undefined){
+            res.send( {isExist: true} );
+        }else{
+            res.send( {isExist: false} );
+        }        
+    } catch (err) {
+        next(err);
+    }
+}
+
+
+
+const verifyUserId = async function (req, res, next) {    
+    try {
+        const result = await new Auth({user_id : req.body.user_id}).verifyUserId();
+        if(result !== "" && result.length > 0 && result !== null && result !== undefined){
+            res.send( {isExist: true} );
+        }else{
+            res.send( {isExist: false} );
+        }  
+    } catch (err) {
+        next(err);
+    }
+}
+
+const activateEmail = async function (req, res, next) {
+    const params = {
+        accountId : req.query.accountId,
+        user_id : req.query.name,
+        token : req.query.token,
+    }
+    try {
+        const activity = new Auth(params);
+        const result = await activity.activateEmail();
+        if(result !== 0){
+            res.status(200).json({ message: "You account successfully verified. Now you can login into application." });
+        }else{
+            res.status(404).json({ message: "Invalid token" })
+        }
+    } catch (err) {
+        next(err);
+    }
+}
+
+module.exports = {
     login : login,
+    register : register,
     getUserList : getUserList,
+    verifyEmail : verifyEmail,
+    verifyUserId : verifyUserId,
+    activateEmail : activateEmail, 
 };

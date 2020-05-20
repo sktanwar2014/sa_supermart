@@ -1,10 +1,10 @@
-export const API_URL = 'http://ordernow.a1abilities.co.nz/'; // Config[KEY].API_URL;
-export const AUTH_URL = 'http://ordernow.a1abilities.co.nz/'; // Config[KEY].AUTH_URL;
-export const API_CONSUMER = 'http://ordernow.a1abilities.co.nz/'; // Config[KEY].API_URL;
+// export const API_URL = 'http://ordernow.a1abilities.co.nz/'; // Config[KEY].API_URL;
+// export const AUTH_URL = 'http://ordernow.a1abilities.co.nz/'; // Config[KEY].AUTH_URL;
+// export const API_CONSUMER = 'http://ordernow.a1abilities.co.nz/'; // Config[KEY].API_URL;
 
-// export const API_URL = 'http://localhost:5000';         // Config[KEY].API_URL;
-// export const AUTH_URL = 'http://localhost:5000';        // Config[KEY].AUTH_URL;
-// export const API_CONSUMER = 'http://localhost:5000';   // Config[KEY].API_URL;
+export const API_URL = 'http://localhost:5000';         // Config[KEY].API_URL;
+export const AUTH_URL = 'http://localhost:5000';        // Config[KEY].AUTH_URL;
+export const API_CONSUMER = 'http://localhost:5000';   // Config[KEY].API_URL;
 
 export const APP_TOKEN = {
     set: ({user_id, name, token, account_id, id, role_id}) => {
@@ -13,7 +13,7 @@ export const APP_TOKEN = {
         sessionStorage.setItem('user_id', user_id);
         sessionStorage.setItem('role_id', role_id);
         sessionStorage.setItem('name', name);
-        sessionStorage.setItem('account_id', account_id);
+        // sessionStorage.setItem('account_id', account_id);
     },
     get: () => ({
         userId: sessionStorage.getItem('userId'),
@@ -21,7 +21,7 @@ export const APP_TOKEN = {
         user_id : sessionStorage.getItem('user_id'),
         role_id : sessionStorage.getItem('role_id'),
         name : sessionStorage.getItem('name'),
-        account_id: sessionStorage.getItem('account_id'),
+        // account_id: sessionStorage.getItem('account_id'),
     }),
     remove: () => {
         // sessionStorage.clear();

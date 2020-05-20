@@ -10863,11 +10863,12 @@ input[type="file"] {
   justify-content: center;
   -webkit-box-align: center;
   align-items: center;  
-  background-color: rgb(255, 255, 255);
+  background-color: ghostwhite;  
+  height: -webkit-fill-available;
 }
 
 .signup-container {
-  margin: 75px 0px;
+  /* margin: 75px 0px; */
   width: 70%;
   border: 3px solid #82ae46;
   display: flex;
@@ -10875,7 +10876,7 @@ input[type="file"] {
 }
 
 .signup-title-div {
-  height: 450px;
+  /* height: 450px; */
   width: 35%;
   background: #82ae46;
   text-align: center;
@@ -10891,8 +10892,8 @@ input[type="file"] {
 }
 
 .signup-form-div {
-  height: 450px;
-  overflow: overlay;
+  /* height: 450px; */
+  /* overflow: overlay; */
   width: 65%;
   background: #fff;
   border-bottom-right-radius: 10px;
@@ -10915,7 +10916,7 @@ input[type="file"] {
 .error-msg {
   font-size: 13px;
   color: #d62b2b;
-  display: block;
+  display: block;  
 }
 
 .error-input {
@@ -10924,4 +10925,44 @@ input[type="file"] {
   font-size: 12px;
   padding: 0px 10px;
   color: red;  
+  width: 100%;
+  font-style: italic;
+  line-height: 0px;
+}
+
+
+.icon-size {
+  width: 15px;
+  object-fit: cover;
+}
+
+.tooltip-div {
+  position: relative;
+  display: inline-block;  
+}
+
+.tooltip-div .tooltiptext {
+  visibility: hidden;
+  width: 350px;
+  background-color: black;
+  color: #fff;
+  border-radius: 6px;  
+  position: absolute;
+  z-index: 1;
+  font-size: 11px;
+  margin-left: -70px;
+  bottom: 100%;
+  font-weight: 600;
+}
+
+.tooltip-div:hover .tooltiptext {
+  visibility: visible;
+}
+
+.m-empty {
+  margin: 0;
+}
+
+.signup-section {
+
 }

@@ -10,10 +10,53 @@ const PARAMS = ({ methodType = 'GET' }) => ({
 
 export default {
 
-  
-  login:async ({...payload }) => {
+  login:async ({cancelToken, ...payload }) => {
 
     const URL = `${c.API_CONSUMER}/auth/login`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        cancelToken,
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  register:async ({...payload }) => {
+
+    const URL = `${c.API_CONSUMER}/auth/register`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
+
+  verifyEmail:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/auth/verifyEmail`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
+  verifyUserId:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/auth/verifyUserId`;
     try {
       const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
         data: payload,
@@ -39,179 +82,4 @@ export default {
       throw error;
     }
   },
-
-  addUpdateFormContent:async ({...payload }) => {
-    const URL = `${c.API_CONSUMER}/api/addUpdateFormContent`;
-    try {
-      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
-        data: payload.formData,
-      }),
-    );
-      return data;
-    } catch (error) {
-      checkError(error);
-      throw error;
-    }
-  },
-
-  getTabRelatedList:async ({...payload }) => {
-    const URL = `${c.API_CONSUMER}/api/getTabRelatedList`;
-    try {
-      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
-        data: payload,
-      }),
-    );
-      return data;
-    } catch (error) {
-      checkError(error);
-      throw error;
-    }
-  },
-
-  getContactList:async ({...payload }) => {
-    const URL = `${c.API_CONSUMER}/api/getContactList`;
-    try {
-      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'GET' }), {
-        data: payload,
-      }),
-    );
-      return data;
-    } catch (error) {
-      checkError(error);
-      throw error;
-    }
-  },
-
-  changeState:async ({...payload }) => {
-    const URL = `${c.API_CONSUMER}/api/changeState`;
-    try {
-      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
-        data: payload,
-      }),
-    );
-      return data;
-    } catch (error) {
-      checkError(error);
-      throw error;
-    }
-  },
-  
-
-
-  // submitContact:async ({...payload }) => {
-
-  //   const URL = `${c.API_CONSUMER}/api/submitContact`;
-  //   try {
-  //     const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
-  //       data: payload,
-  //     }),
-  //   );
-  //     return data;
-  //   } catch (error) {
-  //     checkError(error);
-  //     throw error;
-  //   }
-  // },
-
-  
-  // getServicesList:async ({...payload }) => {
-  //   const URL = `${c.API_CONSUMER}/api/getServicesList`;
-  //   try {
-  //     const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'GET' }), {
-  //       data: payload,
-  //     }),
-  //   );
-  //     return data;
-  //   } catch (error) {
-  //     checkError(error);
-  //     throw error;
-  //   }
-  // },
-
-//   getWyusList:async ({...payload }) => {
-//   const URL = `${c.API_CONSUMER}/api/getWhyusList`;
-//   try {
-//     const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'GET' }), {
-//       data: payload,
-//     }),
-//   );
-//     return data;
-//   } catch (error) {
-//     checkError(error);
-//     throw error;
-//   }
-// },
-
-// getAboutList:async ({...payload }) => {
-//   const URL = `${c.API_CONSUMER}/api/getAboutList`;
-//   try {
-//     const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'GET' }), {
-//       data: payload,
-//     }),
-//   );
-//     return data;
-//   } catch (error) {
-//     checkError(error);
-//     throw error;
-//   }
-// },
-
-
-
-// getGoalsList:async ({...payload }) => {
-//   const URL = `${c.API_CONSUMER}/api/getGoalsList`;
-//   try {
-//     const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'GET' }), {
-//       data: payload,
-//     }),
-//   );
-//     return data;
-//   } catch (error) {
-//     checkError(error);
-//     throw error;
-//   }
-// },
-
-// getTechnologyList:async ({...payload }) => {
-//   const URL = `${c.API_CONSUMER}/api/getTechnologyList`;
-//   try {
-//     const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'GET' }), {
-//       data: payload,
-//     }),
-//   );
-//     return data;
-//   } catch (error) {
-//     checkError(error);
-//     throw error;
-//   }
-// },
-
-// getPartnersList:async ({...payload }) => {
-//   const URL = `${c.API_CONSUMER}/api/getPartnersList`;
-//   try {
-//     const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'GET' }), {
-//       data: payload,
-//     }),
-//   );
-//     return data;
-//   } catch (error) {
-//     checkError(error);
-//     throw error;
-//   }
-// },
-
-// getPortfolioList:async ({...payload }) => {
-//   const URL = `${c.API_CONSUMER}/api/getPortfolioList`;
-//   try {
-//     const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'GET' }), {
-//       data: payload,
-//     }),
-//   );
-//     return data;
-//   } catch (error) {
-//     checkError(error);
-//     throw error;
-//   }
-// },
-
 };

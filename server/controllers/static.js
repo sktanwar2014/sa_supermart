@@ -12,7 +12,7 @@ const getProductUnitList = async function (req, res, next) {
 }
 
 
-const getOrderStatusList = async function (req, res, next) {    
+const getOrderStatusList = async function (req, res, next) {
     try {
         const StaticModel = new Static({});
         const orderStatusList = await StaticModel.getOrderStatusList();

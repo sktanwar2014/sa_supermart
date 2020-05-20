@@ -1,4 +1,4 @@
-import { validString, passwordRegex, validNumber, validFullLengthDecimalNumber, validEmail, validAlpha } from './Regex';
+import { validString, validNonSpaceString, passwordRegex, validNumber, validFullLengthDecimalNumber, validEmail, validAlpha } from './Regex';
 
 
 export default function validate(values) {
@@ -31,12 +31,18 @@ export default function validate(values) {
         errors.email = 'Email Address is missing';
     }  else if (!validEmail.test(values.email)) {
         errors.email = 'Email Address is invalid';
-    }  
+    }  else if(values.email_verification === true ){
+        errors.email = 'Email already registered';
+    }
 
 
 
     if (!values.userId) {
-        errors.userId = 'UserId is missing';
+        errors.userId = 'User id is missing';
+    }  else if(!validNonSpaceString.test(values.userId)) {
+        errors.userId = 'Invalid user id.';
+    }  else if(values.userId_verification === true ){
+        errors.userId = 'User id already exist';
     }
 
     
