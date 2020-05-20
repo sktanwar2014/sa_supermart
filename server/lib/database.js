@@ -2,9 +2,11 @@ const env = 'local';
 
 let DbName = 'a1abiliti_shopping';
 let domainName = 'ordernow.a1abilities.co.nz';
-let mailPass = 'sarga123';
-let mailUser = 'donotreply.sarga@gmail.com';
-let mailService = 'GMAIL';
+let mailPass = 'q!G#19weS';
+let mailUser = 'admin@ordernow.a1abilities.co.nz';
+let mailService = 'ordernow.a1abilities.co.nz';
+
+
 
 console.log('env...', env);
 
