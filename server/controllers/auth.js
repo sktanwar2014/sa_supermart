@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const Auth = require('../models/auth.js');
 const Miscellaneious = require('../lib/miscellaneous.js');
 const { trans } = require("../lib/mailtransporter");
-const {domainName} = require("../lib/database");
+const {domainName, mailUser} = require("../lib/database");
 
 
 const login = async function (req, res, next) {
@@ -72,10 +72,8 @@ const register = async function (req, res, next) {
         if(result !== "" && result !== null && result !== undefined){           
 
 			let url = 'http://' + domainName + '/auth/activateEmail?accountId=' + params.accountId + '&name=' + params.user_id + '&token=' + params.token;
-            const mail = {
-                // from: 'admin@' + domainName,
-                //  to: 'mpurohit88@gmail.com',
-                from : 'donotreply.sarga@gmail.com',
+            const mail = {                
+                from : mailUser,
                 to: params.email,
                 subject: 'Please verify your email address',
                 text: 'activate your account ',
@@ -91,7 +89,7 @@ const register = async function (req, res, next) {
             res.send( {isRegistered: true} );
         }else{
             res.send( {isRegistered: false} );
-        }          
+        }
     } catch (err) {
         next(err);
     }
