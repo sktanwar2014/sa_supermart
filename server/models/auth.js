@@ -67,7 +67,7 @@ Auth.prototype.getUserList = function () {
       }
 
       connection.changeUser({database : dbName});
-      connection.query(`SELECT id, name, token, account_id, role_id, user_id, is_active FROM users WHERE id != 1 `, function (error, rows, fields) { 
+      connection.query(`SELECT id, name, token, account_id, role_id, user_id, is_active FROM users WHERE id != 1 AND status = 1`, function (error, rows, fields) { 
         if (error) {  console.log("Error...", error); reject(error);  }          
         resolve(rows);
       });
