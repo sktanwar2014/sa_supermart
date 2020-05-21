@@ -88,15 +88,16 @@ const register = async function (req, res, next) {
                 const template = handlebars.compile(html);    
                 const finalHtmlPage = template(replacements);
                 
-                const mail = {
-                    from : mailUser,
+                const mailOptions = {                    
+                    from : `"SA Supermart" <${mailUser}>`,
                     to: params.email,
+                    replyTo : mailUser,
                     subject: 'Please verify your email address',
                     text: 'Hi ' + params.firstname + ', confirmation mail of SA Supermart account',
                     html: finalHtmlPage,
                 }
                 
-                trans.sendMail(mail, (err, info) => {
+                trans.sendMail(mailOptions, (err, info) => {
                     if (err) {
                         return console.log(err);
                     }

@@ -213,7 +213,7 @@ export default function BrowseProduct(props) {
 														<select className="product-cart-control"  name={'productUnit-'+data.id} id={'productUnit-'+data.id} required disabled={cart !== "" ? true : false} >
 																{(productUnitList.length > 0 ? productUnitList : [] ).map((unit)=>{
 																		return(
-																			Object.values(data.unit_id).map(unit_id => {
+																			Object.values((data.unit_id).split(',')).map(unit_id => {
 																				return(
 																					unit_id == unit.id  ? <option id={unit.id}  value={unit.id} selected={cart.selected_unit_id == unit.id }>{unit.unit_name}</option>  : null
 																				)

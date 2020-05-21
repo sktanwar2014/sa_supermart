@@ -11,6 +11,7 @@ export default function ViewProductDetails(props) {
     const [product, setProduct] = useState({});
     const [productUnitList, setProductUnitList] = useState([]);
 
+    console.log(props.location.state)
 
     useEffect(() => {        
         let product = props.location.state;
@@ -62,7 +63,7 @@ return(
                                             <select name="" id="" class="form-control">
                                                {(productUnitList.length > 0 ? productUnitList : [] ).map((unit)=>{
                                                     return(
-                                                        Object.values(product.unit_id).map(unit_id => {
+                                                        Object.values((product.unit_id).split(',')).map(unit_id => {
                                                             return(
                                                                 unit_id == unit.id  ? <option id={unit.id}  value={unit.id}>{unit.unit_name}</option>  : null
                                                             )

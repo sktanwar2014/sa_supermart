@@ -158,7 +158,7 @@ export default function CartList() {
 																	<option  value="" >Select unit</option>
 																	{(productUnitList.length > 0 ? productUnitList : [] ).map((unit)=>{
 																			return(
-																				Object.values(data.unit_id).map(unit_id => {
+																				Object.values((data.unit_id).split(',')).map(unit_id => {
 																					return(
 																						unit_id == unit.id  ? <option id={unit.id}  value={unit.id} selected={data.selected_unit_id == unit.id }>{unit.unit_name}</option>  : null
 																					)

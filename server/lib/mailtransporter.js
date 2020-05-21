@@ -1,13 +1,14 @@
 const nodemailer = require('nodemailer');
 const smtpTransport = require('nodemailer-smtp-transport');
-const { domainName, mailUser, mailPass, mailService } = require("../lib/database");
+const { mailUser, mailPass, mailService } = require("../lib/database");
 
  const mailAccountUser = mailUser;
  const mailAccountPass = mailPass;
 
  const trans = nodemailer.createTransport(smtpTransport({
   service: mailService,
-  tls: { rejectUnauthorized: false },
+  host: mailService,
+  tls: { rejectUnauthorized: true },
   auth: {
     user: mailAccountUser,
     pass: mailAccountPass

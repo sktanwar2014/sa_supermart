@@ -10,7 +10,6 @@ module.exports = {
         throw err;        
       }
       else {
-        console.log('all ok');
         callback(null, html);
       }
     });

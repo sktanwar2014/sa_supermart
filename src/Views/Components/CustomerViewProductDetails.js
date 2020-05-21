@@ -129,7 +129,7 @@ return(
                                             <select id="productUnit" class="form-control" onChange={handleUnitChange} required>
                                                {(productUnitList.length > 0 ? productUnitList : []).map((unit)=>{
                                                     return(
-                                                        Object.values(product.unit_id).map(unit_id => {
+                                                        Object.values((product.unit_id).split(',')).map(unit_id => {
                                                             return(
                                                                 unit_id == unit.id  ? <option id={unit.id}  value={unit.id}  selected={product.selected_unit_id == unit.id }>{unit.unit_name}</option>  : null
                                                             )
