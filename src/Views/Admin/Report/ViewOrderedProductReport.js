@@ -126,16 +126,16 @@ export default function ViewOrderedProduct() {
                                                 </div>
                                             </div>
                                         </div> 
-                                        <div class="w-100" style={{ maxHeight: '1500px', overflow: 'scroll'}}>
-                                            <table class="table" >
+                                        <div class="w-100 table-div">
+                                            <table class="table table-td" >
                                                 <thead class="thead-primary">
                                                     <tr class="text-center">
-                                                        <th colSpan={2} style={{minWidth:'500px'}}> Product List</th>
-                                                        <th style={{minWidth:'150px'}}>Total Quantity</th>
+                                                        <th colSpan={2} style={{minWidth:'350px'}}> Product List</th>
+                                                        <th style={{minWidth:'140px'}}>Total Quantity</th>
                                                         {(userIdList.length > 0 ? userIdList : []).map(userId => {
                                                             let userName = orderedProductList.find(ele => {return ele.user_id === userId})
                                                             return(
-                                                                userName !== undefined && <th style={{minWidth:'150px'}}>{userName.user_name}</th>
+                                                                userName !== undefined && <th style={{minWidth:'140px'}}>{userName.user_name}</th>
                                                             )
                                                         })}
                                                     </tr>

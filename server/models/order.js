@@ -208,21 +208,21 @@ Order.prototype.handlePurchasedRecord = function () {
       
       
       Object.values(that.formData).map((data) => {
-
+        console.log(data);
         connection.query(`SELECT * FROM purchase_register WHERE product_id = ${data.product_id} AND purchase_date = '${data.purchase_date}' AND is_active = 1`, function (error, rows, fields) {
           if (error) {  console.log("Error...", error); reject(error); }
           
-          let insertValues = [data.product_id, data.purchase_date, data.required_quantity, data.required_unit_id, data.purchased_quantity, data.purchased_unit_id, data.cost, 1, 1, data.createdBy];
+          let insertValues = [data.product_id, data.purchase_date, data.required_quantity, data.required_unit_id, data.purchased_quantity, data.purchased_unit_id, data.cost, data.cost_of_each, 1, 1, data.createdBy];
           const prod = rows[0];
           
           if(rows.length > 0){
-            if(prod.purchased_quantity != data.purchased_quantity || prod.cost != data.cost){
+            if(prod.purchased_quantity != data.purchased_quantity || prod.cost != data.cost || prod.cost_of_each != data.cost_of_each){
               connection.query(`UPDATE purchase_register SET is_active = 0, status = 2, updated_by = ${data.createdBy},  updated_at = now() WHERE id = ${prod.id}`, function (error, updateResult, fields) {
                 if (error) {  console.log("Error...", error); reject(error);  }
               });
 
               
-              connection.query(`INSERT INTO purchase_register(product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, status, is_active, created_by) VALUES (?)`, [insertValues], function (error, rows, fields) {
+              connection.query(`INSERT INTO purchase_register(product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, cost_of_each, status, is_active, created_by) VALUES (?)`, [insertValues], function (error, rows, fields) {
                 if (error) {  console.log("Error...", error); reject(error);  }
                 resolve(rows.insertId)
               });
@@ -230,7 +230,7 @@ Order.prototype.handlePurchasedRecord = function () {
               resolve()
             }
           }else{
-            connection.query(`INSERT INTO purchase_register(product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, status, is_active, created_by) VALUES (?)`, [insertValues], function (error, rows, fields) {
+            connection.query(`INSERT INTO purchase_register(product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, cost_of_each, status, is_active, created_by) VALUES (?)`, [insertValues], function (error, rows, fields) {
               if (error) {  console.log("Error...", error); reject(error);  }
               resolve(rows.insertId)
             });
@@ -697,7 +697,7 @@ Order.prototype.getDailyPurchaseRecords = function () {
         throw error;
       }
       connection.changeUser({database : dbName});
-      let Query = `SELECT id, product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, status, is_active FROM purchase_register WHERE is_active = 1 AND product_id IN(${that.product_id}) AND (DATE_FORMAT(purchase_date, '%Y-%m-%d')  = '${that.date}')`;
+      let Query = `SELECT id, product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, cost_of_each, status, is_active FROM purchase_register WHERE is_active = 1 AND product_id IN(${that.product_id}) AND (DATE_FORMAT(purchase_date, '%Y-%m-%d')  = '${that.date}')`;
       // console.log(Query)
       connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }

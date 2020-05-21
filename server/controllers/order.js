@@ -241,18 +241,19 @@ const getOrderedProductListSingleDay = async function (req, res, next) {
             purchaseRecord = await Model.getDailyPurchaseRecords();
         }
     
-        // console.log(calculatedResult, purchaseRecord)
             (calculatedResult.length > 0 ? calculatedResult : []).map(data => {
                const found = purchaseRecord.find(ele => {return ele.product_id === data.id})
                 if(found !== undefined && found !== null && found !== ""){
                     data.purchased_quantity = found.purchased_quantity;
                     data.purchased_unit_id = found.purchased_unit_id;
                     data.cost = found.cost;
+                    data.cost_of_each = found.cost_of_each;
                     data.purchased_status = found.status;
                 }else{
                     data.purchased_quantity = '';
                     data.purchased_unit_id = '';
                     data.cost = '';
+                    data.cost_of_each = '',
                     data.purchased_status = '';
                 }
             })
