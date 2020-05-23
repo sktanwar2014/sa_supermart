@@ -1,4 +1,5 @@
 import React, {useState, useEffect, Fragment} from 'react';
+import {Link} from 'react-router-dom';
 
 //Components
 import Header from '../Partials/Header.js';
@@ -10,8 +11,6 @@ import StaticAPI from '../../api/static.js';
 export default function ViewProductDetails(props) {
     const [product, setProduct] = useState({});
     const [productUnitList, setProductUnitList] = useState([]);
-
-    console.log(props.location.state)
 
     useEffect(() => {        
         let product = props.location.state;
@@ -76,7 +75,7 @@ return(
                                     </div>
                                 </div>
                             </div>
-                        <p><a href="#" class="btn btn-black py-3 px-5">Edit</a></p>
+                		<p><Link class="btn btn-black py-3 px-5" to={{pathname: '/edit-product', state:{productId: product.id}}}>Edit</Link></p>
                     </div>
                 </div>
             </div>

@@ -36,7 +36,20 @@ export default {
     }
   },
 
-  
+  getSingleProductData:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/categories/getSingleProductData`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+ 
   
   getAllMainCategories:async () => {
     const URL = `${c.API_CONSUMER}/categories/getAllMainCategories`;
@@ -196,6 +209,20 @@ export default {
 
   insertNewProduct:async ({...payload }) => {
     const URL = `${c.API_CONSUMER}/categories/insertNewProduct`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
+  updateProduct:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/categories/updateProduct`;
     try {
       const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
         data: payload,

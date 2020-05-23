@@ -1,5 +1,5 @@
 const Categories = require('../models/categories.js');
-const {isEmpty} = require('../utils/conditionChecker.js');
+const {isNotEmpty} = require('../utils/conditionChecker.js');
 const {uploadDocument} = require('../utils/uploadDocument.js');
 
 const getCategoryList = async function (req, res, next) {    
@@ -96,6 +96,23 @@ const getProductList = async function (req, res, next) {
 
 
 
+const getSingleProductData = async function (req, res, next) {    
+    const params = {
+        productId : req.body.productId,
+    }
+    try {
+        const defModal = new Categories(params);
+        const productData = await defModal.getSingleProductData();
+        const units = await defModal.unitsOfProduct();
+        const images = await defModal.imagesOfProduct();
+        res.send({ productData: productData, units : units, images: images});
+    } catch (err) {
+        next(err);
+    }
+}
+
+
+
 const getProductUnderMainCategory = async function (req, res, next) {
     const params = {
         mainCategoryId : req.body.mainCategoryId,
@@ -122,6 +139,48 @@ const getSubCategoryList = async function (req, res, next) {
     }
 }
 
+
+
+
+
+const updateProduct = async function (req, res, next) {
+    // console.log(req.body);
+    const params = {
+        productId : req.body.productId,
+        productName : req.body.productName,
+        description : req.body.description,
+        productUnits : req.body.productUnits,
+        imageId : req.body.imageId,
+        picType : req.body.picType,
+        documentName : '',
+    };
+    try {
+        const defineModal = new Categories(params);
+
+        if(params.picType === 1 && params.document !== ""){
+            const base64Data = req.body.document.data.split(';base64,').pop();
+            let name = req.body.document.name.split('.')[0] + "_" + Date.now() + '.' + req.body.document.name.split('.')[1];
+        
+            await uploadDocument(`./files/productImages/${name}`, base64Data).catch(error => {
+                console.error(error);
+                throw (error);
+            });
+            defineModal.documentName = name;
+            await defineModal.uploadProductImage();
+        }else if(params.picType === 2 && params.imageId !== 0){
+            await defineModal.changeProductImage();
+        }
+    
+        if(params.productUnits.length > 0){
+            await defineModal.updateProductUnits();
+        }
+        
+        const result = await defineModal.updateProduct();
+        res.send(isNotEmpty(result));
+    } catch (err) {
+        next(err);
+    }
+}
 
 
 
@@ -158,18 +217,11 @@ const insertNewProduct = async function (req, res, next) {
             const unitsInsertId = await defineModal.insertProductUnits();
         }
         
-
-        if(isEmpty(productInsertId)){
-            res.send(true);
-        }else{
-            res.send(false);
-        }
-        
+        res.send(isNotEmpty(productInsertId));
     } catch (err) {
         next(err);
     }
 }
-
 
 
 
@@ -279,8 +331,10 @@ module.exports = {
     handleCategoryActivation: handleCategoryActivation,
     handleSubCategoryActivation: handleSubCategoryActivation,
     getProductList : getProductList,
+    getSingleProductData : getSingleProductData,
     getSubCategoryList : getSubCategoryList,
     insertNewProduct : insertNewProduct,
+    updateProduct : updateProduct,
 
     getProductUnderMainCategory : getProductUnderMainCategory,
     

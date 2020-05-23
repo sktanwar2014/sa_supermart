@@ -13,6 +13,7 @@ const Signup = lazy(()=> import('./Views/Auth/signup.js'));
 const AdminHome = lazy(()=> import('./Views/Admin/AdminHome.js'));
 const Home = lazy(()=> import('./Views/Home.js'));
 const AddProduct = lazy(()=> import('./Views/Admin/AddProduct.js'));
+const EditProduct = lazy(()=> import('./Views/Admin/EditProduct.js'));
 const ViewProduct = lazy(()=> import('./Views/Admin/ViewProduct.js'));
 const ViewOrder = lazy(()=> import('./Views/Admin/ViewOrder.js'));
 const ViewOrderedProduct = lazy(()=> import('./Views/Admin/ViewOrderedProduct.js'));
@@ -176,6 +177,17 @@ function App() {
                     ? <AlterCategories  {...props} />
                     : <Redirect to="/" /> 
  
+                  }}
+                />
+                <Route 
+                  exact 
+                  path="/edit-product" 
+                  render = { props => {
+                    return (!APP_TOKEN.notEmpty)
+                    ? <Redirect to="/login" />
+                    : (APP_TOKEN.isAdmin)
+                    ? <EditProduct  {...props} />
+                    : <Redirect to="/" /> 
                   }}
                 />
                 <Route 

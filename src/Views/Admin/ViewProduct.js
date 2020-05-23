@@ -173,7 +173,9 @@ export default function ViewProduct() {
 												<div class="row">
 													<div class="col-md-12 col-lg-6 b-right-light">
 														<div class="category-menu">
-															<button type="button" >Edit</button>
+															<button type="button" >
+																<Link to={{pathname: '/edit-product', state:{productId: data.id}}}>Edit</Link>
+															</button>
 														</div>
 													</div>
 													<div class="col-md-12 col-lg-6">

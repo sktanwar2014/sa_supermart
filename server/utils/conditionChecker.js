@@ -1,5 +1,5 @@
-function isEmpty(data){
+function isNotEmpty(data){
     return (data !==  null && data !== undefined && data !== "")
 }
 
-module.exports = {isEmpty}
+module.exports = {isNotEmpty}
