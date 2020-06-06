@@ -51,27 +51,55 @@ export const CART_TOKEN = {
     set: ({product}) => {
         let prev = sessionStorage.getItem('cart');
         if(prev !== null && prev !== ""){
-            let obj = JSON.parse(prev);
-            let filtered = obj.filter(ele => ele.id !== product.id)            
-            filtered.push(product);
-            sessionStorage.setItem('cart', JSON.stringify(filtered));
+            let obj = JSON.parse(prev);            
+            
+            let userCart = obj.filter(ele =>  Number(ele.user_id) === Number(APP_TOKEN.get().userId));
+            if(userCart){
+                let index = obj.findIndex(ele => ele.id === product.id && ele.user_id == APP_TOKEN.get().userId);
+                if(index >= 0){
+                    const updatedCart = Object.assign([], obj, {[index]: product});
+                    sessionStorage.setItem('cart', JSON.stringify(updatedCart));
+                }else{
+                    obj.push(product);
+                    sessionStorage.setItem('cart', JSON.stringify(obj));
+                }
+            }else{
+                obj.push(product);
+                sessionStorage.setItem('cart', JSON.stringify(obj));
+            }
         }else{
             sessionStorage.setItem('cart', JSON.stringify([product]));            
-        }            
+        }
     },
     get: () => ({
-        cartTotal: sessionStorage.getItem('cart') !== null && sessionStorage.getItem('cart') !== "" ? JSON.parse(sessionStorage.getItem('cart')).length : 0,
-        cart: sessionStorage.getItem('cart') !== null && sessionStorage.getItem('cart') !== "" ? JSON.parse(sessionStorage.getItem('cart')) : [],
+        cartTotal:
+                    sessionStorage.getItem('cart') !== null 
+                &&  sessionStorage.getItem('cart') !== "" 
+                ?   JSON.parse(sessionStorage.getItem('cart')).filter(ele => Number(ele.user_id) === Number(APP_TOKEN.get().userId)).length
+                : 0,
+        cart:
+                    sessionStorage.getItem('cart') !== null 
+                &&  sessionStorage.getItem('cart') !== "" 
+                ?   JSON.parse(sessionStorage.getItem('cart')).filter(ele => Number(ele.user_id) === Number(APP_TOKEN.get().userId))
+                : [],
     }),
+
     removeProduct:({productId}) => {
         let prev = sessionStorage.getItem('cart');
         if(prev !== null && prev !== ""){
-            let obj = JSON.parse(prev);
-            let filtered = obj.filter(ele => ele.id !== productId)            
-            sessionStorage.setItem('cart', JSON.stringify(filtered));
+            let obj = JSON.parse(prev);            
+            let index = obj.findIndex(ele => ele.id == productId && ele.user_id == APP_TOKEN.get().userId);
+            obj.splice(index,1);            
+            sessionStorage.setItem('cart', JSON.stringify(obj));
         }
     },
     removeCart: () =>{
-        sessionStorage.removeItem('cart');
+        // sessionStorage.removeItem('cart');
+        let prev = sessionStorage.getItem('cart');
+        if(prev !== null && prev !== ""){
+            let obj = JSON.parse(prev);            
+            let filtered = obj.filter(ele => ele.user_id != APP_TOKEN.get().userId);
+            sessionStorage.setItem('cart', JSON.stringify(filtered));
+        }
     }
 }

@@ -1,5 +1,5 @@
 const Order = require('../models/order.js');
-const {isEmpty} = require('../utils/conditionChecker.js');
+const {isNotEmpty} = require('../utils/conditionChecker.js');
 const Static = require('../models/static.js')
 const Auth = require('../models/auth.js')
 
@@ -115,8 +115,9 @@ const addNewOrder = async function (req, res, next) {
     }
     try {
         const Model = new Order(params);
-        
-        if(!isEmpty(params.shipping_id)){
+        console.log(params.shipping_id)
+        console.log(isNotEmpty(params.shipping_id))
+        if(!isNotEmpty(params.shipping_id)){
             const shippingId = await Model.insertShippingDetails();
             Model.shipping_id = shippingId;
         }else{

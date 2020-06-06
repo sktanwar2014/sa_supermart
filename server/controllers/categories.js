@@ -216,7 +216,6 @@ const insertNewProduct = async function (req, res, next) {
         if(params.productUnits.length > 0){
             const unitsInsertId = await defineModal.insertProductUnits();
         }
-        
         res.send(isNotEmpty(productInsertId));
     } catch (err) {
         next(err);
