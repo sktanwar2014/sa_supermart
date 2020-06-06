@@ -1,6 +1,6 @@
 import React, {useState, useEffect, Fragment} from 'react';
 import $ from "jquery";
-
+import { Link } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import Pagination from '@material-ui/lab/Pagination';
 
@@ -11,7 +11,7 @@ import Footer from '../Partials/Footer.js';
 import CategoriesAPI from '../../api/categories.js';
 import CallLoader from '../../common/Loader.js';
 import {API_URL} from '../../api/config/Constants.js';
-import { Link } from 'react-router-dom';
+import {isNotEmpty} from '../../utils/conditionChecker.js';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -49,13 +49,29 @@ export default function ViewProduct() {
         }catch(e){
             console.log('Error...',e);
         }
-    }
+	}
 	
-	const getProductList = async (categoryId = 0, subCategoryId=0, page=1) => {
+	const handleProTypeChange = (e) => {
+		let isActive = e.target.value;
+		let categoryId = document.getElementById('categoryDropDown').value;
+		let subCategoryId = document.getElementById('subCategoryDropDown').value;
+		
+		categoryId = isNotEmpty(categoryId) ? categoryId : 0;
+		subCategoryId = isNotEmpty(subCategoryId) ? subCategoryId : 0;
+		setPageNo(1);
+		getProductList(categoryId, subCategoryId, 1, isActive);
+	}
+	
+	const getProductList = async (categoryId = 0, subCategoryId=0, page=1, isActive=1) => {
         setIsLoading(true);
 
         try{
-            const result = await CategoriesAPI.getProductList({categoryId: categoryId, subCategoryId: subCategoryId, pageNo: page});
+            const result = await CategoriesAPI.getProductList({
+				categoryId: categoryId, 
+				subCategoryId: subCategoryId, 
+				pageNo: page,
+				is_active : isActive,
+			});
 			setProductsList(result.productList);
 			setPageCount(result.productListCount);
 			setIsLoading(false);
@@ -68,6 +84,7 @@ export default function ViewProduct() {
         setIsLoading(true);
 		setPageNo(1);
 		let id = document.getElementById('categoryDropDown').value;
+		let type = document.getElementById('productType').value;
         if(id !== '' && id !== undefined && id !== null){
             try{
                 const result = await CategoriesAPI.getSubCategoryList({categoryId: id});
@@ -77,27 +94,51 @@ export default function ViewProduct() {
             }catch(e){
                 console.log('Error...',e);
 			}
-			getProductList(id, 0);
+			getProductList(id, 0, 1, type);
         }else{
 			setSubCategory([]);
-			getProductList();
+			getProductList(0, 0, 1, type);
 		}
     }
 
 	const getProductUnderSubCategoryList = async (id) => {	
         let categoryId = document.getElementById('categoryDropDown').value;		
 		let subCategoryId = document.getElementById('subCategoryDropDown').value;
+		let type = document.getElementById('productType').value;
         if(subCategoryId !== '' && subCategoryId !== undefined && subCategoryId !== null){
-			setPageNo(1);	
-			getProductList(categoryId, subCategoryId);
+			setPageNo(1);
+			getProductList(categoryId, subCategoryId, 1, type);
 		}
 	}
 
 	const handlePagination = (event, page) => {
 		let categoryId = document.getElementById('categoryDropDown').value;
 		let subCategoryId = document.getElementById('subCategoryDropDown').value;
+		let type = document.getElementById('productType').value;
 		setPageNo(page);
-		getProductList(categoryId, subCategoryId, page);
+		getProductList(categoryId, subCategoryId, page, type);
+	}
+
+	const handleArchiveProduct = async (product) => {		
+		setIsLoading(true);
+		setPageNo(1);
+		let type = document.getElementById('productType').value;
+		let categoryId = document.getElementById('categoryDropDown').value;
+		let subCategoryId = document.getElementById('subCategoryDropDown').value;
+		
+		categoryId = isNotEmpty(categoryId) ? categoryId : 0;
+		subCategoryId = isNotEmpty(subCategoryId) ? subCategoryId : 0;		
+		
+        try{
+            const result = await CategoriesAPI.handleArchiveProduct({
+				productId: product.id,
+				is_active: product.is_active,
+			});
+			getProductList(categoryId, subCategoryId, 1, type);
+			setIsLoading(false);
+        }catch(e){
+            console.log('Error...',e);
+        }
 	}
 
     return(
@@ -119,7 +160,18 @@ export default function ViewProduct() {
                         <div class="col-xl-12 ftco-animate fadeInUp ftco-animated">
                             <div class="p-5 bg-light b-top-dark">
                                     <div class="row align-items-end">
-                                        <div class="col-md-6">
+										<div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="country">Product Type * </label>
+                                                <div class="d-flex">
+                                                    <select id="productType" class="form-control" onChange={handleProTypeChange}>
+														<option id="productType-1" value="1" >Active Product</option>
+                                                        <option id="productType-0" value="0" >Archived</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div> 
+                                        <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="country">Category * </label>
                                                 <div class="d-flex">
@@ -136,7 +188,7 @@ export default function ViewProduct() {
                                                 </div>
                                             </div>
                                         </div>   
-                                        <div class="col-md-6">
+                                        <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="country">Sub Category * </label>
                                                 <div class="d-flex">
@@ -171,17 +223,27 @@ export default function ViewProduct() {
 												<h3><a>{data.product_name}</a></h3>
 												<hr />
 												<div class="row">
-													<div class="col-md-12 col-lg-6 b-right-light">
+													<div class="col-md-12 col-lg-4 b-right-light">
 														<div class="category-menu">
 															<button type="button" >
 																<Link to={{pathname: '/edit-product', state:{productId: data.id}}}>Edit</Link>
 															</button>
 														</div>
 													</div>
-													<div class="col-md-12 col-lg-6">
+													<div class="col-md-12 col-lg-4 b-right-light">
+														<div class="category-menu">
+															<button type="button" onClick={() => {handleArchiveProduct(data)}}>
+																{/* Remove */}
+																<Link>
+																	{data.is_active === 1 ? 'Remove' : 'Reactive'}
+																</Link>
+															</button>
+														</div>
+													</div>
+													<div class="col-md-12 col-lg-4">
 														<div class="category-menu">
 															<button type="button" >
-																<Link to={{pathname: '/view-product-details', state:{productDetails: data}}}>View Details</Link>
+																<Link to={{pathname: '/view-product-details', state:{productDetails: data}}}>View</Link>
 															</button>
 														</div>
 													</div>

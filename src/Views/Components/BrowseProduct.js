@@ -66,12 +66,17 @@ export default function BrowseProduct(props) {
         }
     }
 	
-	const getProductList = async (categoryId = 0, subCategoryId=0, page=1) => {
+	const getProductList = async (categoryId = 0, subCategoryId=0, page=1, isActive=1) => {
 		setProductsList([]);
         setIsLoading(true);
 
         try{
-            const result = await CategoriesAPI.getProductList({categoryId: categoryId, subCategoryId: subCategoryId, pageNo: page});
+            const result = await CategoriesAPI.getProductList({
+				categoryId: categoryId, 
+				subCategoryId: subCategoryId, 
+				pageNo: page,
+				is_active: isActive,
+			});
 			setProductsList(result.productList);
 			setPageCount(result.productListCount);
       		setIsLoading(false);

@@ -132,7 +132,7 @@ module.exports = function generateInvoice(params) {
                         [
                           
                           { text: 'Order ID: ' + shipping.order_id, style: styles.invoiceDetail, }, 
-                          { text: 'Order Date: ' + getDateInDDMMYYYY(shipping.director_name), style: styles.invoiceDetail, }, 
+                          { text: 'Order Date: ' + getDateInDDMMYYYY(shipping.order_date), style: styles.invoiceDetail, }, 
                           { text: 'Delivery Date: ' + getDateInDDMMYYYY(shipping.delivery_date), style: styles.invoiceDetail, }, 
                         ]
                       ]

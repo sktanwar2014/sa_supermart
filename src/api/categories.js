@@ -120,6 +120,20 @@ export default {
     }
   },
 
+  handleArchiveProduct:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/categories/handleArchiveProduct`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
   addNewCategory:async ({...payload }) => {
     const URL = `${c.API_CONSUMER}/categories/addNewCategory`;
     try {

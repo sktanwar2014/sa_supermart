@@ -82,6 +82,7 @@ const getProductList = async function (req, res, next) {
         categoryId : Number(req.body.categoryId),
         subCategoryId : Number(req.body.subCategoryId),
         pageNo : Number(req.body.pageNo),
+        isActive : Number(req.body.is_active),
     }
     try {
         const defModal = new Categories(params);
@@ -89,6 +90,23 @@ const getProductList = async function (req, res, next) {
         const productListCount = await defModal.getProductListCount();
         
         res.send({ productList: productList, productListCount: productListCount.length});
+    } catch (err) {
+        next(err);
+    }
+}
+
+
+
+const handleArchiveProduct = async function (req, res, next) {    
+    const params = {
+        productId : Number(req.body.productId),
+        isActive : Number(req.body.is_active) === 1 ? 0 : 1,
+    }
+    try {
+        const defModal = new Categories(params);
+        const result = await defModal.handleArchiveProduct();
+        
+        res.send(result);
     } catch (err) {
         next(err);
     }
@@ -330,6 +348,7 @@ module.exports = {
     handleCategoryActivation: handleCategoryActivation,
     handleSubCategoryActivation: handleSubCategoryActivation,
     getProductList : getProductList,
+    handleArchiveProduct: handleArchiveProduct,
     getSingleProductData : getSingleProductData,
     getSubCategoryList : getSubCategoryList,
     insertNewProduct : insertNewProduct,

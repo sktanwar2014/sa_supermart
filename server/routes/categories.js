@@ -10,6 +10,8 @@ Router.route("/getAllMainCategories").get(validateToken, Categories.getAllMainCa
 Router.route("/getAllSubCategories").post(validateToken, Categories.getAllSubCategories);
 
 Router.route("/getProductList").post(validateToken, Categories.getProductList);
+Router.route("/handleArchiveProduct").post(validateToken, Categories.handleArchiveProduct);
+
 Router.route("/getSingleProductData").post(validateToken, Categories.getSingleProductData);
 Router.route("/handleCategoryActivation").post(validateToken, Categories.handleCategoryActivation);
 Router.route("/handleSubCategoryActivation").post(validateToken, Categories.handleSubCategoryActivation);
