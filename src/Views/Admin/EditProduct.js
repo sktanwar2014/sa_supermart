@@ -521,7 +521,7 @@ export default function AddProduct(props) {
                                             <div class="form-group">
                                                 <div class="field" align="left">
                                                     <label for="productImage">Click to upload new image for product *</label>
-                                                    <input type="file" class="form-control" id="productImage" name="productImage" accept=".png, .jpg, .jpeg" onChange={handleFileChange} required={preImages.length === 0}/>
+                                                    <input type="file" class="form-control" id="productImage" name="productImage" accept=".png, .jpg, .jpeg" onChange={handleFileChange}  />
                                                 </div>
                                             </div>
                                             <span>

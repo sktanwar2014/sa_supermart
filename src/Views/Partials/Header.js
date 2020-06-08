@@ -71,6 +71,7 @@ export default function Header() {
                             <div className="dropdown-menu" aria-labelledby="dropdown04">
                                 <a className="dropdown-item" href="/alter-categories">Categories</a>
                                 <a className="dropdown-item" href="/alter-units">Units</a>
+                                <a className="dropdown-item" href="/handle-clients">Clients</a>
                             </div>
                         </li>
                         <li className="nav-item"><a href="/logout" className="nav-link">Logout</a></li> 

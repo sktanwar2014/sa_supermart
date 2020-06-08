@@ -204,14 +204,16 @@ const updateProduct = async function (req, res, next) {
 
 
 const insertNewProduct = async function (req, res, next) {
-    // console.log(req.body);
-    const base64Data = req.body.document.data.split(';base64,').pop();
-    const name = req.body.document.name.split('.')[0] + "_" + Date.now() + '.' + req.body.document.name.split('.')[1];
+    let docName = '';
+    if(req.body.document !== ""){
+        const base64Data = req.body.document.data.split(';base64,').pop();
+        docName = req.body.document.name.split('.')[0] + "_" + Date.now() + '.' + req.body.document.name.split('.')[1];
 
-    await uploadDocument(`./files/productImages/${name}`, base64Data).catch(error => {
-        console.error(error);
-        throw (error);
-    });
+        await uploadDocument(`./files/productImages/${docName}`, base64Data).catch(error => {
+            console.error(error);
+            throw (error);
+        });
+    }
 
     const params = {
         categoryId : Number(req.body.categoryId),
@@ -221,7 +223,7 @@ const insertNewProduct = async function (req, res, next) {
         createdBy : Number(req.body.createdBy),
         productUnits : req.body.productUnits,
         mainUnitId : Number(req.body.mainUnitId),
-        documentName : name,
+        documentName : docName,
     };
 
     try {
@@ -229,8 +231,10 @@ const insertNewProduct = async function (req, res, next) {
         const productInsertId = await defineModal.insertNewProduct();
         defineModal.productId = productInsertId;
         
-        await defineModal.uploadProductImage();
-
+        if(req.body.document !== ""){
+            await defineModal.uploadProductImage();
+        }
+        
         if(params.productUnits.length > 0){
             const unitsInsertId = await defineModal.insertProductUnits();
         }

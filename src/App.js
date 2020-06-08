@@ -29,6 +29,7 @@ const AlterSubCategories = lazy(()=> import('./Views/Admin/AlterSubCategories.js
 const ViewProductDetails = lazy(()=> import('./Views/Admin/ViewProductDetails.js'));
 const ProductDetails = lazy(()=> import('./Views/Components/CustomerViewProductDetails.js'));
 const AlterUnits = lazy(()=> import('./Views/Admin/AlterUnits.js'));
+const ClientsList = lazy(()=> import('./Views/Admin/ClientsList.js'));
 
 
 function App() {
@@ -99,6 +100,17 @@ function App() {
                     : (APP_TOKEN.isAdmin)
                     ? <ViewProduct {...props} />
                     : <Redirect to="/" /> 
+                  }}                    
+                />
+                 <Route 
+                  exact 
+                  path="/handle-clients" 
+                  render = { props => {
+                    return (!APP_TOKEN.notEmpty)
+                    ? <Redirect to="/login" />
+                    : (APP_TOKEN.isAdmin)
+                    ? <ClientsList {...props} />
+                    : <Redirect to="/" />
                   }}                    
                 />
                 <Route 

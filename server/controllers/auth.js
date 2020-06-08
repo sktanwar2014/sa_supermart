@@ -25,10 +25,14 @@ const login = async function (req, res, next) {
         const user = users[0];
         
         if (users && users.length > 0) {
-            if (user.status === 0) {
+            if(user.is_mail_verified === 0 && user.status === 0){
                 status = 401;
                 result.errorCode = status;
-                result.message = `Account is not verified`;
+                result.message = `Account is not verified, check your email.`;
+            } else if (user.status === 0) {
+                status = 401;
+                result.errorCode = status;
+                result.message = `Account is not activate, please contact to administrator.`;
             }else{
                 const payload = { id: user.id, name: user.name, user_id: user.user_id, role: user.role_id, account_id : user.account_id };
                 const options = { expiresIn: '12h', issuer: 'https://sargatechnology.com' };
@@ -93,7 +97,7 @@ const register = async function (req, res, next) {
                     to: params.email,
                     replyTo : mailUser,
                     subject: 'Please verify your email address',
-                    text: 'Hi ' + params.firstname + ', confirmation mail of SA Supermart account',
+                    text: 'Hi ' + params.firstname + ', click to verify mail',
                     html: finalHtmlPage,
                 }
                 
@@ -125,6 +129,21 @@ const getUserList = async function (req, res, next) {
     }
 }
 
+
+const getClientList = async function (req, res, next) {
+    const params = {
+        pageNo : Number(req.body.pageNo),
+        // isActive : Number(req.body.is_active),
+    }
+    try {
+        const result = await new Auth(params).getClientList();
+        const counts = await new Auth(params).getTotalClientsCount();
+        
+        res.send( {clientList: result, totalCount: counts[0].total_client } );
+    } catch (err) {
+        next(err);
+    }
+}
 
 
 const verifyEmail = async function (req, res, next) {
@@ -165,7 +184,7 @@ const activateEmail = async function (req, res, next) {
         const activity = new Auth(params);
         const result = await activity.activateEmail();
         if(result !== 0){
-            res.status(200).json({ message: "You account successfully verified. Now you can login into application." });
+            res.status(200).json({ message: "You email successfully verified. Now you can login into application." });
         }else{
             res.status(404).json({ message: "Invalid token" })
         }
@@ -181,4 +200,5 @@ module.exports = {
     verifyEmail : verifyEmail,
     verifyUserId : verifyUserId,
     activateEmail : activateEmail, 
+    getClientList : getClientList,
 };

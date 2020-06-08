@@ -180,7 +180,7 @@ export default function AddProduct(props) {
     }
 
     const handleSubmit = async (e) => {
-        
+        console.log(document.getElementById('productImage').files[0])
 //         var selectedFile = this.files[0];
 // var idxDot = selectedFile.name.lastIndexOf(".") + 1;
 // var extFile = selectedFile.name.substr(idxDot, selectedFile.name.length).toLowerCase();
@@ -194,6 +194,7 @@ export default function AddProduct(props) {
             if(e.target.name === "mainForm"){
                 if(productUnitBio.length > 0){
                     setIsLoading(true);
+                    let doc = document.getElementById('productImage').files[0];
                     const data = {
                         categoryId : document.getElementById('categoryDropDown').value,
                         subCategoryId : document.getElementById('subCategoryDropDown').value,
@@ -202,7 +203,7 @@ export default function AddProduct(props) {
                         createdBy :  APP_TOKEN.get().userId,
                         productUnits : productUnitBio,
                         mainUnitId : document.getElementById('productMainUnit').value,
-                        document : await FileReaders.toBase64(document.getElementById('productImage').files[0]),
+                        document : doc ? await FileReaders.toBase64(doc) : '',
                     };
 
                     const result = await CategoriesAPI.insertNewProduct(data);
@@ -391,7 +392,7 @@ export default function AddProduct(props) {
                                             <div class="form-group">
                                                 <div class="field" align="left">
                                                     <label for="productImage">Upload product image *</label>
-                                                    <input type="file" class="form-control" id="productImage" name="productImage" accept=".png, .jpg, .jpeg" onChange={handleFileChange} required/>
+                                                    <input type="file" class="form-control" id="productImage" name="productImage" accept=".png, .jpg, .jpeg" onChange={handleFileChange} />
                                                 </div>
                                             </div>
                                             <span>
