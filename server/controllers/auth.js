@@ -146,6 +146,25 @@ const getClientList = async function (req, res, next) {
 }
 
 
+
+const handleClientActivation = async function (req, res, next) {
+    const params = {
+        user_id : req.body.user_id,
+        status : req.body.status === 1 ? 0 : 1,
+    }
+    try {
+        const result = await new Auth(params).handleClientActivation();
+        if(result !== 0){
+            res.send(true);
+        }else{
+            res.send(false);
+        }        
+    } catch (err) {
+        next(err);
+    }
+}
+
+
 const verifyEmail = async function (req, res, next) {
     try {
         const result = await new Auth({email : req.body.email}).verifyEmail();
@@ -201,4 +220,5 @@ module.exports = {
     verifyUserId : verifyUserId,
     activateEmail : activateEmail, 
     getClientList : getClientList,
+    handleClientActivation : handleClientActivation,
 };

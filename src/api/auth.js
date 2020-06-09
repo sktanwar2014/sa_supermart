@@ -97,5 +97,19 @@ export default {
     }
   },
 
+  handleClientActivation:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/auth/handleClientActivation`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
 
 };

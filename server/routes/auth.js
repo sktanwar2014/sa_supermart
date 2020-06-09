@@ -13,6 +13,7 @@ Router.route("/verifyUserId").post(AUthController.verifyUserId);
 
 Router.route("/getUserList").get(validateToken, AUthController.getUserList);
 Router.route("/getClientList").post(validateToken, AUthController.getClientList);
+Router.route("/handleClientActivation").post(validateToken, AUthController.handleClientActivation);
 
 
 

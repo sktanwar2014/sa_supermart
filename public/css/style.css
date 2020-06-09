@@ -10983,3 +10983,13 @@ input[type="file"] {
   padding: 5px 10px;
   border: 1px solid rgba(0, 0, 0, 0.05) !important;
 } 
+
+.action-btn {
+  background: none!important;
+  border: none;
+  font-family: arial, sans-serif;
+  /* color: #82ae46; */
+  cursor: pointer;
+  outline: none;
+  font-weight: 300;
+}

@@ -11,6 +11,8 @@ const Auth = function (params) {
   this.token = params.token;
   this.accountId = params.accountId;
   this.pageNo = params.pageNo;
+  this.isActive = params.isActive;
+  this.status = params.status;
 };
 
 
@@ -86,9 +88,8 @@ Auth.prototype.getClientList = function () {
   return new Promise(function (resolve, reject) {
     connection.getConnection(function (error, connection) {
       if (error) { throw error; }
-
       connection.changeUser({database : dbName});
-      connection.query(`SELECT u.id, u.name, u.user_id, u.is_mail_verified, u.status, u.is_active, u.created_at, p.email, p.mobile FROM users as u INNER JOIN profile as p ON p.user_id = u.id WHERE u.id != 1 LIMIT ${((that.pageNo * 20) - 20)},20 `, function (error, rows, fields) { 
+      connection.query(`SELECT u.id, u.name, u.user_id, u.is_mail_verified, u.status, u.is_active, u.created_at, p.email, p.mobile FROM users as u INNER JOIN profile as p ON p.user_id = u.id WHERE u.id != 1 ORDER BY u.id DESC LIMIT ${((that.pageNo * 20) - 20)},20 `, function (error, rows, fields) { 
         if (error) {  console.log("Error...", error); reject(error);  }          
         resolve(rows);
       });
@@ -179,5 +180,23 @@ Auth.prototype.activateEmail = function () {
 }
 
 
+Auth.prototype.handleClientActivation = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+
+      connection.changeUser({database : dbName});
+      connection.query(`UPDATE users SET status = ${that.status} WHERE id = ${that.user_id}`, function (error, rows, fields) { 
+        if (error) {  console.log("Error...", error); reject(error);  }        
+        resolve(rows.changedRows);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+}
 
 module.exports = Auth;
