@@ -57,6 +57,18 @@ export default function ClientsList() {
         }
     }
 
+    const handleMailBoxClose = (result) => {
+        setShowAlert(true);
+        if(result.isRegistered === true){
+            alertParams.message = "Activation link sent on your registered email. Please confirm your account to login."; 
+            alertParams.variant = "info";            
+        }else{
+            alertParams.message = "Operation failed."; 
+            alertParams.variant = "warning";
+        }
+        window.scrollTo(0,0);
+        setShowEmailDialog(false);
+    }
     
     const handleClientActivation = async (data) => {
         setIsLoading(true);
@@ -184,7 +196,7 @@ export default function ClientsList() {
 		<Footer />
         {isLoading ?   <CallLoader />   : null  }
         {openYesNoDialog ? <YesNoDialog open={openYesNoDialog} handleClose = {handleYesNoDialogClose} props = {yesNoDialogParams} /> : null }
-        {showEmailDialog ? <ResendMailDialog open={showEmailDialog} setShowEmailDialog = {setShowEmailDialog} clientData ={clientData} /> : null }
+        {showEmailDialog ? <ResendMailDialog open={showEmailDialog} setShowEmailDialog = {setShowEmailDialog} handleMailBoxClose={handleMailBoxClose} clientData ={clientData} setIsLoading={setIsLoading} /> : null }
 	</Fragment>
     )
 }

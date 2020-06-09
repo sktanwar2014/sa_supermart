@@ -4,7 +4,7 @@ import {Modal, Button} from 'react-bootstrap';
 import { validEmail} from '../../../common/Validation/Regex.js';
 import AuthAPI from '../../../api/auth.js';
 
-export default function ResendMailDialog({open, setShowEmailDialog, clientData}) {
+export default function ResendMailDialog({open, setShowEmailDialog, handleMailBoxClose, clientData, setIsLoading}) {
     
     const [email, setEmail] = useState(clientData.email);
     const [errors, setErrors] = useState({email:''});
@@ -12,16 +12,17 @@ export default function ResendMailDialog({open, setShowEmailDialog, clientData})
     
 
     const handleMailAvaibility = async () => {
+        setIsLoading(true);
+        setIsVerified(0);
         try{
-            setIsVerified(0);
-            if(email === clientData.email){
-                setErrors({...errors, ['email']: ''});
-                setIsVerified(1);
-            }else if (!email) {
+            if (!email) {
                 setErrors({...errors, ['email']: 'Email Address is missing'});
             } else if (!validEmail.test(email)) {
                 setErrors({...errors, ['email']: 'Email Address is invalid'});
-            } else {
+            } else if(email === clientData.email){
+                setErrors({...errors, ['email']: ''});
+                setIsVerified(1);
+            }else {
                 setErrors({...errors, ['email']: ''});
                 const result = await AuthAPI.verifyEmail({email : email});
                 if(result.isExist === true){
@@ -30,19 +31,22 @@ export default function ResendMailDialog({open, setShowEmailDialog, clientData})
                     setIsVerified(1);
                 }
             }
+            setIsLoading(false);
         }catch(e){
             console.log("Error...", e);
         }
     }
 
     const handleResendMailLink = async () => {
+        setIsLoading(true);
         try{
             const result = await AuthAPI.resendEmailVarificationLink({
                 email : email,
                 user_id : clientData.id,
-            });
+            });            
             setIsVerified(0);
-            console.log(result);
+            setIsLoading(false);
+            handleMailBoxClose(result);
         }catch(e){
             console.log("Error...", e);
         }

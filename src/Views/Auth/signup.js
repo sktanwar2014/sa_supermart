@@ -106,7 +106,7 @@ export default function Login(props){
                 if(result.isRegistered === true){
                     setInputs(RESET_VALUES);
                     setShowRegisteredMsg(true);
-                }                
+                }
                 setIsLoading(false);
                 setIsSubmitting(false);
             }catch(e){
