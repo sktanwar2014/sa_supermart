@@ -12,6 +12,7 @@ import CallLoader from '../../common/Loader.js';
 
 import {getDateInDDMMYYYY, getDate} from '../../common/moment.js';
 import YesNoDialog from '../../common/YesNoDialog.js';
+import ResendMailDialog from './Components/ResendMailDialog.js';
 import {SimpleAlert} from '../../common/Alert.js'
 
 
@@ -23,6 +24,7 @@ const RESET_VALUES = {
 export default function ClientsList() {
 
     const [clientList, setClientList] = useState([]);
+    const [clientData, setClientData] = useState({});
     const [pageNo, setPageNo] = useState(1);
     const [pageCount, setPageCount] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +32,8 @@ export default function ClientsList() {
     const [yesNoDialogParams, setYesNoDialogParams] = useState({title: '', body: '', data: {}});
     const [alertParams, setAlertParams] = useState({message:'', variant: 'success', style: {}});
     const [showAlert, setShowAlert] = useState(false);
-
+    const [showEmailDialog, setShowEmailDialog] = useState(false);
+    
 
     useEffect(()=>{
 		getClientList();
@@ -92,6 +95,11 @@ export default function ClientsList() {
         }
     }
 
+    const handleResendMailDialogOpen = (data) => {
+        setClientData(data);
+        setShowEmailDialog(true);
+    }
+
     return(
 		<Fragment>
 			<Header />
@@ -110,6 +118,7 @@ export default function ClientsList() {
                                                         <th style={{minWidth : '50px'}}>#</th>
                                                         <th style={{minWidth : '200px'}}>Name</th>
                                                         <th style={{minWidth : '200px'}}>User Id</th>
+                                                        <th style={{minWidth : '150px'}}>Password</th>
                                                         <th style={{minWidth : '300px'}}>Email</th>
                                                         <th style={{minWidth : '180px'}}>Mobile</th>
                                                         <th style={{minWidth : '120px'}}>Status</th>
@@ -124,6 +133,7 @@ export default function ClientsList() {
                                                             <td>{(pageNo * 20) - 20 + index + 1}</td>
                                                             <td>{data.name}</td>
                                                             <td>{data.user_id}</td>
+                                                            <td>{data.password}</td>
                                                             <td>{data.email}
                                                                 {(data.is_mail_verified === 1)
                                                                     ?   <span class="ion-ios-checkmark-circle" style={{color: '#82ae46', fontSize: '17px', margin: '5px'}}></span>
@@ -146,9 +156,11 @@ export default function ClientsList() {
                                                                                 <a class="dropdown-item"  onClick={() => {handleYesNoOpen(data)}} style={{cursor: 'pointer'}}>
                                                                                     {data.status === 0 ? "Active" : "Deactive"}
                                                                                 </a>
-                                                                                <a class="dropdown-item"  style={{cursor: 'pointer'}}>
-                                                                                    Resend Verification E-mail
-                                                                                </a>
+                                                                                {data.is_mail_verified !== 1 &&
+                                                                                    <a class="dropdown-item"  style={{cursor: 'pointer'}} onClick={() => {handleResendMailDialogOpen(data)}}>
+                                                                                        Resend Verification E-mail
+                                                                                    </a>
+                                                                                }
                                                                             </div>
                                                                     </li>
                                                                 </ul>
@@ -172,6 +184,7 @@ export default function ClientsList() {
 		<Footer />
         {isLoading ?   <CallLoader />   : null  }
         {openYesNoDialog ? <YesNoDialog open={openYesNoDialog} handleClose = {handleYesNoDialogClose} props = {yesNoDialogParams} /> : null }
+        {showEmailDialog ? <ResendMailDialog open={showEmailDialog} setShowEmailDialog = {setShowEmailDialog} clientData ={clientData} /> : null }
 	</Fragment>
     )
 }

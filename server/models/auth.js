@@ -60,6 +60,29 @@ Auth.prototype.register = function () {
 } 
 
 
+Auth.prototype.resendEmailVarificationLink = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) { throw error; }
+
+      connection.changeUser({database : dbName});
+      connection.query(`UPDATE users as u INNER JOIN profile as p ON p.user_id = u.id SET u.token = '${that.token}', p.email = '${that.email}' WHERE u.id = ${that.user_id}`, function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        connection.query(`SELECT name as firstname, token, account_id, user_id, AES_DECRYPT(password, 'secret') as password FROM users WHERE id = ${that.user_id}`, function (error, user, fields) {
+          if (error) {  console.log("Error...", error); reject(error);  }
+          let data = user[0];
+              let pass = data.password.toString('utf8');
+              data.password = pass;
+          resolve(data);
+        });
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
+
 
 Auth.prototype.getUserList = function () {
   const that = this;
@@ -89,9 +112,15 @@ Auth.prototype.getClientList = function () {
     connection.getConnection(function (error, connection) {
       if (error) { throw error; }
       connection.changeUser({database : dbName});
-      connection.query(`SELECT u.id, u.name, u.user_id, u.is_mail_verified, u.status, u.is_active, u.created_at, p.email, p.mobile FROM users as u INNER JOIN profile as p ON p.user_id = u.id WHERE u.id != 1 ORDER BY u.id DESC LIMIT ${((that.pageNo * 20) - 20)},20 `, function (error, rows, fields) { 
-        if (error) {  console.log("Error...", error); reject(error);  }          
-        resolve(rows);
+      connection.query(`SELECT u.id, u.name, u.user_id, AES_DECRYPT(u.password, 'secret') as password, u.is_mail_verified, u.status, u.is_active, u.created_at, p.email, p.mobile FROM users as u INNER JOIN profile as p ON p.user_id = u.id WHERE u.id != 1 ORDER BY u.id DESC LIMIT ${((that.pageNo * 20) - 20)},20 `, function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        let datas = [];
+        (rows && rows.length > 0 ? rows : []).map(data =>{
+          let pass = data.password.toString('utf8');
+          data.password = pass;
+          datas.push(data);
+        });
+        resolve(datas);
       });
         connection.release();
         console.log('Process Complete %d', connection.threadId);

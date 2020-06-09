@@ -47,7 +47,7 @@ export default function Login(props){
         const email = e.target.value;        
         try{
             if (!email) {
-                setErrors({...errors, ['email']: 'Email Address is missing'});            
+                setErrors({...errors, ['email']: 'Email Address is missing'}); 
             }  else if (!validEmail.test(email)) {
                 setErrors({...errors, ['email']: 'Email Address is invalid'});
             }else {

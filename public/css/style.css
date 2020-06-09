@@ -10993,3 +10993,13 @@ input[type="file"] {
   outline: none;
   font-weight: 300;
 }
+
+.check-avaibility {
+  float: right;
+  background: none!important;
+  border: none;
+  font-family: arial, sans-serif;
+  color: #82ae46;
+  cursor: pointer;    
+  outline: none;
+}

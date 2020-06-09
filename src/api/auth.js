@@ -111,5 +111,18 @@ export default {
     }
   },
 
+  resendEmailVarificationLink:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/auth/resendEmailVarificationLink`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
 
 };

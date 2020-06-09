@@ -8,7 +8,7 @@ const Auth = require('../models/auth.js');
 const Miscellaneious = require('../lib/miscellaneous.js');
 const { trans } = require("../lib/mailtransporter");
 const {domainName, mailUser} = require("../lib/database");
-
+const {isNotEmpty} = require('../utils/conditionChecker.js');
 
 const login = async function (req, res, next) {
     const params = {
@@ -165,6 +165,57 @@ const handleClientActivation = async function (req, res, next) {
 }
 
 
+
+const resendEmailVarificationLink = async function (req, res, next) {
+    const params = {
+        email : req.body.email,
+        user_id : req.body.user_id,
+        token : Miscellaneious.generateRandomToken(),
+    }
+    try {
+        const result = await new Auth(params).resendEmailVarificationLink();
+        let data = result;
+        if(isNotEmpty(result)){
+            let url = 'http://' + domainName + '/auth/activateEmail?accountId=' + data.account_id + '&name=' + data.user_id + '&token=' + data.token;
+            let filePath = path.join(__dirname, '..', '/templates/accountVerificatoin.html');
+
+            const replacements = {
+                username: data.firstname,
+                userid : data.user_id,
+                password : data.password,
+                activationLink : url,
+            };
+
+            readHTMLFile(filePath, (err, html) => {
+                const template = handlebars.compile(html);    
+                const finalHtmlPage = template(replacements);
+                
+                const mailOptions = {                    
+                    from : `"SA Supermart" <${mailUser}>`,
+                    to: params.email,
+                    replyTo : mailUser,
+                    subject: 'Please verify your email address',
+                    text: 'Hi ' + data.firstname + ', click to verify mail',
+                    html: finalHtmlPage,
+                }
+                
+                trans.sendMail(mailOptions, (err, info) => {
+                    if (err) {
+                        return console.log(err);
+                    }
+                    console.log('Message sent: %s', info.messageId);
+                    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+                });
+            });
+            res.send( {isRegistered: true} );
+        }else{
+            res.send( {isRegistered: false} );
+        }
+    } catch (err) {
+        next(err);
+    }
+}
+
 const verifyEmail = async function (req, res, next) {
     try {
         const result = await new Auth({email : req.body.email}).verifyEmail();
@@ -221,4 +272,5 @@ module.exports = {
     activateEmail : activateEmail, 
     getClientList : getClientList,
     handleClientActivation : handleClientActivation,
+    resendEmailVarificationLink : resendEmailVarificationLink,
 };
