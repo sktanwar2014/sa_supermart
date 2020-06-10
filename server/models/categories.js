@@ -258,8 +258,15 @@ Categories.prototype.getSubCategoryList = function () {
       if (error) {
         throw error;
       }
+      let Query = ``;
+      if(that.categoryId){
+        Query = `SELECT * FROM categories WHERE type = 2 AND parent_id = ${that.categoryId} AND is_active = 1 ORDER BY category_name`;
+      }else{
+        Query = `SELECT * FROM categories WHERE type = 2 AND is_active = 1 ORDER BY  parent_id, category_name`;
+      }
+
       connection.changeUser({database : dbName});
-      connection.query(`SELECT * FROM categories WHERE type = 2 AND parent_id = ${that.categoryId} AND is_active = 1 ORDER BY category_name` , function (error, rows, fields) {
+      connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);
       });

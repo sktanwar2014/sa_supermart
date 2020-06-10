@@ -274,7 +274,7 @@ const getOrderedProductList = async function (req, res, next) {
         const Model = new Order(params);
         const staticRecords = await new Static({}).getAllUnitList();
         const result = await Model.getOrderedProductList();
-
+        
         const prodIds = [...new Set(result.map(dist => dist.product_id))];
         const userIds = [...new Set(result.map(dist => dist.user_id))];
         const subCategoryIdList = [...new Set(result.map(dist => dist.sub_category_id))];
@@ -321,6 +321,9 @@ const getOrderedProductList = async function (req, res, next) {
                         product_id : product.product_id,
                         user_id : product.user_id,
                         user_name : product.user_name,
+                        ordered_unit_id : product.ordered_unit_id,
+                        ordered_unit_name : product.ordered_unit_name,
+                        ordered_quantity : product.ordered_quantity,
                         product_name : product.product_name,
                         quantity : weight,
                         unit_id: product.main_unit_id,

@@ -78,6 +78,7 @@ export default function ViewOrderedProduct() {
                 to_date : getDate(inputs.toDate),
                 user_ids : isCheckedAll === true ? 0 : userIdsToFetch,
             });
+            console.log('result',result);
             setOrderedProductList(result.orderedProductList);
             setUserIdList(result.userIdList);
             setSubCategoryIdList(result.subCategoryIdList);
@@ -135,7 +136,7 @@ export default function ViewOrderedProduct() {
                                                         {(userIdList.length > 0 ? userIdList : []).map(userId => {
                                                             let userName = orderedProductList.find(ele => {return ele.user_id === userId})
                                                             return(
-                                                                userName !== undefined && <th style={{minWidth:'140px'}}>{userName.user_name}</th>
+                                                                userName !== undefined && <th style={{minWidth:'170px'}}>{userName.user_name}</th>
                                                             )
                                                         })}
                                                     </tr>
@@ -156,10 +157,34 @@ export default function ViewOrderedProduct() {
                                                                                 <td>{Number(totalQuantity).toFixed(3) + ' ' + productRecord[0].unit_name}</td>
                                                                                     {(userIdList.length > 0 ? userIdList : []).map((userId) => {
                                                                                         const returnValue = (productRecord.length > 0 ? productRecord :[]).find((data) => { return userId === data.user_id });
+                                                                                        let orderedUnits = returnValue !== undefined ? ((returnValue.ordered_unit_id).toString().split(',')) : [];
                                                                                             return(
                                                                                                 returnValue !== undefined ? 
-                                                                                                    <td>{returnValue.quantity + ' ' + returnValue.unit_name}</td>
-                                                                                                :   <td>0</td> 
+                                                                                                    <td>                                                                                                        
+                                                                                                        <table className="w-100">
+                                                                                                            {(orderedUnits.length > 0 ? orderedUnits : []).map((unitId, index) => {
+                                                                                                                return(
+                                                                                                                    <tr>
+                                                                                                                        <td>
+                                                                                                                            {(returnValue.ordered_quantity).toString().split(',')[index]}
+                                                                                                                        </td>
+                                                                                                                        <td>
+                                                                                                                            {(returnValue.ordered_unit_name).toString().split(',')[index]}
+                                                                                                                        </td>
+                                                                                                                    </tr> 
+                                                                                                                )
+                                                                                                            })}
+                                                                                                            {
+                                                                                                                <tr>
+                                                                                                                    <td>Total</td>
+                                                                                                                    <td>
+                                                                                                                        {returnValue.quantity + ' ' + returnValue.unit_name}
+                                                                                                                    </td>
+                                                                                                                </tr> 
+                                                                                                            }
+                                                                                                        </table>                                                                                                        
+                                                                                                    </td>
+                                                                                                :   <td>-</td> 
                                                                                             )
                                                                                     })}
                                                                                     {<p style={{display:'none'}}> {rowSpanNo = 0}</p>}

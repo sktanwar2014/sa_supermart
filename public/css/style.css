@@ -11003,3 +11003,13 @@ input[type="file"] {
   cursor: pointer;    
   outline: none;
 }
+
+
+.prev-next-btn{
+  background: none!important;
+  border: none;
+  font-family: arial, sans-serif;
+  cursor: pointer;    
+  outline: none;
+  font-size: 12px;
+}

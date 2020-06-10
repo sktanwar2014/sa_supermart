@@ -33,13 +33,18 @@ export default function ViewProduct() {
 	const [pageCount, setPageCount] = useState(0);
 	const [pageNo, setPageNo] = useState(1);
 	
+	
+	const [prevDisable, setPrevDisable] = useState(false);
+	const [nextDisable, setNextDisable] = useState(false);
     
 	const [isLoading, setIsLoading] = useState(false);
 	
 	
     useEffect(()=>{
 		getCategoryList();
+		getSubCategoryList();
 		getProductList();
+		disableFun();
     },[]);
 
     const getCategoryList = async () => {
@@ -49,6 +54,23 @@ export default function ViewProduct() {
         }catch(e){
             console.log('Error...',e);
         }
+	}
+	
+	const getSubCategoryList = async () => {
+        setIsLoading(true);
+		setPageNo(1);
+		setSubCategory([]);
+		let id = document.getElementById('categoryDropDown').value;
+		let type = document.getElementById('productType').value;
+		try{
+			const result = await CategoriesAPI.getSubCategoryList({categoryId: id});
+			setSubCategory(result.subCategoriesList);
+			setIsLoading(false);
+		}catch(e){
+			console.log('Error...',e);
+		}
+		getProductList(id, 0, 1, type);
+		disableFun();
 	}
 	
 	const handleProTypeChange = (e) => {
@@ -80,35 +102,18 @@ export default function ViewProduct() {
         }
 	}
 
-	const getSubCategoryList = async () => {
-        setIsLoading(true);
-		setPageNo(1);
-		let id = document.getElementById('categoryDropDown').value;
-		let type = document.getElementById('productType').value;
-        if(id !== '' && id !== undefined && id !== null){
-            try{
-                const result = await CategoriesAPI.getSubCategoryList({categoryId: id});
-				setSubCategory(result.subCategoriesList);
-				setIsLoading(false);
-				
-            }catch(e){
-                console.log('Error...',e);
-			}
-			getProductList(id, 0, 1, type);
-        }else{
-			setSubCategory([]);
-			getProductList(0, 0, 1, type);
-		}
-    }
+	
 
-	const getProductUnderSubCategoryList = async (id) => {	
+	const getProductUnderSubCategoryList = async () => {
         let categoryId = document.getElementById('categoryDropDown').value;		
 		let subCategoryId = document.getElementById('subCategoryDropDown').value;
 		let type = document.getElementById('productType').value;
-        if(subCategoryId !== '' && subCategoryId !== undefined && subCategoryId !== null){
+		
+        if(isNotEmpty(subCategoryId)){
 			setPageNo(1);
 			getProductList(categoryId, subCategoryId, 1, type);
 		}
+		disableFun();
 	}
 
 	const handlePagination = (event, page) => {
@@ -139,6 +144,42 @@ export default function ViewProduct() {
         }catch(e){
             console.log('Error...',e);
         }
+	}
+
+	const prevCategory = () => {				
+		let select = document.getElementById('subCategoryDropDown');
+		--select.selectedIndex;
+		if((select.selectedIndex) > 0){
+			getProductUnderSubCategoryList();
+		}else{
+			select.selectedIndex = 1;			
+		}
+		disableFun();
+	}
+
+	const nextCategory = () => {		
+		let select = document.getElementById('subCategoryDropDown');
+		++select.selectedIndex;
+		if((select.selectedIndex) > 0){
+			getProductUnderSubCategoryList();
+		}else{
+			select.selectedIndex = select.options.length - 1;			
+		}
+		disableFun();
+	}
+
+	const disableFun = () => {
+		let select = document.getElementById('subCategoryDropDown');
+		if((select.selectedIndex + 1) === select.options.length){			
+			setNextDisable(true);
+		}else {
+			setNextDisable(false);
+		}
+		if(select.selectedIndex <= 1){
+			setPrevDisable(true);
+		}else{
+			setPrevDisable(false);
+		}
 	}
 
     return(
@@ -177,7 +218,7 @@ export default function ViewProduct() {
                                                 <div class="d-flex">
                                                     <select id="categoryDropDown" class="form-control" onChange={getSubCategoryList}>
                                                         <option  value = "">All</option>
-                                                        {(categoryList !== undefined && categoryList !== null && categoryList !== "") && 
+                                                        {(isNotEmpty(categoryList)) && 
                                                          (categoryList.length > 0 ? categoryList : [] ).map((data, index)=>{
                                                             return(
                                                                 <option id={data.id} value={data.id} >{data.category_name}</option>
@@ -194,10 +235,13 @@ export default function ViewProduct() {
                                                 <div class="d-flex">
                                                     <select id="subCategoryDropDown" class="form-control"  onChange={getProductUnderSubCategoryList}>
                                                         <option  value = "">Select Any One</option>
-                                                        {(subCategory !== undefined && subCategory !== null && subCategory !== "") && 
+                                                        {(isNotEmpty(subCategory)) && 
                                                          (subCategory.length > 0 ? subCategory : [] ).map((data, index)=>{
+															let category = (categoryList.length > 0) ? categoryList.find(ele => ele.id === data.parent_id) : {category_name : ''};
                                                             return(
-                                                                <option id={data.id} value={data.id} >{data.category_name}</option>
+                                                                <option id={data.id} value={data.id} >
+																	{category.category_name + " - " + data.category_name}
+																</option>
                                                             )
                                                          })
                                                         }
@@ -255,7 +299,17 @@ export default function ViewProduct() {
 							})}
 						</div>
 						<div  className="row" style={{ justifyContent: 'center'}}>
+							<button 
+								className="prev-next-btn"
+								onClick={prevCategory}	
+								disabled = {prevDisable}
+							> Prev Category </button>
 							<Pagination count={Math.ceil(pageCount/20)} page={pageNo} showFirstButton showLastButton onChange={handlePagination} />
+							<button 
+								className="prev-next-btn" 
+								onClick={nextCategory}
+								disabled = {nextDisable}
+							> Next Category </button>
 						</div>
 				</div>
    			</section>

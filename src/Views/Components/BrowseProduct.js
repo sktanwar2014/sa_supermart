@@ -5,6 +5,7 @@ import Pagination from '@material-ui/lab/Pagination';
 //Components 
 import CategoriesAPI from '../../api/categories.js';
 import StaticAPI from '../../api/static.js';
+import {isNotEmpty} from '../../utils/conditionChecker.js';
 
 import {CART_TOKEN, APP_TOKEN} from '../../api/config/Constants.js';
 import Footer from '../Partials/Footer.js';
@@ -39,12 +40,18 @@ export default function BrowseProduct(props) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [pageCount, setPageCount] = useState(0);
 	const [pageNo, setPageNo] = useState(1);
+	
+	const [prevDisable, setPrevDisable] = useState(false);
+	const [nextDisable, setNextDisable] = useState(false);
 
+	
     useEffect(()=>{
 		setCartList(CART_TOKEN.get().cart);
 		getProductUnitList();
 		getCategoryList();
+		getSubCategoryList();
 		getProductList();
+		disableFun();
 	},[]);
 	
 	
@@ -89,30 +96,28 @@ export default function BrowseProduct(props) {
 	const getSubCategoryList = async () => {
 		setIsLoading(true);
 		setPageNo(1);
-        let id = document.getElementById('categoryDropDown').value;
-        if(id !== '' && id !== undefined && id !== null){
-            try{
-                const result = await CategoriesAPI.getSubCategoryList({categoryId: id});
-				setSubCategory(result.subCategoriesList);
-				setIsLoading(false);
-				
-            }catch(e){
-                console.log('Error...',e);
-			}
-			getProductList(id, 0);
-        }else{
-			setSubCategory([]);
-			getProductList();
+		setSubCategory([]);
+        let id = document.getElementById('categoryDropDown').value;        
+		try{
+			const result = await CategoriesAPI.getSubCategoryList({categoryId: id});
+			setSubCategory(result.subCategoriesList);
+			setIsLoading(false);
+			
+		}catch(e){
+			console.log('Error...',e);
 		}
+		getProductList(id, 0);
+		disableFun();
 	}
 	
-	const getProductUnderSubCategoryList = async (id) => {
+	const getProductUnderSubCategoryList = async () => {
         let categoryId = document.getElementById('categoryDropDown').value;
 		let subCategoryId = document.getElementById('subCategoryDropDown').value;
-        if(subCategoryId !== '' && subCategoryId !== undefined && subCategoryId !== null){
+        if(isNotEmpty(subCategoryId)){
 			setPageNo(1);	
 			getProductList(categoryId, subCategoryId);
 		}
+		disableFun();
 	}
 
 	const handlePagination = (event, page) => {
@@ -136,6 +141,45 @@ export default function BrowseProduct(props) {
 		CART_TOKEN.set({product : product});
 		setCartList(CART_TOKEN.get().cart);
 	}
+
+
+	
+	const prevCategory = () => {				
+		let select = document.getElementById('subCategoryDropDown');
+		--select.selectedIndex;
+		if((select.selectedIndex) > 0){
+			getProductUnderSubCategoryList();
+		}else{
+			select.selectedIndex = 1;			
+		}
+		disableFun();
+	}
+
+	const nextCategory = () => {		
+		let select = document.getElementById('subCategoryDropDown');
+		++select.selectedIndex;
+		if((select.selectedIndex) > 0){
+			getProductUnderSubCategoryList();
+		}else{
+			select.selectedIndex = select.options.length - 1;			
+		}
+		disableFun();
+	}
+
+	const disableFun = () => {
+		let select = document.getElementById('subCategoryDropDown');
+		if((select.selectedIndex + 1) === select.options.length){			
+			setNextDisable(true);
+		}else {
+			setNextDisable(false);
+		}
+		if(select.selectedIndex <= 1){
+			setPrevDisable(true);
+		}else{
+			setPrevDisable(false);
+		}
+	}
+
 
     return(
 		<Fragment>
@@ -180,13 +224,16 @@ export default function BrowseProduct(props) {
 												<div class="d-flex">
 													<select id="subCategoryDropDown" class="form-control"  onChange={getProductUnderSubCategoryList}>
 														<option  value = "">Select Any One</option>
-														{(subCategory !== undefined && subCategory !== null && subCategory !== "") && 
-															(subCategory.length > 0 ? subCategory : [] ).map((data, index)=>{
-															return(
-																<option id={data.id} value={data.id} >{data.category_name}</option>
-															)
-															})
-														}
+														{(isNotEmpty(subCategory)) && 
+                                                         (subCategory.length > 0 ? subCategory : [] ).map((data, index)=>{
+															let category = (categoryList.length > 0) ? categoryList.find(ele => ele.id === data.parent_id) : {category_name : ''};
+                                                            return(
+                                                                <option id={data.id} value={data.id} >
+																	{category.category_name + " - " + data.category_name}
+																</option>
+                                                            )
+                                                         })
+                                                        }
 													</select>
 												</div>
 											</div>
@@ -244,7 +291,17 @@ export default function BrowseProduct(props) {
 							})}
 						</div>
 						<div  className="row" style={{ justifyContent: 'center'}}>
+							<button 
+								className="prev-next-btn"
+								onClick={prevCategory}	
+								disabled = {prevDisable}
+							> Prev Category </button>
 							<Pagination count={Math.ceil(pageCount/20)} page={pageNo} showFirstButton showLastButton onChange={handlePagination} />
+							<button 
+								className="prev-next-btn" 
+								onClick={nextCategory}
+								disabled = {nextDisable}
+							> Next Category </button>
 						</div>
 					</div>
 				</section>
