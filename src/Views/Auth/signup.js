@@ -30,6 +30,7 @@ export default function Login(props){
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showRegisteredMsg, setShowRegisteredMsg] = useState(false);
+    const [alertParams, setAlertParams] = useState({message:'', variant: 'info'});
 
     
     const handleInputChange  = (props) => {
@@ -105,6 +106,11 @@ export default function Login(props){
                 });
                 if(result.isRegistered === true){
                     setInputs(RESET_VALUES);
+                    if(result.mailSend === true){
+                        setAlertParams({...alertParams, ['message']: "Confirmation link sent on your registered email. Please confirm your account."});
+                    }else{
+                        setAlertParams({...alertParams, ['message']: "Registration successfully but confirmation mail operation failed. contact your administrator."});
+                    }
                     setShowRegisteredMsg(true);
                 }
                 setIsLoading(false);
@@ -202,7 +208,7 @@ export default function Login(props){
                                         </p>
                                     </div>
                                 </div>
-                                {showRegisteredMsg ? <SimpleAlert message="Activation link sent on your registered email. Please confirm your account to login." variant="info" style = {{padding:'0px', paddingLeft:'10px', marginTop:'10px'}}/> : ""}
+                                {showRegisteredMsg ? <SimpleAlert message={alertParams.message} variant={alertParams.variant} style = {{padding:'0px', paddingLeft:'10px', marginTop:'10px'}}/> : ""}
 	                        </div>
 	                    </form>
                     </div>

@@ -4,11 +4,10 @@ const { mailUser, mailPass, mailService } = require("../lib/database");
 
  const mailAccountUser = mailUser;
  const mailAccountPass = mailPass;
-
+ 
  const trans = nodemailer.createTransport(smtpTransport({
   service: mailService,
-  host: mailService,
-  tls: { rejectUnauthorized: true },
+  tls: { rejectUnauthorized: false },
   auth: {
     user: mailAccountUser,
     pass: mailAccountPass

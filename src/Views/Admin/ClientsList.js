@@ -59,12 +59,14 @@ export default function ClientsList() {
 
     const handleMailBoxClose = (result) => {
         setShowAlert(true);
-        if(result.isRegistered === true){
-            alertParams.message = "Activation link sent on your registered email. Please confirm your account to login."; 
-            alertParams.variant = "info";            
-        }else{
-            alertParams.message = "Operation failed."; 
-            alertParams.variant = "warning";
+        if(result.isUpdated === true){
+            if(result.mailSend === true){
+                alertParams.message = "Confirmation link resend on your given email. Please confirm your account."; 
+                alertParams.variant = "info";
+            }else{
+                alertParams.message = "Resent confirmation mail failed.";
+                alertParams.variant = "danger";
+            }
         }
         window.scrollTo(0,0);
         setShowEmailDialog(false);

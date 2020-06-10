@@ -39,12 +39,12 @@ export default function ResendMailDialog({open, setShowEmailDialog, handleMailBo
 
     const handleResendMailLink = async () => {
         setIsLoading(true);
+        setIsVerified(0);
         try{
             const result = await AuthAPI.resendEmailVarificationLink({
                 email : email,
                 user_id : clientData.id,
             });            
-            setIsVerified(0);
             setIsLoading(false);
             handleMailBoxClose(result);
         }catch(e){
