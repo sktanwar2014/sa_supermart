@@ -115,15 +115,19 @@ Categories.prototype.getProductList = function () {
         throw error;
       }
       connection.changeUser({database : dbName});
-      let Query = `SELECT p.id, p.category_id, p.sub_category_id, p.product_name, p.main_unit_id, p.description, p.is_active, p.status, p.created_at, GROUP_CONCAT(pm.id) AS unit_table_id, GROUP_CONCAT(pm.unit_value) AS unit_value, GROUP_CONCAT(pm.unit_id) AS unit_id, GROUP_CONCAT(pm.price) AS price, GROUP_CONCAT(pm.packet_weight) AS packet_weight, GROUP_CONCAT(pm.is_packet) AS is_packet, GROUP_CONCAT(pm.packet_unit_id) AS packet_unit_id, pi.image_name FROM products as p INNER JOIN products_measurement as pm ON pm.product_id =  p.id AND pm.is_active = 1 LEFT JOIN product_images as pi ON pi.product_id = p.id AND pi.is_active = 1 AND pi.type = 1 WHERE p.is_active = ${that.isActive} `;
+      let Query = `SELECT p.id, p.category_id, p.sub_category_id, p.product_name, p.main_unit_id, ur.unit_name as main_unit_name, p.description, p.is_active, p.status, p.created_at, GROUP_CONCAT(pm.id) AS unit_table_id, GROUP_CONCAT(pm.unit_value) AS unit_value, GROUP_CONCAT(pm.unit_id) AS unit_id, GROUP_CONCAT(pm.price) AS price, GROUP_CONCAT(pm.packet_weight) AS packet_weight, GROUP_CONCAT(pm.is_packet) AS is_packet, GROUP_CONCAT(pm.packet_unit_id) AS packet_unit_id, pi.image_name FROM products as p INNER JOIN products_measurement as pm ON pm.product_id =  p.id AND pm.is_active = 1 LEFT JOIN product_images as pi ON pi.product_id = p.id AND pi.is_active = 1 AND pi.type = 1 INNER JOIN unit_records as ur ON ur.id = p.main_unit_id WHERE p.is_active = ${that.isActive} `;
       if(that.categoryId !== 0){
         Query = Query + ` AND p.category_id = ${that.categoryId} `;
       }
       if(that.subCategoryId !== 0){
         Query = Query + ` AND p.sub_category_id = ${that.subCategoryId} `;
       }
-      Query = Query + ` GROUP BY p.id ORDER BY product_name LIMIT ${((that.pageNo * 20) - 20)},20 `;
-
+      
+        Query = Query + ` GROUP BY p.id ORDER BY product_name `;
+      
+      if(that.pageNo > 0 ){
+        Query = Query + ` LIMIT ${((that.pageNo * 20) - 20)},20 `;
+      }
       // console.log(Query)
       connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }

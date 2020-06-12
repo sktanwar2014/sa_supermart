@@ -2,8 +2,32 @@ const Order = require('../models/order.js');
 const {isNotEmpty} = require('../utils/conditionChecker.js');
 const Static = require('../models/static.js')
 const Auth = require('../models/auth.js')
-
 const invoiceReport  = require('../reports/generateInvoice.js')
+
+
+
+
+function calTotalUnit(unitList, unitId, quantity, mainSequence, mainUnitId ){
+    const currUnit = Object.values(unitList).find((unit) => {return unit.id === unitId});
+    const finalResult = unitList.map(data => {
+        if(data.id === currUnit.id){
+            if(currUnit.sequence ===  mainSequence && unitId === mainUnitId){
+                return  quantity;
+            }else if(currUnit.sequence < mainSequence && currUnit.id !== mainUnitId){
+                let newQuantity = quantity / currUnit.equal_value_of_parent;
+                return calTotalUnit(unitList, currUnit.parent_id, newQuantity, mainSequence, mainUnitId)
+            }else if(currUnit.sequence > mainSequence &&  currUnit.id !== mainUnitId ){
+                const belowUnit = Object.values(unitList).find((unit) => {return unit.parent_id === currUnit.id});
+                let newQuantity = quantity * belowUnit.equal_value_of_parent;
+                return calTotalUnit(unitList, belowUnit.id, newQuantity, mainSequence, mainUnitId)
+            }
+        }
+    });
+    return Object.values(finalResult).find(ele => {return (ele !== undefined && ele !== NaN && ele !== null) });
+}
+
+
+
 
 const generateInvoice = async function (req, res, next) {
     const params = {
@@ -225,46 +249,92 @@ const handlePurchasedRecord = async function (req, res, next) {
 }
 
 
-const getOrderedProductListSingleDay = async function (req, res, next) {    
+const getOrderedProductListSingleDay = async function (req, res, next) {
     const params = {
         date :  req.body.date,
     }
     try {
+     
         const Model = new Order(params);
         const result = await Model.getOrderedProductListSingleDay();
-        const calculatedResult = await calculateProductTotalQuantity(result);
+        const purchaseRecord = await Model.getDailyPurchaseRecords();
+        const staticRecords = await new Static({}).getAllUnitList();
         
-        let purchaseRecord =  [];
+        const prodIds = [...new Set(result.map(dist => dist.product_id))];
+        let returnValues  = [];
 
-        if(result.length > 0){
-            const prodIds = [...new Set(result.map(dist => dist.product_id))];
-            Model.product_id = String(prodIds.toString());
-            purchaseRecord = await Model.getDailyPurchaseRecords();
-        }
-    
-            (calculatedResult.length > 0 ? calculatedResult : []).map(data => {
-               const found = purchaseRecord.find(ele => {return ele.product_id === data.id})
-                if(found !== undefined && found !== null && found !== ""){
-                    data.purchased_quantity = found.purchased_quantity;
-                    data.purchased_unit_id = found.purchased_unit_id;
-                    data.cost = found.cost;
-                    data.cost_of_each = found.cost_of_each;
-                    data.purchased_status = found.status;
-                }else{
-                    data.purchased_quantity = '';
-                    data.purchased_unit_id = '';
-                    data.cost = '';
-                    data.cost_of_each = '',
-                    data.purchased_status = '';
+        prodIds.map((prodId) => {
+            const mainUnit = Object.values(result).find((prod) => { return prod.product_id === prodId})
+            const unit = Object.values(staticRecords).find((unit) => {return unit.id === mainUnit.main_unit_id});
+            const unitList = Object.values(staticRecords).filter((ele) => {return ele.group_id === unit.group_id})
+            const purchase = purchaseRecord.find(ele => {return ele.product_id === prodId})
+
+            let weight =  0;
+            let product = {};
+            let row = {};
+
+            Object.values(result).map((prod) => {
+                if(prodId === prod.product_id){
+                    product = prod;
+                    let mainWeight =  calTotalUnit(unitList, prod.unit_id, prod.quantity, unit.sequence, mainUnit.main_unit_id);
+                    weight = weight +  mainWeight;
                 }
-            })
-        res.send({orderedProductListSingleDay: calculatedResult});
+            });
+            
+                row.id = product.product_id;
+                row.product_name = product.product_name;
+                row.quantity = weight;
+                row.main_unit_id= product.main_unit_id;
+                row.unit_name= unit.unit_name;
+                row.sub_category_id = product.sub_category_id;
+                row.category_id = product.category_id;
+                row.price = product.price;
+            if(isNotEmpty(purchase)){
+                row.purchased_quantity = purchase.purchased_quantity;
+                row.purchased_unit_id = purchase.purchased_unit_id;
+                row.cost = purchase.cost;
+                row.cost_of_each = purchase.cost_of_each;
+                row.purchased_status = purchase.status;
+                // row.is_extra = purchase.is_extra;
+            }else{
+                row.purchased_quantity = '';
+                row.purchased_unit_id = '';
+                row.cost = '';
+                row.cost_of_each = '',
+                row.purchased_status = '';
+                // row.is_extra = 0;
+            }
+            returnValues.push(row);
+        });
+        
+        Object.values(purchaseRecord).map(data => {
+            let found = prodIds.find(ele=> ele === data.product_id);
+            if(!(found)){
+                returnValues.push({
+                    id : data.product_id,
+                    product_name : data.product_name,
+                    quantity : data.required_quantity,
+                    main_unit_id: data.required_unit_id,
+                    unit_name: data.unit_name,
+                    sub_category_id : data.sub_category_id,
+                    category_id : data.category_id,
+                    price : 0,
+                    // is_extra : data.is_extra,
+                    purchased_quantity : data.purchased_quantity,
+                    purchased_unit_id : data.purchased_unit_id,
+                    cost : data.cost,
+                    cost_of_each : data.cost_of_each,
+                    purchased_status : data.status,
+                });
+            }
+        })
+        res.send({orderedProductListSingleDay: returnValues});        
     } catch (err) {
         next(err);
     }
 }
 
-const getOrderedProductList = async function (req, res, next) {    
+const getOrderedProductList = async function (req, res, next) {
     const params = {
         from_date :  req.body.from_date,
         to_date :  req.body.to_date,
@@ -279,26 +349,6 @@ const getOrderedProductList = async function (req, res, next) {
         const userIds = [...new Set(result.map(dist => dist.user_id))];
         const subCategoryIdList = [...new Set(result.map(dist => dist.sub_category_id))];
         let returnValues  = [];
-    
-        function calTotalUnit(unitList, unitId, quantity, mainSequence, mainUnitId ){
-            const currUnit = Object.values(unitList).find((unit) => {return unit.id === unitId});
-            const finalResult = unitList.map(data => {
-                if(data.id === currUnit.id){
-                    if(currUnit.sequence ===  mainSequence && unitId === mainUnitId){
-                        return  quantity;
-                    }else if(currUnit.sequence < mainSequence && currUnit.id !== mainUnitId){
-                        let newQuantity = quantity / currUnit.equal_value_of_parent;
-                        return calTotalUnit(unitList, currUnit.parent_id, newQuantity, mainSequence, mainUnitId)
-                    }else if(currUnit.sequence > mainSequence &&  currUnit.id !== mainUnitId ){
-                        const belowUnit = Object.values(unitList).find((unit) => {return unit.parent_id === currUnit.id});
-                        let newQuantity = quantity * belowUnit.equal_value_of_parent;
-                        return calTotalUnit(unitList, belowUnit.id, newQuantity, mainSequence, mainUnitId)
-                    }
-                }
-            });
-            return Object.values(finalResult).find(ele => {return (ele !== undefined && ele !== NaN && ele !== null) });
-        }
-
     
         prodIds.map((prodId) => {
             const mainUnit = Object.values(result).find((prod) => { return prod.product_id === prodId})
@@ -389,77 +439,77 @@ const handleOrderConfirmation = async function (req, res, next) {
 }
 
 
-async function calculateProductTotalQuantity(products){
+// async function calculateProductTotalQuantity(products){
 
-    const prodIds = [...new Set(products.map(dist => dist.product_id))];
-    let returnValues  = [];
+//     const prodIds = [...new Set(products.map(dist => dist.product_id))];
+//     let returnValues  = [];
 
-    prodIds.map(prodId => {
-        let units = [];
-        let product =[];
-        let weight =  0;
-        Object.values(products).map((prod) => {
-            if(prodId === prod.product_id){
-                product = prod;
+//     prodIds.map(prodId => {
+//         let units = [];
+//         let product =[];
+//         let weight =  0;
+//         Object.values(products).map((prod) => {
+//             if(prodId === prod.product_id){
+//                 product = prod;
                 
-                let unit_id = 0;
-                let weight = 0;
-                if(prod.is_packet == 1){
-                    unit_id = prod.packet_unit_id;     weight = prod.packet_weight * prod.quantity; 
-                }else{
-                    unit_id = prod.unit_id;            weight = prod.quantity;  
-                }
+//                 let unit_id = 0;
+//                 let weight = 0;
+//                 if(prod.is_packet == 1){
+//                     unit_id = prod.packet_unit_id;     weight = prod.packet_weight * prod.quantity; 
+//                 }else{
+//                     unit_id = prod.unit_id;            weight = prod.quantity;  
+//                 }
 
-                if(units.length == 0){
-                    units.push({id: unit_id, weight: weight, price: prod.price})
-                }else{
-                    const found = units.find((ele) => {return ele.id == unit_id});
-                    if(found){
-                        let temp = [...units];
-                        temp.map((data, index) => {
-                            if(data.id == unit_id){
-                                units[index].weight =  units[index].weight + weight;
-                            }
-                        })
-                    }else{
-                        units.push({id: unit_id, weight: weight})
-                    }
-                }
-            }
-        })
+//                 if(units.length == 0){
+//                     units.push({id: unit_id, weight: weight, price: prod.price})
+//                 }else{
+//                     const found = units.find((ele) => {return ele.id == unit_id});
+//                     if(found){
+//                         let temp = [...units];
+//                         temp.map((data, index) => {
+//                             if(data.id == unit_id){
+//                                 units[index].weight =  units[index].weight + weight;
+//                             }
+//                         })
+//                     }else{
+//                         units.push({id: unit_id, weight: weight})
+//                     }
+//                 }
+//             }
+//         })
 
-        units.map(w  => {
-            if(product.main_unit_id === 1 || product.main_unit_id === 3){
-                if(w.id === 2 || w.id === 4){
-                    weight = weight + (w.weight /1000);
-                }else if(w.id === 1 || w.id === 3){
-                    weight = weight + w.weight;
-                }
-            }else if(product.main_unit_id === 2 || product.main_unit_id === 4){
-                if(w.id === 2 || w.id === 4){
-                    weight = weight  + w.weight;
-                }else if(w.id === 1 || w.id  === 3){
-                    weight = weight + w.weight * 1000;
-                }
-            }else if(product.main_unit_id === 5){
-                if(w.id === 5){
-                    weight = weight  + w.weight;
-                }
-            }
-        })
+//         units.map(w  => {
+//             if(product.main_unit_id === 1 || product.main_unit_id === 3){
+//                 if(w.id === 2 || w.id === 4){
+//                     weight = weight + (w.weight /1000);
+//                 }else if(w.id === 1 || w.id === 3){
+//                     weight = weight + w.weight;
+//                 }
+//             }else if(product.main_unit_id === 2 || product.main_unit_id === 4){
+//                 if(w.id === 2 || w.id === 4){
+//                     weight = weight  + w.weight;
+//                 }else if(w.id === 1 || w.id  === 3){
+//                     weight = weight + w.weight * 1000;
+//                 }
+//             }else if(product.main_unit_id === 5){
+//                 if(w.id === 5){
+//                     weight = weight  + w.weight;
+//                 }
+//             }
+//         })
 
 
-        returnValues.push({
-            id : product.product_id,
-            product_name : product.product_name,
-            weight : weight,
-            main_unit_id: product.main_unit_id,
-            unit_name: product.unit_name,
-            price : product.price,
-        });
-    })
-    return returnValues;
-}
+//         returnValues.push({
+//             id : product.product_id,
+//             product_name : product.product_name,
+//             weight : weight,
+//             main_unit_id: product.main_unit_id,
+//             unit_name: product.unit_name,
+//             price : product.price,
+//         });
+//     })
+//     return returnValues;
+// }
 
 
  // 1 KG

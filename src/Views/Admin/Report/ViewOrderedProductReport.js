@@ -78,7 +78,7 @@ export default function ViewOrderedProduct() {
                 to_date : getDate(inputs.toDate),
                 user_ids : isCheckedAll === true ? 0 : userIdsToFetch,
             });
-            console.log('result',result);
+            // console.log('result',result);
             setOrderedProductList(result.orderedProductList);
             setUserIdList(result.userIdList);
             setSubCategoryIdList(result.subCategoryIdList);

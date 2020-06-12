@@ -208,21 +208,21 @@ Order.prototype.handlePurchasedRecord = function () {
       
       
       Object.values(that.formData).map((data) => {
-        console.log(data);
+        // console.log(data);
         connection.query(`SELECT * FROM purchase_register WHERE product_id = ${data.product_id} AND purchase_date = '${data.purchase_date}' AND is_active = 1`, function (error, rows, fields) {
           if (error) {  console.log("Error...", error); reject(error); }
           
-          let insertValues = [data.product_id, data.purchase_date, data.required_quantity, data.required_unit_id, data.purchased_quantity, data.purchased_unit_id, data.cost, data.cost_of_each, 1, 1, data.createdBy];
+          let insertValues = [data.product_id, data.purchase_date, data.required_quantity, data.required_unit_id, data.purchased_quantity, data.purchased_unit_id, data.cost, data.cost_of_each, data.is_extra, 1, 1, data.createdBy];
           const prod = rows[0];
           
           if(rows.length > 0){
-            if(prod.purchased_quantity != data.purchased_quantity || prod.cost != data.cost || prod.cost_of_each != data.cost_of_each){
+            if(prod.purchased_quantity != data.purchased_quantity || prod.cost != data.cost || prod.cost_of_each != data.cost_of_each || prod.required_quantity != data.required_quantity){
               connection.query(`UPDATE purchase_register SET is_active = 0, status = 2, updated_by = ${data.createdBy},  updated_at = now() WHERE id = ${prod.id}`, function (error, updateResult, fields) {
                 if (error) {  console.log("Error...", error); reject(error);  }
               });
 
               
-              connection.query(`INSERT INTO purchase_register(product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, cost_of_each, status, is_active, created_by) VALUES (?)`, [insertValues], function (error, rows, fields) {
+              connection.query(`INSERT INTO purchase_register(product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, cost_of_each, is_extra, status, is_active, created_by) VALUES (?)`, [insertValues], function (error, rows, fields) {
                 if (error) {  console.log("Error...", error); reject(error);  }
                 resolve(rows.insertId)
               });
@@ -230,7 +230,7 @@ Order.prototype.handlePurchasedRecord = function () {
               resolve()
             }
           }else{
-            connection.query(`INSERT INTO purchase_register(product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, cost_of_each, status, is_active, created_by) VALUES (?)`, [insertValues], function (error, rows, fields) {
+            connection.query(`INSERT INTO purchase_register(product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, cost_of_each, is_extra, status, is_active, created_by) VALUES (?)`, [insertValues], function (error, rows, fields) {
               if (error) {  console.log("Error...", error); reject(error);  }
               resolve(rows.insertId)
             });
@@ -675,7 +675,13 @@ Order.prototype.getOrderedProductListSingleDay = function () {
         throw error;
       }
       connection.changeUser({database : dbName});
-      let Query = `SELECT op.id, op.user_id, op.order_id, op.tracking_id, op.product_id, op.quantity, op.unit_id, op.status, op.is_active, p.product_name, p.main_unit_id, unit.unit_name, unit.id as unit_table_id, unit.equal_value_of_parent, pm.unit_value, pm.price, pm.is_packet, pm.packet_weight, pm.packet_unit_id from ordered_product as op INNER JOIN products AS p ON p.id = op.product_id INNER JOIN unit_records as unit ON unit.id = p.main_unit_id INNER JOIN products_measurement as pm ON pm.product_id = op.product_id AND pm.unit_id = op.unit_id AND pm.is_active = 1 WHERE op.order_id IN(SELECT id FROM orders WHERE is_active = 1 AND (DATE_FORMAT(order_date, '%Y-%m-%d')  = '${that.date}'))`;
+      // let Query = `SELECT op.id, op.user_id, op.order_id, op.tracking_id, op.product_id, op.quantity, op.unit_id, op.status, op.is_active, p.product_name, p.main_unit_id, unit.unit_name, unit.id as unit_table_id, unit.equal_value_of_parent, pm.unit_value, pm.price, pm.is_packet, pm.packet_weight, pm.packet_unit_id from ordered_product as op INNER JOIN products AS p ON p.id = op.product_id INNER JOIN unit_records as unit ON unit.id = p.main_unit_id INNER JOIN products_measurement as pm ON pm.product_id = op.product_id AND pm.unit_id = op.unit_id AND pm.is_active = 1 WHERE op.order_id IN(SELECT id FROM orders WHERE is_active = 1 AND (DATE_FORMAT(order_date, '%Y-%m-%d')  = '${that.date}'))`;
+      let Query = `SELECT op.product_id, p.product_name, 
+      SUM(CASE pm.is_packet WHEN 1 THEN (pm.packet_weight * op.quantity) WHEN 0 THEN op.quantity END) as quantity, 
+      (CASE pm.is_packet WHEN 1 THEN pm.packet_unit_id WHEN 0 THEN op.unit_id END) as unit_id, 
+      p.main_unit_id, p.sub_category_id, p.category_id, pm.price FROM orders as o INNER JOIN ordered_product as op ON o.id = op.order_id INNER JOIN products AS p ON p.id = op.product_id INNER JOIN products_measurement as  pm ON pm.product_id = op.product_id AND pm.unit_id = op.unit_id AND pm.is_active = 1
+      WHERE (DATE_FORMAT(o.order_date, '%Y-%m-%d') = '${that.date}') AND o.status = 1 GROUP BY product_id, unit_id ORDER BY op.product_id ASC`;
+      console.log(Query)
       connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);
@@ -697,7 +703,9 @@ Order.prototype.getDailyPurchaseRecords = function () {
         throw error;
       }
       connection.changeUser({database : dbName});
-      let Query = `SELECT id, product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, cost_of_each, status, is_active FROM purchase_register WHERE is_active = 1 AND product_id IN(${that.product_id}) AND (DATE_FORMAT(purchase_date, '%Y-%m-%d')  = '${that.date}')`;
+      // let Query = `SELECT id, product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, cost_of_each, status, is_active FROM purchase_register WHERE is_active = 1 AND product_id IN(${that.product_id}) AND (DATE_FORMAT(purchase_date, '%Y-%m-%d')  = '${that.date}')`;
+      // let Query = `SELECT id, product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, cost_of_each, status, is_active FROM purchase_register WHERE is_active = 1 AND (DATE_FORMAT(purchase_date, '%Y-%m-%d')  = '${that.date}')`;
+      let Query = `SELECT pr.id, pr.product_id, pr.purchase_date, pr.required_quantity, pr.required_unit_id, pr.purchased_quantity, pr.purchased_unit_id, pr.cost, pr.cost_of_each, pr.is_extra, pr.status, pr.is_active, p.category_id, p.sub_category_id, p.main_unit_id, p.product_name, ur.unit_name FROM purchase_register as pr INNER JOIN products as p ON p.id = pr.product_id INNER JOIN unit_records as ur ON ur.id = p.main_unit_id WHERE pr.is_active = 1 AND (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d')  = '${that.date}')`
       // console.log(Query)
       connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
