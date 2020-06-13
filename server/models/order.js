@@ -85,7 +85,7 @@ Order.prototype.proceedToDelivered = function () {
         if (error) {  console.log("Error...", error); reject(error);  }
           resolve(rows);
       });
-
+console.log(that.formData)
       Object.values(that.formData).map((data, index) => {
         connection.query(`UPDATE ordered_product SET status = '2' WHERE id = ${data.ordered_id}`, function (error, rows, fields) {
           if (error) {  console.log("Error...", error); reject(error);  }
@@ -163,7 +163,7 @@ Order.prototype.submitDeliveryDetails = function () {
       connection.changeUser({database : dbName});
       
       Object.values(that.formData).map((data, index) => {
-        connection.query(`INSERT INTO delivered_product(ordered_id, product_id, order_date, delivery_date, paid_quantity, unit_id, price, is_active, created_by) VALUES (?) `, [[data.ordered_id, data.product_id, data.order_date, data.delivery_date,  data.paid_quantity, data.unit_id, data.price, 1, data.created_by]], function (error, rows, fields) {
+        connection.query(`INSERT INTO delivered_product(order_id, ordered_id, product_id, order_date, delivery_date, paid_quantity, unit_id, price, is_active, created_by) VALUES (?) `, [[data.order_id, data.ordered_id, data.product_id, data.order_date, data.delivery_date,  data.paid_quantity, data.unit_id, data.price, 1, data.created_by]], function (error, rows, fields) {
           if (error) {  console.log("Error...", error); reject(error);  }
           resolve(rows);
         });
@@ -184,10 +184,15 @@ Order.prototype.fetchDeliveryFormData = function () {
       }
       connection.changeUser({database : dbName});
       let Query = `SELECT SUM(dp.paid_quantity) AS paid_quantity,  op.id, p.product_name, unit.unit_name as ordered_unit_name, op.product_id, op.quantity, op.unit_id,  op.status, pr.purchased_quantity, pr.purchased_unit_id, pr.cost, unit2.unit_name as purchased_unit_name FROM ordered_product as op INNER JOIN products as p ON p.id = op.product_id  INNER JOIN unit_records as unit ON unit.id = op.unit_id LEFT JOIN purchase_register as pr ON pr.product_id  = op.product_id AND pr.is_active =  1 AND (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d') = '${that.order_date}')  LEFT JOIN unit_records as unit2 ON pr.purchased_unit_id = unit2.id LEFT JOIN delivered_product as dp ON op.product_id = dp.product_id  AND (DATE_FORMAT(dp.order_date, '%Y-%m-%d') = '${that.order_date}') WHERE op.order_id = ${that.orderId} GROUP BY op.product_id`
-      console.log(Query)
+      let Query2 = `SELECT pr.product_id, pr.purchased_quantity, pr.purchased_unit_id, pr.cost, pr.cost_of_each, pr.is_extra, pr.status,
+                    p.product_name, ur.unit_name as purchased_unit_name, SUM(dp.paid_quantity) AS paid_quantity FROM purchase_register as pr INNER JOIN products as p ON p.id = pr.product_id LEFT JOIN unit_records as ur ON pr.purchased_unit_id = ur.id LEFT JOIN delivered_product as dp ON pr.product_id = dp.product_id AND (DATE_FORMAT(dp.order_date, '%Y-%m-%d') = '${that.order_date}') WHERE pr.is_active =  1 AND (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d') = '${that.order_date}') AND pr.is_extra = 1 GROUP BY pr.product_id`;
+      // console.log(Query)
       connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
-        resolve(rows);
+        connection.query(Query2, function (error, result, fields) {
+          if (error) {  console.log("Error...", error); reject(error);  }
+          resolve({deliveryFormData: rows, extraPurchased: result});
+        });
       });
         connection.release();
         console.log('Process Complete %d', connection.threadId);
@@ -430,6 +435,7 @@ Order.prototype.getOrderedProduct = function () {
           Query = `SELECT op.id as ordered_id, op.order_id, op.user_id, dp.product_id, dp.paid_quantity as quantity, dp.unit_id, dp.price, p.product_name, unit.unit_name as ordered_unit_name, vp.quantity as verified_quantity, ur.unit_name as verified_unit_name, vp.unit_id as verified_unit_id FROM delivered_product as dp INNER JOIN ordered_product as op on op.id = dp.ordered_id INNER JOIN products as p ON p.id = op.product_id  INNER JOIN unit_records as unit ON unit.id = dp.unit_id LEFT JOIN verified_product as vp ON vp.delivered_id = dp.id AND vp.ordered_id = op.id INNER JOIN unit_records as ur ON ur.id = vp.unit_id WHERE op.order_id IN(SELECT id from orders WHERE is_active = 1 AND status != 1 AND  (DATE_FORMAT(order_date, '%Y-%m-%d') = '${that.date}'))`
         }
       }
+      console.log(Query);
       connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);
@@ -508,12 +514,45 @@ Order.prototype.getOrderListOfSingleDay = function () {
         throw error;
       }
       connection.changeUser({database : dbName});
-      let Query = ``;
-      if(that.order_status == 1 || that.order_status == 2){
-        Query = `SELECT o.id, o.order_id, o.user_id, o.order_date, o.status, sd.full_name, sd.mobile, sd.email, sd.pincode, sd.flat_add, sd.street_add, sd.state, sd.city, dp.delivery_date FROM orders as o INNER JOIN shipping_details as sd ON o.shipping_id = sd.id INNER JOIN ordered_product as op ON op.order_id = o.id LEFT JOIN  delivered_product  as dp ON dp.ordered_id = op.id WHERE o.is_active = 1 AND o.status = ${that.order_status} AND  (DATE_FORMAT(o.order_date, '%Y-%m-%d') = '${that.date}')  GROUP BY op.order_id`;
-      }else if(that.order_status == 3 || that.order_status == 4 || that.order_status == 5){
-        Query = `SELECT o.id, o.order_id, o.user_id, o.order_date, o.status, sd.full_name, sd.mobile, sd.email, sd.pincode, sd.flat_add, sd.street_add, sd.state, sd.city, dp.delivery_date FROM orders as o INNER JOIN shipping_details as sd ON o.shipping_id = sd.id INNER JOIN ordered_product as op ON op.order_id = o.id LEFT JOIN  delivered_product  as dp ON dp.ordered_id = op.id WHERE o.is_active = 1 AND o.status IN(3,4) AND  (DATE_FORMAT(o.order_date, '%Y-%m-%d') = '${that.date}')  GROUP BY op.order_id`;
+      let Query = ``;      
+      if(that.order_status === 1){
+        Query = `SELECT o.id, o.order_id, o.user_id, o.order_date, o.status, sd.full_name, sd.mobile, sd.email, 
+                sd.pincode, sd.flat_add, sd.street_add, sd.state, sd.city, op.quantity, op.unit_id, op.product_id, 
+                p.product_name, ur.unit_name FROM orders as o 
+                INNER JOIN shipping_details as sd ON o.shipping_id = sd.id
+                INNER JOIN ordered_product as op ON op.order_id = o.id
+                INNER JOIN products as p ON p.id = op.product_id
+                INNER JOIN unit_records as ur ON ur.id = op.unit_id
+                WHERE o.is_active = 1 AND o.status = 1 AND (DATE_FORMAT(o.order_date, '%Y-%m-%d') = '${that.date}');`
+        
+      }else if(that.order_status === 2){
+        Query = `SELECT o.id, o.order_id, o.user_id, o.order_date, o.status, sd.full_name, sd.mobile, sd.email,
+                sd.pincode, sd.flat_add, sd.street_add, sd.state, sd.city, dp.delivery_date, dp.product_id, 
+                dp.paid_quantity as quantity, dp.unit_id, dp.price, ur.unit_name, p.product_name
+                FROM orders as o INNER JOIN shipping_details as sd ON o.shipping_id = sd.id
+                LEFT JOIN  delivered_product  as dp ON dp.order_id = o.id
+                INNER JOIN unit_records as ur ON ur.id = dp.unit_id
+                INNER JOIN products as p ON p.id = dp.product_id
+                WHERE o.is_active = 1 AND o.status = 2 AND  (DATE_FORMAT(o.order_date, '%Y-%m-%d') = '${that.date}');`
+      }else if(that.order_status === 3){
+        Query = `SELECT o.id, o.order_id, o.user_id, o.order_date, o.status, sd.full_name, sd.mobile, sd.email, sd.pincode,
+                sd.flat_add, sd.street_add, sd.state, sd.city, dp.delivery_date, dp.product_id, 
+                dp.paid_quantity as quantity, dp.unit_id, dp.price, ur.unit_name, p.product_name, vp.quantity as verified_quantity, 
+                vp.unit_id as verified_unit_id, ur2.unit_name as verified_unit_name
+                FROM orders as o INNER JOIN shipping_details as sd ON o.shipping_id = sd.id
+                LEFT JOIN  delivered_product  as dp ON dp.order_id = o.id
+                INNER JOIN unit_records as ur ON ur.id = dp.unit_id
+                INNER JOIN products as p ON p.id = dp.product_id
+                INNER JOIN verified_product as vp ON vp.delivered_id = dp.id
+                INNER JOIN unit_records as ur2 ON ur2.id = vp.unit_id
+                WHERE o.is_active = 1 AND o.status IN(3,4) AND  (DATE_FORMAT(o.order_date, '%Y-%m-%d') = '${that.date}');`;
       }
+      // if(that.order_status == 1 || that.order_status == 2){
+      //   Query = `SELECT o.id, o.order_id, o.user_id, o.order_date, o.status, sd.full_name, sd.mobile, sd.email, sd.pincode, sd.flat_add, sd.street_add, sd.state, sd.city, dp.delivery_date FROM orders as o INNER JOIN shipping_details as sd ON o.shipping_id = sd.id INNER JOIN ordered_product as op ON op.order_id = o.id LEFT JOIN  delivered_product  as dp ON dp.ordered_id = op.id WHERE o.is_active = 1 AND o.status = ${that.order_status} AND  (DATE_FORMAT(o.order_date, '%Y-%m-%d') = '${that.date}')  GROUP BY op.order_id`;
+      // }else if(that.order_status == 3 || that.order_status == 4 || that.order_status == 5){
+      //   Query = `SELECT o.id, o.order_id, o.user_id, o.order_date, o.status, sd.full_name, sd.mobile, sd.email, sd.pincode, sd.flat_add, sd.street_add, sd.state, sd.city, dp.delivery_date FROM orders as o INNER JOIN shipping_details as sd ON o.shipping_id = sd.id INNER JOIN ordered_product as op ON op.order_id = o.id LEFT JOIN  delivered_product  as dp ON dp.ordered_id = op.id WHERE o.is_active = 1 AND o.status IN(3,4) AND  (DATE_FORMAT(o.order_date, '%Y-%m-%d') = '${that.date}')  GROUP BY op.order_id`;
+      // }
+      // console.log(Query);
       connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);
@@ -537,11 +576,40 @@ Order.prototype.getCustomerOrderList = function () {
       }
       connection.changeUser({database : dbName});
       let Query = ``;
-      if(that.order_status == 1 || that.order_status == 2){
-        Query = `SELECT o.id, o.order_id, o.user_id, o.order_date, o.status,  sd.full_name, sd.mobile, sd.email, sd.pincode, sd.flat_add, sd.street_add, sd.state, sd.city, dp.delivery_date FROM orders as o INNER JOIN shipping_details as sd ON o.shipping_id = sd.id INNER JOIN ordered_product as op ON op.order_id = o.id LEFT JOIN  delivered_product  as dp ON dp.ordered_id = op.id WHERE o.is_active = 1 AND o.status = ${that.order_status} AND o.user_id = ${that.createdBy} AND  (DATE_FORMAT(o.order_date, '%Y-%m-%d') BETWEEN '${that.from_date}' AND '${that.to_date}') GROUP BY op.order_id`;
-      }else if(that.order_status == 3  || that.order_status == 4 || that.order_status == 5){
-        Query = `SELECT o.id, o.order_id, o.user_id, o.order_date, o.status,  sd.full_name, sd.mobile, sd.email, sd.pincode, sd.flat_add, sd.street_add, sd.state, sd.city, dp.delivery_date FROM orders as o INNER JOIN shipping_details as sd ON o.shipping_id = sd.id INNER JOIN ordered_product as op ON op.order_id = o.id LEFT JOIN  delivered_product  as dp ON dp.ordered_id = op.id WHERE o.is_active = 1 AND o.status IN(3,4) AND o.user_id = ${that.createdBy} AND  (DATE_FORMAT(o.order_date, '%Y-%m-%d') BETWEEN '${that.from_date}' AND '${that.to_date}') GROUP BY op.order_id`;
+      if(that.order_status === 1){
+        Query = `SELECT o.id, o.order_id, o.user_id, o.order_date, o.status, sd.full_name, sd.mobile, sd.email, 
+                 sd.pincode, sd.flat_add, sd.street_add, sd.state, sd.city, op.quantity, op.unit_id, op.product_id, 
+                 p.product_name, ur.unit_name 
+                 FROM orders as o 
+                INNER JOIN shipping_details as sd ON o.shipping_id = sd.id
+                INNER JOIN ordered_product as op ON op.order_id = o.id
+                INNER JOIN products as p ON p.id = op.product_id
+                INNER JOIN unit_records as ur ON ur.id = op.unit_id
+                WHERE o.is_active = 1 AND o.user_id = ${that.createdBy} AND o.status = 1 AND (DATE_FORMAT(o.order_date, '%Y-%m-%d') BETWEEN '${that.from_date}' AND '${that.to_date}');`;
+      }else if(that.order_status === 2){
+        Query = `SELECT o.id, o.order_id, o.user_id, o.order_date, o.status, sd.full_name, sd.mobile, sd.email,
+                sd.pincode, sd.flat_add, sd.street_add, sd.state, sd.city, dp.delivery_date, dp.product_id, 
+                dp.paid_quantity as quantity, dp.unit_id, dp.price, ur.unit_name, p.product_name
+                FROM orders as o INNER JOIN shipping_details as sd ON o.shipping_id = sd.id
+                LEFT JOIN  delivered_product  as dp ON dp.order_id = o.id
+                INNER JOIN unit_records as ur ON ur.id = dp.unit_id
+                INNER JOIN products as p ON p.id = dp.product_id
+                WHERE o.is_active = 1 AND o.user_id = ${that.createdBy} AND o.status = 2 AND (DATE_FORMAT(o.order_date, '%Y-%m-%d') BETWEEN '${that.from_date}' AND '${that.to_date}');`
+      }else if(that.order_status === 3){
+        Query = `SELECT o.id, o.order_id, o.user_id, o.order_date, o.status, sd.full_name, sd.mobile, sd.email,
+                sd.pincode, sd.flat_add, sd.street_add, sd.state, sd.city, dp.delivery_date, p.product_name
+                FROM orders as o INNER JOIN shipping_details as sd ON o.shipping_id = sd.id
+                LEFT JOIN  delivered_product  as dp ON dp.order_id = o.id                
+                INNER JOIN products as p ON p.id = dp.product_id
+                WHERE o.is_active = 1 AND o.user_id = ${that.createdBy} AND o.status IN(3,4) AND (DATE_FORMAT(o.order_date, '%Y-%m-%d') BETWEEN '${that.from_date}' AND '${that.to_date}');`
       }
+
+
+      // if(that.order_status == 1 || that.order_status == 2){
+      //   Query = `SELECT o.id, o.order_id, o.user_id, o.order_date, o.status,  sd.full_name, sd.mobile, sd.email, sd.pincode, sd.flat_add, sd.street_add, sd.state, sd.city, dp.delivery_date FROM orders as o INNER JOIN shipping_details as sd ON o.shipping_id = sd.id INNER JOIN ordered_product as op ON op.order_id = o.id LEFT JOIN  delivered_product  as dp ON dp.ordered_id = op.id WHERE o.is_active = 1 AND o.status = ${that.order_status} AND o.user_id = ${that.createdBy} AND  (DATE_FORMAT(o.order_date, '%Y-%m-%d') BETWEEN '${that.from_date}' AND '${that.to_date}') GROUP BY op.order_id`;
+      // }else if(that.order_status == 3  || that.order_status == 4 || that.order_status == 5){
+      //   Query = `SELECT o.id, o.order_id, o.user_id, o.order_date, o.status,  sd.full_name, sd.mobile, sd.email, sd.pincode, sd.flat_add, sd.street_add, sd.state, sd.city, dp.delivery_date FROM orders as o INNER JOIN shipping_details as sd ON o.shipping_id = sd.id INNER JOIN ordered_product as op ON op.order_id = o.id LEFT JOIN  delivered_product  as dp ON dp.ordered_id = op.id WHERE o.is_active = 1 AND o.status IN(3,4) AND o.user_id = ${that.createdBy} AND  (DATE_FORMAT(o.order_date, '%Y-%m-%d') BETWEEN '${that.from_date}' AND '${that.to_date}') GROUP BY op.order_id`;
+      // }
       connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);

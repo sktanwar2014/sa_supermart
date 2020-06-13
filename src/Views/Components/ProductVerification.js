@@ -11,15 +11,14 @@ import CallLoader from '../../common/Loader.js';
 import {getDate, getDateInDDMMYYYY} from '../../common/moment.js';
 
 export default function DeliveryForm(props) {
-
-    const userId = APP_TOKEN.get().userId;
-    const [order, setOrder]  = useState(props.location.state.order);
-    const [productList, setProductList] = useState(props.location.state.product);
+    
+    const order = props.location.state.data[0];
+    const [productList, setProductList] = useState(props.location.state.data);
     const [productUnitList, setProductUnitList] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-
+    console.log(productList);
     useEffect(()=>{
         getProductUnitList();
     },[]);
@@ -70,7 +69,7 @@ export default function DeliveryForm(props) {
                 <div class="container">
                     <div class="row justify-content-center">
                         <div class="col-xl-12 ftco-animate fadeInUp ftco-animated">
-                            <h3 class="mb-4 billing-heading">Delivery Form</h3>
+                            <h3 class="mb-4 billing-heading">Order verification Form</h3>
                             <form onSubmit={handleSubmit} class="p-5 bg-light b-top-dark">
                                     <div class="row align-items-end">
                                         <div class="col-md-3">
@@ -125,14 +124,15 @@ export default function DeliveryForm(props) {
                                         <div class="col-md-12">
                                             <h5>Product List</h5>
                                         </div>
-                                        <table className="unit-array-table table-min-width">
-                                            <thead>
-                                                <tr>
-                                                    <th>Product</th>
-                                                    <th>Received Quantity</th>
-                                                    {/* <th>Unit</th> */}
-                                                </tr>
-                                            </thead>
+                                        <div class="w-100 table-div">
+                                            <table className="table table-td">
+                                                <thead class="thead-primary">
+                                                    <tr class="text-center">
+                                                        <th style={{minWidth : '200px'}}>Product</th>
+                                                        <th style={{minWidth : '150px'}}> Received Quantity</th>
+                                                        {/* <th>Unit</th> */}
+                                                    </tr>
+                                                </thead>
                                                 <tbody>
                                                 {(productList.length >0 ? productList :[]).map((data, index) => {
                                                     return(
@@ -141,7 +141,7 @@ export default function DeliveryForm(props) {
                                                             <td>
                                                                 <div class="d-flex justify-content-center">
                                                                     <input type="number" name={"provideQuantity-"+data.product_id} class="cost-input" id={"provideQuantity-"+data.product_id} min="0" step="0.01" required/>
-                                                                    <p class="cost-input-adoptment"> {data.delivered_unit_name} </p>
+                                                                    <p class="cost-input-adoptment"> {data.unit_name} </p>
                                                                 </div>
                                                             </td>
                                                             {/* <td>
@@ -161,6 +161,7 @@ export default function DeliveryForm(props) {
                                                 }
                                                 </tbody>
                                             </table>
+                                        </div>
                                         <div class="form-group p-4">
                                             <input type="submit" value="Submit" class="btn  px-4 btn-primary" disabled={isSubmitting} />
                                         </div>

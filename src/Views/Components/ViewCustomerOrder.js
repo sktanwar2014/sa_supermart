@@ -11,6 +11,9 @@ import OrderAPI from '../../api/order.js';
 import {APP_TOKEN} from  '../../api/config/Constants.js'
 import {getDateInDDMMYYYY, getDate} from '../../common/moment.js';
 import CallLoader from '../../common/Loader.js';
+import NewOrderTable from './ViewOrderTable/NewOrderTable.js';
+import DeliveredOrderTable from './ViewOrderTable/DeliveredOrderTable.js';
+import VerifiedOrderTable from './ViewOrderTable/VerifiedOrderTable.js';
 
 const RESET_VALUES = {
     toDate : new Date(),
@@ -23,10 +26,10 @@ export default function ViewCustomerOrder() {
 
     const [inputs, setInputs] =  useState(RESET_VALUES);
 	const [orderList, setOrderList] = useState([]);
-    const [orderedProductList, setOrderedProductList] = useState([]);
     const [orderStatusList, setOrderStatusList]  = useState([]);
     const [orderStatus, setOrderStatus] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
+    const [orderIdsArray, setOrderIdsArray] = useState([]);
 
     useEffect(()=>{
 		getCustomerOrderList();		
@@ -44,15 +47,15 @@ export default function ViewCustomerOrder() {
         setOrderStatus(inputs.orderStatus);
         try{
             const result = await OrderAPI.getCustomerOrderList({
-                order_status : inputs.orderStatus,
+                order_status : Number(inputs.orderStatus),
                 from_date : getDate(inputs.fromDate),
                 to_date : getDate(inputs.toDate),
                 createdBy : APP_TOKEN.get().userId,
             });
-            setOrderList(result.orderList);            
-            setOrderedProductList(result.orderedProducts);         
+            const orderIds = [...new Set(result.orderList.map(dist => dist.id))];
+            setOrderList(result.orderList);
+            setOrderIdsArray(orderIds);
             setIsLoading(false);
-
         }catch(e){
             console.log('Error...',e);
         }
@@ -125,8 +128,11 @@ export default function ViewCustomerOrder() {
                                                 </div>
                                             </div>
                                         </div> 
-                                        <div class="w-100">
-                                            <table className="unit-array-table">
+                                        <div class="w-100 table-div">
+                                            {(orderStatus == 1) && <NewOrderTable orderIdsArray={orderIdsArray} orderList = {orderList} />}
+                                            {(orderStatus == 2) && <DeliveredOrderTable orderIdsArray={orderIdsArray} orderList = {orderList} />}
+                                            {(orderStatus == 3) && <VerifiedOrderTable orderIdsArray={orderIdsArray} orderList = {orderList}  handleGenerateInvoice={handleGenerateInvoice} />}
+                                            {/* <table className="unit-array-table">
                                                 <thead>
                                                     <tr>
                                                         <th>#</th>
@@ -179,7 +185,7 @@ export default function ViewCustomerOrder() {
                                                     })
                                                 }	
                                                 </tbody>
-                                            </table>
+                                            </table> */}
                                         </div>
 									</div>
 								</div>

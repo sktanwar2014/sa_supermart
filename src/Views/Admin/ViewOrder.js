@@ -12,7 +12,10 @@ import OrderAcceptRejectDialog from './Components/OrderAcceptRejectDialog.js';
 import CallLoader from '../../common/Loader.js';
 
 
-import {getDateInDDMMYYYY, getDate} from '../../common/moment.js';
+import {getDate} from '../../common/moment.js';
+import NewOrderTable from './OrderViewTables/NewOrderTable.js';
+import DeliveredOrderTable from './OrderViewTables/DeliveredOrderTable.js';
+import VerifiedOrderTable from './OrderViewTables/VerifiedOrderTable.js';
 
 const RESET_VALUES = {
     date : new Date(),
@@ -23,8 +26,9 @@ const RESET_VALUES = {
 export default function ViewOrder(props) {
 
     const [inputs, setInputs] =  useState(RESET_VALUES);
-	const [orderList, setOrderList] = useState([]);
-    const [orderedProductList, setOrderedProductList] = useState([]);
+    const [orderList, setOrderList] = useState([]);
+    const [orderIdsArray, setOrderIdsArray] = useState([]);
+    
     const [orderStatusList, setOrderStatusList]  = useState([]);
     const [orderStatus, setOrderStatus] = useState(1);
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -49,13 +53,14 @@ export default function ViewOrder(props) {
 
         try{
             const result = await OrderAPI.getOrderListOfSingleDay({
-                order_status : inputs.orderStatus,
+                order_status : Number(inputs.orderStatus),
                 date : getDate(inputs.date),
             });
-            setOrderList(result.orderList);            
-            setOrderedProductList(result.orderedProducts); 
+            console.log(result);
+            const orderIds = [...new Set(result.orderList.map(dist => dist.id))];
+            setOrderList(result.orderList);
+            setOrderIdsArray(orderIds);
             setIsLoading(false);
-
         }catch(e){
             console.log('Error...',e);
         }
@@ -86,11 +91,11 @@ export default function ViewOrder(props) {
     }
 
     
-    const handleOrderConfirmation = async (data, products) =>{
+    const handleOrderConfirmation = async (data) =>{
         setOrderProps({
             order_id: data.id,
             order_date : getDate(inputs.date),
-            products: products
+            products: data
         });
         setDialogOpen(true);
     }
@@ -131,73 +136,16 @@ export default function ViewOrder(props) {
                                                 </div>
                                             </div>
                                         </div> 
-                                        <div class="w-100">
-                                            <table className="unit-array-table">
-                                                <thead>
-                                                    <tr>
-                                                        <th>#</th>
-                                                        <th>Order Date</th>
-                                                        <th>Order Id</th>
-                                                        <th>Customer</th>
-                                                        {(orderStatus == 2 || orderStatus  == 1) && <th>Product</th> }
-                                                        {(orderStatus == 2 || orderStatus  == 1) && <th>Quantity</th> }
-                                                        {orderStatus == 2 && <th>Price</th> }
-                                                        <th>Address</th>
-                                                        {orderStatus != 1 && <th>Delivery Date</th> }
-                                                        {orderStatus != 2 && <th>Action</th> }
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {(orderList.length>0 ? orderList :[]).map((order, index) => {
-                                                    let products = orderedProductList.filter(pro => pro.order_id === order.id);                                                    
-                                                    let totalProduct = products.length;                                                    
-                                                    return(
-                                                        (products.length >0 ? products :[]).map((product) =>  {
-                                                            return(
-                                                                <tr class="text-center">
-                                                                    {totalProduct !== 0 &&
-                                                                        <Fragment>                                                                            
-                                                                            <td rowspan={totalProduct}>{index + 1}</td>
-                                                                            <td rowspan={totalProduct}>{getDateInDDMMYYYY(order.order_date)}</td>
-                                                                            <td rowspan={totalProduct}>{order.order_id}</td>
-                                                                            <td rowspan={totalProduct}>{order.full_name}</td>
-                                                                        </Fragment>
-                                                                    }
-                                                                    {(orderStatus == 2 || orderStatus  == 1) && <td>{product.product_name}</td> }
-                                                                    {(orderStatus == 2 || orderStatus  == 1) && <td>{`${product.quantity}  ${product.ordered_unit_name}`}</td> }
-                                                                    {orderStatus == 2 &&  <td>{`${product.price}`}</td>}
-                                                                    {totalProduct !== 0 &&
-                                                                        <Fragment>
-                                                                            <td rowspan={totalProduct}>{`${order.flat_add}, ${order.street_add}, ${order.city}`}</td>
-                                                                            {orderStatus != 1 && <td rowspan={totalProduct}>{getDateInDDMMYYYY(order.delivery_date)}</td> }
-                                                                            <td rowspan={totalProduct}>
-                                                                                {orderStatus  == 1 ? <Link to={{pathname :'/delivery-form', state : {order: order, products: products}}}>Click to delivered</Link> :
-                                                                                 orderStatus  == 3 ?
-                                                                                    order.status == 3 ?
-                                                                                    <button class={ "alter-purchase-record"} type="submit" onClick={()=>{handleOrderConfirmation(order, products)}}> See Info </button>
-                                                                                   :
-                                                                                    (order.status  == 4) ?
-                                                                                    <button class="alter-purchase-record" type="submit" onClick={()=>{handleGenerateInvoice(order)}}> See Invoice </button> : ''
-                                                                                   :''
-                                                                                }
-                                                                            </td>
-                                                                        </Fragment>
-                                                                    }   
-                                                                    <div style={{display:'none'}}>{totalProduct = 0}</div>
-                                                                </tr>
-                                                                )
-                                                            })
-                                                        )
-                                                    })
-                                                }	
-                                                </tbody>
-                                            </table>
+                                        <div class="w-100 table-div">
+                                            {(orderStatus == 1) && <NewOrderTable orderIdsArray={orderIdsArray} orderList = {orderList} />}
+                                            {(orderStatus == 2) && <DeliveredOrderTable orderIdsArray={orderIdsArray} orderList = {orderList} />}
+                                            {(orderStatus == 3) && <VerifiedOrderTable orderIdsArray={orderIdsArray} orderList = {orderList} 
+                                                                    handleOrderConfirmation={handleOrderConfirmation} handleGenerateInvoice={handleGenerateInvoice} />}
                                         </div>
 									</div>
 								</div>
 							</div>
 						</div>
-                    
                 </div>
     </section>
 		<Footer />
@@ -206,8 +154,6 @@ export default function ViewOrder(props) {
                     open={dialogOpen} 
                     setDialogOpen = {setDialogOpen} 
                     props = {orderProps} 
-                    setOrderList = {setOrderList}
-                    setOrderedProductList = {setOrderedProductList}
                     isUpdatable = {1}
                 /> 
                 : null 

@@ -74,8 +74,8 @@ const getOrderListOfSingleDay = async function (req, res, next) {
     try {
         const Model = new Order(params);
         const orderList = await Model.getOrderListOfSingleDay();
-        const orderedProducts = await Model.getOrderedProduct();
-        res.send({ orderList: orderList, orderedProducts: orderedProducts});
+        // const orderedProducts = await Model.getOrderedProduct();
+        res.send({ orderList: orderList });
     } catch (err) {
         next(err);
     }
@@ -91,9 +91,8 @@ const getCustomerOrderList = async function (req, res, next) {
     }
     try {
         const Model = new Order(params);
-        const orderList = await Model.getCustomerOrderList();
-        const orderedProducts = await Model.getCustomerOrderedProduct();
-        res.send({ orderList: orderList, orderedProducts: orderedProducts});
+        const orderList = await Model.getCustomerOrderList();  
+        res.send({ orderList: orderList});
     } catch (err) {
         next(err);
     }
@@ -208,25 +207,11 @@ const fetchDeliveryFormData = async function (req, res, next) {
     try {
         const Model = new Order(params);
         const result = await Model.fetchDeliveryFormData();
-        // let isAllAvailable =  true;
 
-        if(result !==  undefined && result !== null && result.length > 0){
-            res.send({deliveryFormData : result});
-            // result.map(data => {
-            //     if(data.purchased_quantity  === "" || data.cost === "" || data.purchased_quantity  === null || data.cost === null){
-            //         isAllAvailable = false;
-            //     }
-            //     let available = (data.paid_quantity !== null && data.paid_quantity !== undefined && data.paid_quantity !== "") ? (data.purchased_quantity - data.paid_quantity) : data.purchased_quantity ;
-            //     if( available <= 0){
-            //         isAllAvailable = false;
-            //     }
-            // })
-        }
-        // if(isAllAvailable === true){
-        //     res.send({deliveryFormData : result});
-        // }
-        else{
-            res.send({deliveryFormData: []});
+        if(isNotEmpty(result)){
+            res.send(result);
+        } else{
+            res.send({deliveryFormData: [], extraPurchased: []});
         }
     } catch (err) {
         next(err);
@@ -295,14 +280,14 @@ const getOrderedProductListSingleDay = async function (req, res, next) {
                 row.cost = purchase.cost;
                 row.cost_of_each = purchase.cost_of_each;
                 row.purchased_status = purchase.status;
-                // row.is_extra = purchase.is_extra;
+                row.is_extra = purchase.is_extra;
             }else{
                 row.purchased_quantity = '';
                 row.purchased_unit_id = '';
                 row.cost = '';
                 row.cost_of_each = '',
                 row.purchased_status = '';
-                // row.is_extra = 0;
+                row.is_extra = 0;
             }
             returnValues.push(row);
         });
@@ -319,7 +304,7 @@ const getOrderedProductListSingleDay = async function (req, res, next) {
                     sub_category_id : data.sub_category_id,
                     category_id : data.category_id,
                     price : 0,
-                    // is_extra : data.is_extra,
+                    is_extra : data.is_extra,
                     purchased_quantity : data.purchased_quantity,
                     purchased_unit_id : data.purchased_unit_id,
                     cost : data.cost,
@@ -399,12 +384,13 @@ const submitDeliveryDetails = async function (req, res, next) {
         formData : req.body.productData,
         orderId : req.body.orderId,
     }
+    console.log(params.formData);
     try {
         const Model = new Order(params);
         const submit = await Model.proceedToDelivered();
         const update = await Model.updatePurchaseRegister();
         const result = await Model.submitDeliveryDetails();
-        if(result !== "" && result !== null && result !== undefined){
+        if(isNotEmpty(result)){
             res.send(true);
         }else{
             res.send(false);

@@ -7,12 +7,12 @@ import OrderAPI from '../../../api/order.js';
 
 
 
-export default function OrderAcceptRejectDialog({open, setDialogOpen, props, setOrderList, setOrderedProductList, isUpdatable}) {
+export default function OrderAcceptRejectDialog({open, setDialogOpen, props, isUpdatable}) {
 
   const [products, setProducts] = useState(props.products);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-    // console.log(products);
+    console.log(products);
 
   const handleOrderConfirmation = async (e) =>{
     e.preventDefault();
@@ -35,8 +35,6 @@ export default function OrderAcceptRejectDialog({open, setDialogOpen, props, set
           });
         const result = await OrderAPI.handleOrderConfirmation({orderId: props.order_id, productData: productData, date : props.order_date, order_status : 3});
           // console.log(productData)
-        setOrderList(result.orderList);            
-        setOrderedProductList(result.orderedProducts);
         setDialogOpen(false);
         setIsSubmitting(false);
     }catch(e){
@@ -67,12 +65,11 @@ export default function OrderAcceptRejectDialog({open, setDialogOpen, props, set
               </thead>
               <tbody>
                 {(products.length > 0 ? Object.values(products) :[]).map((product, index) => {
-                  // console.log(product)
                     return(
                       <tr class="text-center">
                         <td>{index + 1}</td>
                         <td>{product.product_name}</td>
-                        <td>{product.quantity + ' ' + product.ordered_unit_name}</td>
+                        <td>{product.quantity + ' ' + product.unit_name}</td>
                         <td>{product.price}</td>
                         <td>{product.verified_quantity + ' ' + product.verified_unit_name}</td>
                         {isUpdatable === 1 && <td>

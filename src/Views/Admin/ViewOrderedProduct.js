@@ -66,7 +66,7 @@ export default function ViewOrderedProduct() {
             });            
             let temp = [...result.orderedProductListSingleDay];
             (temp.length > 0 ? temp : []).map(data => {
-                data.is_extra = 0;
+                data.add_remove = 0;
                 data.break_here = 0;
             });
             temp.push({break_here: 1});
@@ -94,6 +94,7 @@ export default function ViewOrderedProduct() {
                 purchased_unit_id: "",
                 unit_name: product.main_unit_name,
                 quantity: 0,
+                add_remove: 1,
             });
             setOrderedProductList(temp);    
         }
@@ -176,7 +177,7 @@ export default function ViewOrderedProduct() {
                                                         <th style={{minWidth : '50px'}}>#</th>
                                                         <th style={{minWidth : '200px'}}>Products</th>
                                                         <th style={{minWidth : '150px'}}>Ordered Quantity</th>
-                                                        <th>Purchased Quantity</th>                                                        
+                                                        <th>Purchased Quantity</th>
                                                         <th>Cost of Each </th>
                                                         <th>Cost of Total</th>
                                                         <th>&nbsp;</th>
@@ -210,13 +211,13 @@ export default function ViewOrderedProduct() {
                                                                             <input type="number" name={"productCostEach-"+data.id} class="cost-input" id={"productCostEach-"+data.id} defaultValue={data.cost_of_each ? data.cost_of_each : (data.price / data.quantity)} min="0"  disabled={data.purchased_status === 3} onChange={handleEachCostChange} required/>
                                                                         </div>
                                                                     </td>       
-                                                                    <td colSpan={data.is_extra === 0 ? 2 : 0}>
+                                                                    <td colSpan={data.add_remove === 0 ? 2 : 0}>
                                                                         <div class="d-flex justify-content-center">
                                                                             <p class="cost-input-adoptment"> $ </p>
                                                                             <input type="number" name={"productCost-"+data.id} class="cost-input" id={"productCost-"+data.id} defaultValue={data.cost ? data.cost : data.price} min="0"  disabled={data.purchased_status === 3} onChange={handleCostChange} required />
                                                                         </div>
                                                                     </td>  
-                                                                    {data.is_extra === 1 && <td class="product-remove"><a onClick={() => {removeAdditionalProduct(index)}}><span class="ion-ios-close"></span></a></td>}
+                                                                    {data.add_remove === 1 && <td class="product-remove"><a onClick={() => {removeAdditionalProduct(index)}}><span class="ion-ios-close"></span></a></td>}
                                                                 </tr>
                                                                 )
                                                             }
