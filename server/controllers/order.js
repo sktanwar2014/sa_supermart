@@ -37,7 +37,7 @@ const generateInvoice = async function (req, res, next) {
     try {
         const Model = new Order(params);
         const result = await Model.getInvoiceDetails();
-        // console.log(result)
+        console.log(result)
 
         let DD = invoiceReport(result);
         res.send(DD);
@@ -52,13 +52,11 @@ const getOrderList = async function (req, res, next) {
         order_status: req.body.order_status,
         from_date :  req.body.from_date,
         to_date :  req.body.to_date,
-        is_date_range : 1,
     }
     try {
         const Model = new Order(params);
         const orderList = await Model.getOrderList();
-        const orderedProducts = await Model.getOrderedProduct();
-        res.send({ orderList: orderList, orderedProducts: orderedProducts});
+        res.send({ orderList: orderList});
     } catch (err) {
         next(err);
     }
@@ -69,7 +67,6 @@ const getOrderListOfSingleDay = async function (req, res, next) {
     const params = {
         order_status: req.body.order_status,
         date :  req.body.date,
-        is_date_range : 0,
     }
     try {
         const Model = new Order(params);
@@ -109,7 +106,7 @@ const orderVerificationByCustomer = async function (req, res, next) {
     try {
         const Model = new Order(params);
         const result = await Model.orderVerificationByCustomer();
-        if(result !== "" && result !== null && result !== undefined){
+        if(isNotEmpty(result)){
             res.send(true);
         }else{
             res.send(false);
@@ -138,8 +135,7 @@ const addNewOrder = async function (req, res, next) {
     }
     try {
         const Model = new Order(params);
-        console.log(params.shipping_id)
-        console.log(isNotEmpty(params.shipping_id))
+        
         if(!isNotEmpty(params.shipping_id)){
             const shippingId = await Model.insertShippingDetails();
             Model.shipping_id = shippingId;
@@ -384,7 +380,7 @@ const submitDeliveryDetails = async function (req, res, next) {
         formData : req.body.productData,
         orderId : req.body.orderId,
     }
-    console.log(params.formData);
+    
     try {
         const Model = new Order(params);
         const submit = await Model.proceedToDelivered();
@@ -406,19 +402,18 @@ const submitDeliveryDetails = async function (req, res, next) {
 
 const handleOrderConfirmation = async function (req, res, next) {  
     const params = {
-        order_status : req.body.order_status,
         formData : req.body.productData,
         orderId : req.body.orderId,
-        date :  req.body.date,
-        is_date_range : 0,
     }
+    console.log(params)
     try {
         const Model = new Order(params);
         const result = await Model.handleOrderConfirmation();
-        
-        const orderList = await Model.getOrderListOfSingleDay();
-        const orderedProducts = await Model.getOrderedProduct();
-        res.send({ orderList: orderList, orderedProducts: orderedProducts});
+        if(isNotEmpty(result)){
+            res.send(true);
+        }else {
+            res.send(false);
+        }
     } catch (err) {
         next(err);
     }

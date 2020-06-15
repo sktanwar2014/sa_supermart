@@ -34,13 +34,7 @@ export default function DeliveryForm(props) {
             temp.push({break_here: 1});
             setProductList(temp);
             setExtraPurchased(result.extraPurchased);
-            // if(result.deliveryFormData.length >0){
-            //     setProductList(result.deliveryFormData);
-            // }
-            // else if(result.deliveryFormData.length === 0){
-            //     alert('Product not available in stock !')
-            //     window.location.pathname = '/view-ordered-product';
-            // }
+            // console.log(result)
             setIsLoading(false);
         }catch(e){
             console.log('Error...',e);
@@ -51,17 +45,19 @@ export default function DeliveryForm(props) {
         let tempProd = [...productList];
         let id =  (e.target.name).split('-')[1];
         let quantity = e.target.value;
-        tempProd.map((data) => {
+        tempProd.map((data) => {            
             if(data.product_id == id){
                 let available = (isNotEmpty(data.paid_quantity)) ? Number(data.purchased_quantity - data.paid_quantity).toFixed(3) : Number(data.purchased_quantity).toFixed(3) ;
                 if(Number(available) < Number(quantity)){
                     data.will_give = '';
                     data.price = '';
+                    data.is_delivered = 0;
                     alert('input quantity is out of stock');
                 }else{
                     let price = (data.cost / data.purchased_quantity) * quantity ;
                     data.price = Number(price).toFixed(2);
                     data.will_give = quantity;
+                    data.is_delivered = 1;
                 }
             }
         })
@@ -80,12 +76,13 @@ export default function DeliveryForm(props) {
 
         try{
             let productData = [];
-            productList.map((data, index)=> {
-                if(isNotEmpty(data.purchased_quantity)){
+            productList.map((data) => {
+                if(data.is_delivered === 1){
                     productData.push({
                         order_id : order.id,
                         ordered_id : data.id,
                         product_id : data.product_id,
+                        tracking_id : data.tracking_id,
                         delivery_date : getDate(new Date()),
                         order_date : getDate(order.order_date),
                         paid_quantity : data.will_give,
@@ -94,7 +91,7 @@ export default function DeliveryForm(props) {
                         created_by : userId,
                     })
                 }
-            })
+            });            
             const result = await OrderAPI.submitDeliveryDetails({productData: productData, orderId : order.id});
             setIsLoading(false);    
             setIsSubmitting(false);
@@ -115,6 +112,7 @@ export default function DeliveryForm(props) {
             temp.push({
                 id : 0,
                 product_id : data.product_id,
+                tracking_id : (Math.ceil(Math.random() *1000000000)).toString(),
                 product_name: data.product_name,
                 quantity : 0,
                 purchased_unit_id : data.purchased_unit_id,

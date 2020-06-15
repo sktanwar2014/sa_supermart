@@ -2,9 +2,9 @@ import React, {Fragment} from 'react';
 import {Link} from  'react-router-dom';
 
 //Components 
-import {getDateInDDMMYYYY, getDate} from '../../../common/moment.js';
+import {getDateInDDMMYYYY} from '../../../../common/moment.js';
 
-export default function VerifiedOrderTable({orderIdsArray, orderList, handleOrderConfirmation, handleGenerateInvoice}) {
+export default function VerifiedReportTable({orderIdsArray, orderList, handleOrderConfirmation}) {
     console.log(orderList)
     return(
         <table className="table table-td">
@@ -40,11 +40,7 @@ export default function VerifiedOrderTable({orderIdsArray, orderList, handleOrde
                                             <td rowspan={totalProduct}>{`${product.flat_add}, ${product.street_add}, ${product.city}`}</td>
                                             <td rowspan={totalProduct}>{getDateInDDMMYYYY(product.delivery_date)}</td> 
                                             <td rowspan={totalProduct}>
-                                                {product.status == 3 ?
-                                                    <button class={ "alter-purchase-record"} type="submit" onClick={()=>{handleOrderConfirmation(products)}}> See Info </button>
-                                                :
-                                                    <button class="alter-purchase-record" type="submit" onClick={()=>{handleGenerateInvoice(orderId)}}> See Invoice </button>
-                                                }
+                                                <button class={ "alter-purchase-record"} type="submit" onClick={()=>{handleOrderConfirmation(products)}}> See Info </button>
                                             </td>
                                         </Fragment>
                                     }   

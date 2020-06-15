@@ -1,4 +1,4 @@
-import React, {useState, Fragment} from 'react';
+import React, {useState} from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
@@ -7,20 +7,18 @@ import OrderAPI from '../../../api/order.js';
 
 
 
-export default function OrderAcceptRejectDialog({open, setDialogOpen, props, isUpdatable}) {
+export default function OrderAcceptRejectDialog({open, setDialogOpen, props, isUpdatable, getOrderListOfSingleDay}) {
 
   const [products, setProducts] = useState(props.products);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-    console.log(products);
-
   const handleOrderConfirmation = async (e) =>{
     e.preventDefault();
     setIsSubmitting(true);
     try{
         let productData  = [];
           products.map((data)=> {
-            let isComponentExist = document.querySelector(`input[name="action-${data.ordered_id}"]:checked`);
+            let isComponentExist = document.querySelector(`input[name="action-${data.delivered_id}"]:checked`);
             let status = '';
             if(isComponentExist === null){
               status = 5;
@@ -28,13 +26,13 @@ export default function OrderAcceptRejectDialog({open, setDialogOpen, props, isU
               status = isComponentExist.value;
             }
             productData.push({
-                ordered_id : data.ordered_id,
+                delivered_id : data.delivered_id,
                 product_id : data.product_id,
                 status :  status,
             });
           });
-        const result = await OrderAPI.handleOrderConfirmation({orderId: props.order_id, productData: productData, date : props.order_date, order_status : 3});
-          // console.log(productData)
+        const result = await OrderAPI.handleOrderConfirmation({orderId: props.order_id, productData: productData});
+        getOrderListOfSingleDay();
         setDialogOpen(false);
         setIsSubmitting(false);
     }catch(e){
@@ -72,12 +70,13 @@ export default function OrderAcceptRejectDialog({open, setDialogOpen, props, isU
                         <td>{product.quantity + ' ' + product.unit_name}</td>
                         <td>{product.price}</td>
                         <td>{product.verified_quantity + ' ' + product.verified_unit_name}</td>
-                        {isUpdatable === 1 && <td>
+                        {isUpdatable === 1 && 
+                        <td>
                           {(Number(product.quantity) === Number(product.verified_quantity) && (product.verified_unit_id === product.unit_id)) ? ''
                            :
                            <div class="radio">
-                              <label style={{ paddingRight: '15px'}}><input type="radio" name={"action-"+product.ordered_id} value="5" class="mr-1" required/>Accept</label>
-                              <label><input type="radio" name={"action-"+product.ordered_id} value="6" class="mr-1" required/> Reject</label>
+                              <label style={{ paddingRight: '15px'}}><input type="radio" name={"action-"+product.delivered_id} value="5" class="mr-1" required/>Accept</label>
+                              <label><input type="radio" name={"action-"+product.delivered_id} value="6" class="mr-1" required/> Reject</label>
                             </div>
                           }
                         </td>

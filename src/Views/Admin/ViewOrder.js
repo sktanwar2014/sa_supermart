@@ -56,7 +56,6 @@ export default function ViewOrder(props) {
                 order_status : Number(inputs.orderStatus),
                 date : getDate(inputs.date),
             });
-            console.log(result);
             const orderIds = [...new Set(result.orderList.map(dist => dist.id))];
             setOrderList(result.orderList);
             setOrderIdsArray(orderIds);
@@ -76,12 +75,11 @@ export default function ViewOrder(props) {
     }
 
 
-    const handleGenerateInvoice = async (data) =>{
+    const handleGenerateInvoice = async (id) =>{
         setIsLoading(true);
-
         pdfmake.vfs = pdfFonts.pdfMake.vfs;
         try{
-            const result = await OrderAPI.generateInvoice({orderId : data.id});
+            const result = await OrderAPI.generateInvoice({orderId : id});
             pdfmake.createPdf(result).open();
             setIsLoading(false);
 
@@ -93,8 +91,7 @@ export default function ViewOrder(props) {
     
     const handleOrderConfirmation = async (data) =>{
         setOrderProps({
-            order_id: data.id,
-            order_date : getDate(inputs.date),
+            order_id: data[0].id,
             products: data
         });
         setDialogOpen(true);
@@ -154,6 +151,7 @@ export default function ViewOrder(props) {
                     open={dialogOpen} 
                     setDialogOpen = {setDialogOpen} 
                     props = {orderProps} 
+                    getOrderListOfSingleDay = {getOrderListOfSingleDay}
                     isUpdatable = {1}
                 /> 
                 : null 

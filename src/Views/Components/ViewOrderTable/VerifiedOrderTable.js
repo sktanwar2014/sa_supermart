@@ -4,8 +4,8 @@ import {Link} from  'react-router-dom';
 //Components 
 import {getDateInDDMMYYYY, getDate} from '../../../common/moment.js';
 
-export default function VerifiedOrderTable({orderIdsArray, orderList, handleOrderConfirmation, handleGenerateInvoice}) {
-    console.log(orderList)
+export default function VerifiedOrderTable({orderIdsArray, orderList, handleGenerateInvoice}) {
+    console.log('dfasdfdasfasdf', orderList)
     return(
         <table className="table table-td">
             <thead class="thead-primary">
@@ -42,8 +42,9 @@ export default function VerifiedOrderTable({orderIdsArray, orderList, handleOrde
                                             <td rowspan={totalProduct}>{`${product.flat_add}, ${product.street_add}, ${product.city}`}</td>
                                             <td rowspan={totalProduct}>{getDateInDDMMYYYY(product.delivery_date)}</td> 
                                             <td rowspan={totalProduct}>
-                                                {(product.status == 3 || product.status) &&
-                                                    <button class="alter-purchase-record" type="submit" onClick={()=>{handleGenerateInvoice(products)}}> See Invoice </button>
+                                                {products[0].status === 4 ?
+                                                        <button class="alter-purchase-record" type="submit" onClick={()=>{handleGenerateInvoice(orderId)}}> See Invoice </button>
+                                                    :   "Not Verified"
                                                 }
                                             </td>
                                         </Fragment>

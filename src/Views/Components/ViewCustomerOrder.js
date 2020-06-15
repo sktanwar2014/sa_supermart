@@ -72,12 +72,11 @@ export default function ViewCustomerOrder() {
     }
 
     
-    const handleGenerateInvoice = async (data) =>{
+    const handleGenerateInvoice = async (id) =>{
         setIsLoading(true);
-
         pdfmake.vfs = pdfFonts.pdfMake.vfs;
         try{
-            const result = await OrderAPI.generateInvoice({orderId : data.id});
+            const result = await OrderAPI.generateInvoice({orderId : id});
             pdfmake.createPdf(result).open();
             setIsLoading(false);
 
@@ -131,72 +130,16 @@ export default function ViewCustomerOrder() {
                                         <div class="w-100 table-div">
                                             {(orderStatus == 1) && <NewOrderTable orderIdsArray={orderIdsArray} orderList = {orderList} />}
                                             {(orderStatus == 2) && <DeliveredOrderTable orderIdsArray={orderIdsArray} orderList = {orderList} />}
-                                            {(orderStatus == 3) && <VerifiedOrderTable orderIdsArray={orderIdsArray} orderList = {orderList}  handleGenerateInvoice={handleGenerateInvoice} />}
-                                            {/* <table className="unit-array-table">
-                                                <thead>
-                                                    <tr>
-                                                        <th>#</th>
-                                                        <th>Order Date</th>
-                                                        <th>Order Id</th>
-                                                        <th>Customer</th>
-                                                        <th>Product</th>
-                                                        {orderStatus == 1 && <th>Quantity</th> }
-                                                        <th>Address</th>
-                                                        {orderStatus != 1 && <th>Delivery Date</th> }
-                                                        {(orderStatus == 2 || orderStatus ==  3) && <th>Action</th> }
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {(orderList.length>0 ? orderList :[]).map((order, index) => {                                                    
-                                                    let products = orderedProductList.filter(pro => pro.order_id === order.id);
-                                                    let totalProduct = products.length;
-                                                    return(
-                                                        (products.length >0 ? products :[]).map((product) =>  {
-                                                            return(
-                                                                <tr class="text-center">
-                                                                    {totalProduct !== 0 &&                                                                    
-                                                                        <Fragment>                                                                            
-                                                                            <td rowspan={totalProduct}>{index + 1}</td>
-                                                                            <td rowspan={totalProduct}>{getDateInDDMMYYYY(order.order_date)}</td>
-                                                                            <td rowspan={totalProduct}>{order.order_id}</td>
-                                                                            <td rowspan={totalProduct}>{order.full_name}</td>
-                                                                        </Fragment>
-                                                                    }
-                                                                    <td>{product.product_name}</td>
-                                                                    {orderStatus == 1 &&  <td>{`${product.quantity}  ${product.ordered_unit_name}`}</td> }
-                                                                    {totalProduct !== 0 &&
-                                                                        <Fragment>
-                                                                            <td rowspan={totalProduct}>{`${order.flat_add}, ${order.street_add}, ${order.city}`}</td>
-                                                                            {orderStatus != 1 && <td rowspan={totalProduct}>{getDateInDDMMYYYY(order.delivery_date)}</td> }
-                                                                            {(orderStatus == 2 || orderStatus == 3) && <td rowspan={totalProduct}>
-                                                                                {orderStatus == 2 && <Link to={{pathname :'/verify-delivered-product', state : {order: order, product: products}}}>Click to verify</Link>}
-                                                                                {(orderStatus == 3 && order.status  == 4) && 
-                                                                                    <button class="alter-purchase-record" type="submit" onClick={()=>{handleGenerateInvoice(order)}}> See Invoice </button>
-                                                                                }
-                                                                                </td>
-                                                                            }
-                                                                        </Fragment>
-                                                                    }
-                                                                    <div style={{display:'none'}}>{totalProduct = 0}</div>
-                                                                </tr>
-                                                                )
-                                                            })
-                                                        )
-                                                    })
-                                                }	
-                                                </tbody>
-                                            </table> */}
+                                            {(orderStatus == 3) && <VerifiedOrderTable orderIdsArray={orderIdsArray} orderList = {orderList}  handleGenerateInvoice={handleGenerateInvoice} />}                                  
                                         </div>
 									</div>
 								</div>
 							</div>
 						</div>
-                    
                 </div>
     </section>
 		<Footer />
 		{isLoading ?   <CallLoader />   : null  }
-
 	</Fragment>
     )
 }

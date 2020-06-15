@@ -8,7 +8,7 @@ import Header from '../Partials/Header.js';
 import Footer from '../Partials/Footer.js';
 import CallLoader from '../../common/Loader.js';
 
-import {getDate, getDateInDDMMYYYY} from '../../common/moment.js';
+import {getDateInDDMMYYYY} from '../../common/moment.js';
 
 export default function DeliveryForm(props) {
     
@@ -42,13 +42,11 @@ export default function DeliveryForm(props) {
             productList.map((data)=> {
                 productData.push({
                     delivered_id : data.delivered_id,
-                    ordered_id : data.id,
                     product_id : data.product_id,
                     quantity : document.getElementById('provideQuantity-'+data.product_id).value,
                     unit_id : data.unit_id,
                 })
             })
-
             const result = await OrderAPI.orderVerificationByCustomer({productData: productData, orderId : order.id});
             setIsLoading(false);
 

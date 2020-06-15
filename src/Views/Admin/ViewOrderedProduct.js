@@ -10,6 +10,8 @@ import ProductSelectionDialog from './Components/productSelectionDialog.js';
 
 import {getDateInDDMMYYYY, getDate} from '../../common/moment.js';
 import {SimpleAlert} from '../../common/Alert.js'
+import {isNotEmpty} from '../../utils/conditionChecker.js';
+
 
 const RESET_VALUES = {
     date : new Date(),
@@ -30,31 +32,7 @@ export default function ViewOrderedProduct() {
 		getOrderedProductListSingleDay();
     },[]);
 
-    const handleEachCostChange = (e) => {
-        let id = (e.target.name).split('-')[1];
-        let price = Number(e.target.value);        
-        const purchasedQuantity = document.getElementById('purchasedQuantity-'+id).value;
-        if(purchasedQuantity == 0 || purchasedQuantity == "" || purchasedQuantity== null || purchasedQuantity == undefined || purchasedQuantity == NaN){
-            document.getElementById('productCost-'+id).value = 0;
-        }else{
-            document.getElementById('productCost-'+id).value = (price * Number(purchasedQuantity)).toFixed(2);
-        }
-    }
     
-    const handleCostChange = (e) => {
-        let id = (e.target.name).split('-')[1];
-        let price = Number(e.target.value);
-        const purchasedQuantity = document.getElementById('purchasedQuantity-'+id).value;
-        if(purchasedQuantity == 0 || purchasedQuantity == "" || purchasedQuantity== null || purchasedQuantity == undefined || purchasedQuantity == NaN){
-            document.getElementById('productCostEach-'+id).value = 0;
-        }else{
-            document.getElementById('productCostEach-'+id).value = (price / Number(purchasedQuantity)).toFixed(2);
-        }
-    }
-    
-	const  handleInputChange = (e) => {
-		setInputs({...inputs, [e.target.name]: e.target.value});
-	}
 
     const getOrderedProductListSingleDay = async () => {
         setIsLoading(true);
@@ -68,6 +46,9 @@ export default function ViewOrderedProduct() {
             (temp.length > 0 ? temp : []).map(data => {
                 data.add_remove = 0;
                 data.break_here = 0;
+                data.purchased_quantity = data.purchased_quantity ? data.purchased_quantity : data.quantity;
+                data.productCostEach = data.cost_of_each ? data.cost_of_each : (data.price / data.quantity);
+                data.productCost = data.cost ? data.cost : data.price;
             });
             temp.push({break_here: 1});
             setOrderedProductList(temp);
@@ -76,6 +57,52 @@ export default function ViewOrderedProduct() {
             console.log('Error...',e);
         }
     }
+
+    const onChangeHandler = (e) => {
+        let name = (e.target.name).split('-')[0];
+        let id = Number((e.target.name).split('-')[1]);
+        let value = e.target.value;
+        let tempList = [...orderedProductList];
+        tempList.map((data) => {
+            if(data.id === id){
+                if(name === "purchased_quantity"){
+                    data.purchased_quantity = value;
+                    if(value){
+                        if(data.productCostEach){
+                            data.productCost = (Number(data.productCostEach) * Number(value)).toFixed(2);
+                        }else if(data.productCost){
+                            data.productCostEach = (Number(data.productCost) / Number(value)).toFixed(2);
+                        }else{
+                            data.productCost = 0;
+                            data.productCostEach = 0;
+                        }
+                    }else{
+                        data.productCost = 0;
+                        data.productCostEach = 0;
+                    }                    
+                }else if(name === "productCostEach"){
+                    data.productCostEach = value;
+                    if(data.purchased_quantity){
+                        data.productCost = (Number(value) * Number(data.purchased_quantity)).toFixed(2);
+                    }else {
+                        data.productCost = 0;
+                    }
+                }else if(name === "productCost"){
+                    data.productCost = value;
+                    if(data.purchased_quantity){
+                        data.productCostEach = (Number(value) / Number(data.purchased_quantity)).toFixed(2);
+                    }else{
+                        data.productCostEach = 0;
+                    }
+                }
+              }
+        });
+        setOrderedProductList(tempList);
+    }
+
+	const  handleInputChange = (e) => {
+		setInputs({...inputs, [e.target.name]: e.target.value});
+	}
 
     const handleProductSelection = (product) => {
         if(!(orderedProductList.find(ele => ele.id === product.id))){
@@ -90,6 +117,8 @@ export default function ViewOrderedProduct() {
                 price: product.price,
                 product_name: product.product_name,
                 purchased_quantity: "",
+                productCostEach :"",
+                productCost : "",
                 purchased_status: "",
                 purchased_unit_id: "",
                 unit_name: product.main_unit_name,
@@ -108,18 +137,15 @@ export default function ViewOrderedProduct() {
             let formData = [];
             (orderedProductList.length > 0 ? orderedProductList : []).map(data => {
                 if(data.break_here === 0){
-                    let purchasedQuantity  = document.getElementById('purchasedQuantity-'+data.id).value;
-                    let productCost  = document.getElementById('productCost-'+data.id).value;
-                    let costOfEachProduct  = document.getElementById('productCostEach-'+data.id).value;
                     formData.push({
                         product_id : data.id,
                         purchase_date : getDate(inputs.date),
                         required_quantity : data.quantity,
                         required_unit_id : data.main_unit_id,
-                        purchased_quantity : purchasedQuantity,
+                        purchased_quantity : data.purchased_quantity,
                         purchased_unit_id : data.main_unit_id,
-                        cost : productCost,
-                        cost_of_each : costOfEachProduct,
+                        cost : data.productCost,
+                        cost_of_each : data.productCostEach,
                         createdBy : userId,
                         is_extra : data.is_extra,
                     });
@@ -127,7 +153,7 @@ export default function ViewOrderedProduct() {
             });
             if(formData.length > 0){
                 const result = await OrderAPI.handlePurchasedRecord({formData: formData});                
-                if(result !== "" && result !== null && result !== undefined){
+                if(isNotEmpty(result)){
                     setAlertParams({...alertParams, ['message'] : 'Table updated successfully'});
                     setShowAlert(true);
                 }
@@ -201,20 +227,20 @@ export default function ViewOrderedProduct() {
                                                                     <td>{data.quantity+ ' ' + data.unit_name}</td>
                                                                     <td>
                                                                         <div class="d-flex justify-content-center">
-                                                                            <input type="number" name={"purchasedQuantity-"+data.id} class="cost-input" id={"purchasedQuantity-"+data.id} defaultValue={data.purchased_quantity ? data.purchased_quantity : data.quantity}  min="0" disabled={data.purchased_status === 3} required />
+                                                                            <input type="number" name={"purchased_quantity-"+data.id} class="cost-input" id={"purchased_quantity-"+data.id}  value={data.purchased_quantity}  min="0" disabled={data.purchased_status === 3} required onChange={onChangeHandler} />
                                                                             <p class="cost-input-adoptment"> {data.unit_name} </p>
                                                                         </div>
                                                                     </td>
                                                                     <td>
                                                                         <div class="d-flex justify-content-center">
                                                                             <p class="cost-input-adoptment"> $ </p>
-                                                                            <input type="number" name={"productCostEach-"+data.id} class="cost-input" id={"productCostEach-"+data.id} defaultValue={data.cost_of_each ? data.cost_of_each : (data.price / data.quantity)} min="0"  disabled={data.purchased_status === 3} onChange={handleEachCostChange} required/>
+                                                                            <input type="number" name={"productCostEach-"+data.id} class="cost-input" id={"productCostEach-"+data.id} value={data.productCostEach} min="0"  disabled={data.purchased_status === 3} onChange={onChangeHandler} required/>
                                                                         </div>
                                                                     </td>       
                                                                     <td colSpan={data.add_remove === 0 ? 2 : 0}>
                                                                         <div class="d-flex justify-content-center">
                                                                             <p class="cost-input-adoptment"> $ </p>
-                                                                            <input type="number" name={"productCost-"+data.id} class="cost-input" id={"productCost-"+data.id} defaultValue={data.cost ? data.cost : data.price} min="0"  disabled={data.purchased_status === 3} onChange={handleCostChange} required />
+                                                                            <input type="number" name={"productCost-"+data.id} class="cost-input" id={"productCost-"+data.id} value={data.productCost}  min="0"  disabled={data.purchased_status === 3} onChange={onChangeHandler} required />
                                                                         </div>
                                                                     </td>  
                                                                     {data.add_remove === 1 && <td class="product-remove"><a onClick={() => {removeAdditionalProduct(index)}}><span class="ion-ios-close"></span></a></td>}

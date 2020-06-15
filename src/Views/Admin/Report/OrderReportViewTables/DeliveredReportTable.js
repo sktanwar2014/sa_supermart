@@ -2,10 +2,9 @@ import React, {Fragment} from 'react';
 import {Link} from  'react-router-dom';
 
 //Components 
-import {getDateInDDMMYYYY, getDate} from '../../../common/moment.js';
+import {getDateInDDMMYYYY, getDate} from '../../../../common/moment.js';
 
-export default function VerifiedOrderTable({orderIdsArray, orderList, handleOrderConfirmation, handleGenerateInvoice}) {
-    console.log(orderList)
+export default function DeliveredReportTable({orderIdsArray, orderList}) {    
     return(
         <table className="table table-td">
             <thead class="thead-primary">
@@ -14,9 +13,11 @@ export default function VerifiedOrderTable({orderIdsArray, orderList, handleOrde
                     <th style={{minWidth : '100px'}}>Order Date</th>
                     <th style={{minWidth : '80px'}}>Order Id</th>
                     <th style={{minWidth : '180px'}}>Customer</th>
-                    <th style={{minWidth : '250px'}}>Address</th>
-                    <th style={{minWidth : '120px'}}>Delivery Date</th>
-                    <th style={{minWidth : '150px'}}>Action</th>
+                    <th style={{minWidth : '200px'}}>Product</th>
+                    <th style={{minWidth : '120px'}}>Quantity</th>
+                    <th style={{minWidth : '125px'}}>Price</th>
+                    <th style={{minWidth : '250px'}}>Address</th>   
+                    <th style={{minWidth : '120px'}}>Delivery Date</th>                  
                 </tr>
             </thead>
             <tbody>
@@ -34,18 +35,14 @@ export default function VerifiedOrderTable({orderIdsArray, orderList, handleOrde
                                             <td rowspan={totalProduct}>{product.order_id}</td>
                                             <td rowspan={totalProduct}>{product.full_name}</td>
                                         </Fragment>
-                                    }                                    
+                                    }
+                                    <td>{product.product_name}</td>
+                                    <td>{`${product.quantity}  ${product.unit_name}`}</td>
+                                    <td>{`${product.price}`}</td>
                                     {totalProduct !== 0 &&
                                         <Fragment>
                                             <td rowspan={totalProduct}>{`${product.flat_add}, ${product.street_add}, ${product.city}`}</td>
                                             <td rowspan={totalProduct}>{getDateInDDMMYYYY(product.delivery_date)}</td> 
-                                            <td rowspan={totalProduct}>
-                                                {product.status == 3 ?
-                                                    <button class={ "alter-purchase-record"} type="submit" onClick={()=>{handleOrderConfirmation(products)}}> See Info </button>
-                                                :
-                                                    <button class="alter-purchase-record" type="submit" onClick={()=>{handleGenerateInvoice(orderId)}}> See Invoice </button>
-                                                }
-                                            </td>
                                         </Fragment>
                                     }   
                                     <div style={{display:'none'}}>{totalProduct = 0}</div>
