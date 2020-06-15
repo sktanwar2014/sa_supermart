@@ -37,7 +37,7 @@ const generateInvoice = async function (req, res, next) {
     try {
         const Model = new Order(params);
         const result = await Model.getInvoiceDetails();
-        console.log(result)
+        // console.log(result)
 
         let DD = invoiceReport(result);
         res.send(DD);
@@ -405,7 +405,7 @@ const handleOrderConfirmation = async function (req, res, next) {
         formData : req.body.productData,
         orderId : req.body.orderId,
     }
-    console.log(params)
+    // console.log(params)
     try {
         const Model = new Order(params);
         const result = await Model.handleOrderConfirmation();

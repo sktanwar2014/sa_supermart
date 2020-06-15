@@ -5,7 +5,6 @@ import {Link} from  'react-router-dom';
 import {getDateInDDMMYYYY, getDate} from '../../../common/moment.js';
 
 export default function VerifiedOrderTable({orderIdsArray, orderList, handleGenerateInvoice}) {
-    console.log('dfasdfdasfasdf', orderList)
     return(
         <table className="table table-td">
             <thead class="thead-primary">

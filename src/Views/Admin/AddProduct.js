@@ -180,7 +180,6 @@ export default function AddProduct(props) {
     }
 
     const handleSubmit = async (e) => {
-        console.log(document.getElementById('productImage').files[0])
 //         var selectedFile = this.files[0];
 // var idxDot = selectedFile.name.lastIndexOf(".") + 1;
 // var extFile = selectedFile.name.substr(idxDot, selectedFile.name.length).toLowerCase();

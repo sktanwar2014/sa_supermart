@@ -18,7 +18,6 @@ export default function DeliveryForm(props) {
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    console.log(productList);
     useEffect(()=>{
         getProductUnitList();
     },[]);
