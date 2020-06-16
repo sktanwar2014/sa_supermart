@@ -3,6 +3,7 @@ const {isNotEmpty} = require('../utils/conditionChecker.js');
 const Static = require('../models/static.js')
 const Auth = require('../models/auth.js')
 const invoiceReport  = require('../reports/generateInvoice.js')
+const generateOrderedProductReport  = require('../reports/generateOrderedProductReport.js')
 
 
 
@@ -374,6 +375,67 @@ const getOrderedProductList = async function (req, res, next) {
 
 
 
+const generatePDFOfOrderedProducts = async function (req, res, next) {
+    const params = {
+        from_date :  req.body.from_date,
+        to_date :  req.body.to_date,
+        user_ids : req.body.user_ids,
+    }
+    try {
+        const Model = new Order(params);
+        const staticRecords = await new Static({}).getAllUnitList();
+        const result = await Model.getOrderedProductList();
+        
+        const prodIds = [...new Set(result.map(dist => dist.product_id))];
+        const userIds = [...new Set(result.map(dist => dist.user_id))];
+        const subCategoryIdList = [...new Set(result.map(dist => dist.sub_category_id))];
+        let returnValues  = [];
+    
+        prodIds.map((prodId) => {
+            const mainUnit = Object.values(result).find((prod) => { return prod.product_id === prodId})
+            const unit = Object.values(staticRecords).find((unit) => {return unit.id === mainUnit.main_unit_id});
+            const unitList = Object.values(staticRecords).filter((ele) => {return ele.group_id === unit.group_id})
+            
+            userIds.map((userId) => {
+                let weight =  0;
+                let product = {};
+                Object.values(result).map((prod) => {
+                    if(prodId === prod.product_id && userId  ===  prod.user_id){
+                        product = prod;
+                        let mainWeight =  calTotalUnit(unitList, prod.unit_id, prod.quantity, unit.sequence, mainUnit.main_unit_id);
+                        weight = weight +  mainWeight;
+                    }
+                });
+
+                if(product !== null && product !== undefined && Object.values(product).length > 0){
+                    returnValues.push({
+                        product_id : product.product_id,
+                        user_id : product.user_id,
+                        user_name : product.user_name,
+                        ordered_unit_id : product.ordered_unit_id,
+                        ordered_unit_name : product.ordered_unit_name,
+                        ordered_quantity : product.ordered_quantity,
+                        product_name : product.product_name,
+                        quantity : weight,
+                        unit_id: product.main_unit_id,
+                        unit_name: unit.unit_name,
+                        sub_category_id : product.sub_category_id,
+                        sub_category_name: product.sub_category_name,
+                    });
+                }
+            });
+        });
+        
+        const company = await Model.getCompanyDetails();
+        let DD = generateOrderedProductReport({orderedProductList: returnValues, userIdList: userIds, subCategoryIdList: subCategoryIdList, companyDetail : company[0] });
+        res.send(DD);
+        
+    } catch (err) {
+        next(err);
+    }
+}
+
+
 
 const submitDeliveryDetails = async function (req, res, next) {  
     const params = {
@@ -533,6 +595,7 @@ module.exports = {
     removeSelectedAddress: removeSelectedAddress,
     getOrderedProductList: getOrderedProductList,
     getOrderedProductListSingleDay: getOrderedProductListSingleDay,
+    generatePDFOfOrderedProducts: generatePDFOfOrderedProducts,
     getOrderListOfSingleDay : getOrderListOfSingleDay,
     handlePurchasedRecord: handlePurchasedRecord,
     fetchDeliveryFormData : fetchDeliveryFormData,

@@ -111,6 +111,20 @@ export default {
     }
   },
 
+  generatePDFOfOrderedProducts:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/order/generatePDFOfOrderedProducts`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
   getOrderedProductListSingleDay:async ({...payload }) => {
     const URL = `${c.API_CONSUMER}/order/getOrderedProductListSingleDay`;
     try {

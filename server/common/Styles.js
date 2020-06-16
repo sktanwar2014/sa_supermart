@@ -17,7 +17,7 @@ const styles = {
   productTableHeader:{
     margin: [10,0,0,0],
     bold: true,
-    alignment: 'left',
+    alignment: 'center',
     fontSize: 8
   },
   Header3: {

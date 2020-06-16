@@ -1,4 +1,7 @@
 import React, {useState, useEffect, Fragment} from 'react';
+import pdfmake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
+
 
 //Components 
 import Header from '../../Partials/Header.js';
@@ -77,8 +80,7 @@ export default function ViewOrderedProduct() {
                 from_date : getDate(inputs.fromDate),
                 to_date : getDate(inputs.toDate),
                 user_ids : isCheckedAll === true ? 0 : userIdsToFetch,
-            });
-            // console.log('result',result);
+            });            
             setOrderedProductList(result.orderedProductList);
             setUserIdList(result.userIdList);
             setSubCategoryIdList(result.subCategoryIdList);
@@ -88,6 +90,24 @@ export default function ViewOrderedProduct() {
         setIsLoading(false);
     }
 
+
+    const generatePDFOfOrderedProducts = async () =>{
+        // setIsLoading(true);
+        pdfmake.vfs = pdfFonts.pdfMake.vfs;
+        try{
+            const result = await OrderAPI.generatePDFOfOrderedProducts({
+                from_date : getDate(inputs.fromDate),
+                to_date : getDate(inputs.toDate),
+                user_ids : isCheckedAll === true ? 0 : userIdsToFetch,
+            });
+            console.log(result)
+            pdfmake.createPdf(result).open();
+            setIsLoading(false);
+
+        }catch(e){
+            console.log('Error...',e);
+        }
+    }
 
     return(
 		<Fragment>
@@ -197,10 +217,12 @@ export default function ViewOrderedProduct() {
                                             </table>
                                         </div>
 									</div>
+                                    <div class="form-group p-4">
+                                        <button class="btn  px-4 btn-primary" onClick={generatePDFOfOrderedProducts}>Print</button>
+                                    </div>
 								</div>
-							</div>
+							</div>                            
 						</div>
-                    
                 </div>
     </section>
 		<Footer />

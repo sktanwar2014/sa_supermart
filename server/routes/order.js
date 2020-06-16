@@ -11,6 +11,7 @@ Router.route("/addNewOrder").post(validateToken, Order.addNewOrder);
 Router.route("/fetchPreviousBillingAddresss").post(validateToken, Order.fetchPreviousBillingAddresss);
 Router.route("/removeSelectedAddress").post(validateToken, Order.removeSelectedAddress);
 Router.route("/getOrderedProductList").post(validateToken, Order.getOrderedProductList);
+Router.route("/generatePDFOfOrderedProducts").post(validateToken, Order.generatePDFOfOrderedProducts);
 Router.route("/getOrderedProductListSingleDay").post(validateToken, Order.getOrderedProductListSingleDay);
 Router.route("/getOrderListOfSingleDay").post(validateToken, Order.getOrderListOfSingleDay);
 Router.route("/handlePurchasedRecord").post(validateToken, Order.handlePurchasedRecord);

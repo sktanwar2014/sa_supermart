@@ -37,6 +37,26 @@ const Order = function (params) {
 };
 
 
+
+Order.prototype.getCompanyDetails = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+
+      connection.query(`SELECT first_name, email, mobile, address, city, postcode FROM profile WHERE user_id = 1 AND is_active = 1`, function (error, companyDetail, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+          resolve(companyDetail);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
+
 Order.prototype.getInvoiceDetails = function () {
   const that = this;
   return new Promise(function (resolve, reject) {
