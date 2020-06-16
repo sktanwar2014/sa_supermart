@@ -11013,3 +11013,7 @@ input[type="file"] {
   outline: none;
   font-size: 12px;
 }
+
+.w-60 {
+  width: 60%;
+}

@@ -69,7 +69,9 @@ export default function Header() {
                         <li className="nav-item dropdown">
                             <a className="nav-link dropdown-toggle" href="#" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Settings</a>
                             <div className="dropdown-menu" aria-labelledby="dropdown04">
-                                <a className="dropdown-item" href="/alter-categories">Categories</a>
+                                <a className="dropdown-item" href="/change-password">Change Password</a>
+                                <hr />
+                                <a className="dropdown-item" href="/alter-categories">Categories</a>                                
                                 <a className="dropdown-item" href="/alter-units">Units</a>
                                 <a className="dropdown-item" href="/handle-clients">Clients</a>
                             </div>
@@ -83,6 +85,12 @@ export default function Header() {
                             <a className="nav-link dropdown-toggle" href="#" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Orders</a>
                             <div className="dropdown-menu" aria-labelledby="dropdown04">
                                 <a className="dropdown-item" href="/view-user-order-list">View </a>
+                            </div>
+                        </li>
+                        <li className="nav-item dropdown">
+                            <a className="nav-link dropdown-toggle" href="#" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Settings</a>
+                            <div className="dropdown-menu" aria-labelledby="dropdown04">
+                                <a className="dropdown-item" href="/change-password">Change Password</a>
                             </div>
                         </li>
                         <li className="nav-item cta cta-colored"><a href="/cart-list" className="nav-link"><span className="icon-shopping_cart"></span>[{cartTotal}]</a></li>

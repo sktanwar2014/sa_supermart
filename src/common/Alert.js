@@ -11,12 +11,12 @@ export function SimpleAlert({message, variant, style}){
 }
 
 
-export function LinkAlert(message1, message2,  variant, link, linkText){
+export function LinkAlert(alertParams){
     return(
-        <Alert key="02" variant={variant}>
-            {message1}
-            <Alert.Link href={link}>{linkText}</Alert.Link>
-            {message2}
+        <Alert key="02" variant={alertParams.variant} style = {{padding:'0px', paddingLeft:'10px', marginTop:'10px'}}>
+            {alertParams.message1}
+            <Alert.Link href={alertParams.link}>{alertParams.linkText}</Alert.Link>
+            {alertParams.message2}
         </Alert>
     )
 }

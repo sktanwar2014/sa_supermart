@@ -102,6 +102,29 @@ const register = async function (req, res, next) {
 }
 
 
+
+const changePassword = async function (req, res, next) {
+    // console.log(req.body, req.decoded);
+    const params = {
+        password : req.body.password,
+        id : req.decoded.id,
+    }
+    
+    try {
+        const newActivity = new Auth(params);
+        const result = await newActivity.changePassword();
+
+        if(isNotEmpty(result)){
+            res.send({isUpdated: true});
+        }else{
+            res.send({isUpdated: false});
+        }
+    } catch (err) {
+        next(err);
+    }
+}
+
+
 const getUserList = async function (req, res, next) {
     try {
         const result = await new Auth({}).getUserList();
@@ -229,6 +252,7 @@ const activateEmail = async function (req, res, next) {
 module.exports = {
     login : login,
     register : register,
+    changePassword : changePassword,
     getUserList : getUserList,
     verifyEmail : verifyEmail,
     verifyUserId : verifyUserId,

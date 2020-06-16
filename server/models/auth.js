@@ -2,6 +2,7 @@ const connection = require("../lib/connection.js");
 const {dbName} = require("../lib/connection.js");
 
 const Auth = function (params) {
+  this.id = params.id;
   this.password = params.password;
   this.user_id = params.user_id;
   this.email = params.email;
@@ -227,5 +228,29 @@ Auth.prototype.handleClientActivation = function () {
     });
   });
 }
+
+
+
+
+Auth.prototype.changePassword = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+
+      connection.changeUser({database : dbName});
+      connection.query(`UPDATE users SET password = AES_ENCRYPT('${that.password}', 'secret') WHERE id = ${that.id};`, function (error, rows, fields) { 
+        if (error) {  console.log("Error...", error); reject(error);  }        
+        resolve(rows.changedRows);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+}
+
+
 
 module.exports = Auth;

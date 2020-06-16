@@ -11,6 +11,7 @@ Router.route("/verifyEmail").post(AUthController.verifyEmail);
 Router.route("/verifyUserId").post(AUthController.verifyUserId);
 
 
+Router.route("/changePassword").post(validateToken, AUthController.changePassword);
 Router.route("/getUserList").get(validateToken, AUthController.getUserList);
 Router.route("/getClientList").post(validateToken, AUthController.getClientList);
 Router.route("/handleClientActivation").post(validateToken, AUthController.handleClientActivation);

@@ -39,7 +39,21 @@ export default {
       throw error;
     }
   },
+  
+  changePassword:async ({...payload }) => {
 
+    const URL = `${c.API_CONSUMER}/auth/changePassword`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
 
   verifyEmail:async ({...payload }) => {
     const URL = `${c.API_CONSUMER}/auth/verifyEmail`;

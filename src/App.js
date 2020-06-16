@@ -9,6 +9,7 @@ import PageLoader from './Views/Partials/Loader';
 
 
 const Login = lazy(()=> import('./Views/Auth/login.js'));
+const ChangePassword = lazy(()=> import('./Views/Auth/ChangePassword.js'));
 const Signup = lazy(()=> import('./Views/Auth/signup.js'));
 const AdminHome = lazy(()=> import('./Views/Admin/AdminHome.js'));
 const Home = lazy(()=> import('./Views/Home.js'));
@@ -251,6 +252,14 @@ function App() {
                     ? <Redirect to="/login" />
                     : <ProductDetails {...props} /> 
                   }}                    
+                />
+                <Route 
+                  exact 
+                  path="/change-password" 
+                  render = { props => {
+                    return (APP_TOKEN.notEmpty) &&
+                    <ChangePassword {...props} />
+                  }}
                 />
                 
                
