@@ -20,6 +20,12 @@ const styles = {
     alignment: 'center',
     fontSize: 8
   },
+  productTableSubHeader:{
+    margin: [10,0,0,0],
+    bold: true,
+    alignment: 'center',
+    fontSize: 9,
+  },
   Header3: {
     fontSize: 9,
     alignment: 'center',

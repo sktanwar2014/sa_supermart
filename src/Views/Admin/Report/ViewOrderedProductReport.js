@@ -92,7 +92,7 @@ export default function ViewOrderedProduct() {
 
 
     const generatePDFOfOrderedProducts = async () =>{
-        // setIsLoading(true);
+        setIsLoading(true);
         pdfmake.vfs = pdfFonts.pdfMake.vfs;
         try{
             const result = await OrderAPI.generatePDFOfOrderedProducts({
@@ -100,10 +100,8 @@ export default function ViewOrderedProduct() {
                 to_date : getDate(inputs.toDate),
                 user_ids : isCheckedAll === true ? 0 : userIdsToFetch,
             });
-            console.log(result)
             pdfmake.createPdf(result).open();
             setIsLoading(false);
-
         }catch(e){
             console.log('Error...',e);
         }

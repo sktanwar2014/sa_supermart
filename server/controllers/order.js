@@ -427,7 +427,15 @@ const generatePDFOfOrderedProducts = async function (req, res, next) {
         });
         
         const company = await Model.getCompanyDetails();
-        let DD = generateOrderedProductReport({orderedProductList: returnValues, userIdList: userIds, subCategoryIdList: subCategoryIdList, companyDetail : company[0] });
+        let DD = generateOrderedProductReport({
+            fromDate: params.from_date, 
+            toDate: params.to_date, 
+            orderedProductList: returnValues, 
+            userIdList: userIds,
+            subCategoryIdList: subCategoryIdList,
+            companyDetail : company[0]
+        });
+        
         res.send(DD);
         
     } catch (err) {
