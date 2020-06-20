@@ -83,6 +83,7 @@ const setTopMarginOfCellForVerticalCentering = (ri, node) => {
 
 
 function pageTables(fromDate, toDate, orderedProductList, subCategoryIdList, userIdList){
+    const totalUserIdList = [...userIdList];
     let isFirstPage = 1;
     let idArray = [];
     let tables = [];
@@ -114,7 +115,7 @@ function pageTables(fromDate, toDate, orderedProductList, subCategoryIdList, use
           border: [true, false, true, true],
           table: {
             widths: widths,
-            body: buildProductRecordTable(fromDate, toDate, orderedProductList, subCategoryIdList, idArray, isFirstPage),
+            body: buildProductRecordTable(fromDate, toDate, orderedProductList, subCategoryIdList, idArray, isFirstPage, totalUserIdList),
           },
           layout: {paddingTop: function (i, node) { return 20; }},
           pageBreak: (userIdList.length>0) ? "after" : "",
@@ -125,7 +126,7 @@ function pageTables(fromDate, toDate, orderedProductList, subCategoryIdList, use
     return tables;
 }
 
-function buildProductRecordTable(fromDate, toDate, orderedProductList, subCategoryIdList, userIdList, isFirstPage){
+function buildProductRecordTable(fromDate, toDate, orderedProductList, subCategoryIdList, userIdList, isFirstPage, totalUserIdList){
   var body = [];
 
   let tableHeader = [{
@@ -181,6 +182,35 @@ function buildProductRecordTable(fromDate, toDate, orderedProductList, subCatego
         let clientRecord = [];
         let productRecord = (sameCategoryProducts.length > 0 ? sameCategoryProducts :[]).filter(ele => {if(prodId === ele.product_id){totalQuantity = totalQuantity + ele.quantity; return ele;}});
         
+        if(isFirstPage === 1){
+          (totalUserIdList.length > 0 ? totalUserIdList : []).map((userId) => {
+            const returnValue = (productRecord.length > 0 ? productRecord :[]).find((data) => { return userId === data.user_id });
+            let orderedUnits = returnValue !== undefined ? ((returnValue.ordered_unit_id).toString().split(',')) : [];
+              if(returnValue !== undefined){
+                (orderedUnits.length > 0 ? orderedUnits : []).map((unitId, index) => {
+                  let quantity = Number((returnValue.ordered_quantity).toString().split(',')[index]);
+                  let unit_name = (returnValue.ordered_unit_name).toString().split(',')[index];
+                 
+                  if(seprateTotalOfUnit.length === 0){
+                      seprateTotalOfUnit.push({unit: unit_name, quantity: Number(quantity)})
+                  }else{
+                      const found = seprateTotalOfUnit.find((ele) => {return ele.unit == unit_name});
+                      if(found){
+                          let temp = [...seprateTotalOfUnit];
+                          temp.map((data, index) => {
+                              if(data.unit == unit_name){
+                                  seprateTotalOfUnit[index].quantity =  seprateTotalOfUnit[index].quantity + Number(quantity);
+                              }
+                          })
+                      }else{
+                          seprateTotalOfUnit.push({unit: unit_name, quantity: Number(quantity)})
+                      }
+                  }
+                });                
+              }
+            });        
+          }
+
         (userIdList.length > 0 ? userIdList : []).map((userId) => {
           const returnValue = (productRecord.length > 0 ? productRecord :[]).find((data) => { return userId === data.user_id });
           let orderedUnits = returnValue !== undefined ? ((returnValue.ordered_unit_id).toString().split(',')) : [];
@@ -191,31 +221,13 @@ function buildProductRecordTable(fromDate, toDate, orderedProductList, subCatego
                 let unit_name = (returnValue.ordered_unit_name).toString().split(',')[index];
                 
                 data = data +  quantity + ' ' + unit_name+ ', \n';
-                
-                if(seprateTotalOfUnit.length === 0){
-                    seprateTotalOfUnit.push({unit: unit_name, quantity: Number(quantity)})
-                }else{
-                    const found = seprateTotalOfUnit.find((ele) => {return ele.unit == unit_name});
-                    if(found){
-                        let temp = [...seprateTotalOfUnit];
-                        temp.map((data, index) => {
-                            if(data.unit == unit_name){
-                                seprateTotalOfUnit[index].quantity =  seprateTotalOfUnit[index].quantity + Number(quantity);
-                            }
-                        })
-                    }else{
-                        seprateTotalOfUnit.push({unit: unit_name, quantity: Number(quantity)})
-                    }
-                }
               });
-                
               data = data + '_________________\nTotal: ' + returnValue.quantity + ' ' + returnValue.unit_name;
               clientRecord.push({ text: data, style: styles.productTableHeader });
             }else{
               clientRecord.push({ text: '-',  margin: [0,7,0,0], style: styles.productTableHeader }); 
             }
-        });        
-        
+        });   
           
         dataRow.push({ text: (index), style: styles.productTableHeader,  margin: [0,7,0,0],});
         dataRow.push({ text: productRecord[0].product_name, margin: [0,7,0,0], style: styles.productTableHeader });
@@ -392,7 +404,7 @@ module.exports = function generateOrderedProductReport(params) {
             } ]
           },
           '\n',
-          pageTables(fromDate, toDate, orderedProductList, subCategoryIdList, userIdList),
+          pageTables(fromDate, toDate, orderedProductList, subCategoryIdList, [2,5,2,5,5,5,2,5]),
       ],  
       pageSize: 'A4',
       pageOrientation: 'portrait',
