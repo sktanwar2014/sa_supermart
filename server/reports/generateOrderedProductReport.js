@@ -404,7 +404,7 @@ module.exports = function generateOrderedProductReport(params) {
             } ]
           },
           '\n',
-          pageTables(fromDate, toDate, orderedProductList, subCategoryIdList, [2,5,2,5,5,5,2,5]),
+          pageTables(fromDate, toDate, orderedProductList, subCategoryIdList, userIdList),
       ],  
       pageSize: 'A4',
       pageOrientation: 'portrait',
