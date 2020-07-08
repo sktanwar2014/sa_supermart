@@ -1,5 +1,5 @@
 import React, {useState, useEffect, Fragment} from 'react';
-
+import { isNullOrUndefined } from 'util';
 //Components 
 import {APP_TOKEN} from '../../api/config/Constants.js';
 import OrderAPI from '../../api/order.js';
@@ -17,6 +17,8 @@ export default function DeliveryForm(props) {
     const [extraPurchased, setExtraPurchased] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [purchasedStock, setPurchasedStock] = useState([]);
+    const [extraStock, setExtraStock] = useState([]);
     
 
     useEffect(()=>{
@@ -30,34 +32,107 @@ export default function DeliveryForm(props) {
                 orderId : order.id,
                 order_date : getDate(order.order_date),
             });
+            // console.log(result);
             let temp = [...result.deliveryFormData];
+            let temp2 = [...result.extraPurchased];
+            let purchasedStock = [];
+            let extraStock = [];
+
+            temp.map((data) => {
+                let purchased_unit_id =  !(isNullOrUndefined(data.purchased_unit_id)) ? Object.values((data.purchased_unit_id).split(',')) : [];
+                let purchased_quantity = !(isNullOrUndefined(data.purchased_quantity)) ? Object.values((data.purchased_quantity).split(',')) : [];
+                let purchased_unit_name = !(isNullOrUndefined(data.purchased_unit_name)) ? Object.values((data.purchased_unit_name).split(',')) : [];
+                let cost = !(isNullOrUndefined(data.cost)) ? Object.values((data.cost).split(',')) : [];
+                let available_quantity = !(isNullOrUndefined(data.available)) ? Object.values((data.available).split(',')) : [];
+
+                purchased_unit_id.map((unit, index) => {
+                    if(Number(available_quantity[index]) !== 0){
+                        purchasedStock.push({
+                            product_id : Number(data.product_id),
+                            unit_id : Number(unit),
+                            quantity : Number(purchased_quantity[index]),
+                            unit_name : purchased_unit_name[index],
+                            cost : Number(cost[index]),
+                            cost_of_each : Number(cost[index]) / Number(purchased_quantity[index]),
+                            available_quantity : Number(available_quantity[index]),
+                        });
+                    }
+                    
+                    if(Number(unit) === data.unit_id){
+                        if(data.quantity<= available_quantity[index]){
+                            data.will_give = data.quantity;
+                            data.price = (Number(cost[index]) / Number(purchased_quantity[index])) * Number(data.quantity);
+                            data.selected_unit_id = data.unit_id;
+                        }else{
+                            data.will_give = '';
+                            data.price = 0;
+                            data.selected_unit_id = data.unit_id;
+                        }
+                    }
+                });
+            });
+            temp2.map((data) => {
+                let purchased_unit_id =  !(isNullOrUndefined(data.purchased_unit_id)) ? Object.values((data.purchased_unit_id).split(',')) : [];
+                let purchased_quantity = !(isNullOrUndefined(data.purchased_quantity)) ? Object.values((data.purchased_quantity).split(',')) : [];
+                let purchased_unit_name = !(isNullOrUndefined(data.purchased_unit_name)) ? Object.values((data.purchased_unit_name).split(',')) : [];
+                let cost = !(isNullOrUndefined(data.cost)) ? Object.values((data.cost).split(',')) : [];
+                let cost_of_each = !(isNullOrUndefined(data.cost_of_each)) ? Object.values((data.cost_of_each).split(',')) : [];
+                let available_quantity = !(isNullOrUndefined(data.available)) ? Object.values((data.available).split(',')) : [];
+
+                purchased_unit_id.map((unit, index) => {
+                    if(Number(available_quantity[index]) !== 0){
+                        extraStock.push({
+                            product_id : Number(data.product_id),
+                            unit_id : Number(unit),
+                            quantity : Number(purchased_quantity[index]),
+                            unit_name : purchased_unit_name[index],
+                            cost : Number(cost[index]),
+                            cost_of_each : Number(cost_of_each[index]),
+                            available_quantity : Number(available_quantity[index]),
+                        });
+                    }
+                });
+            });
+            
+            setPurchasedStock(purchasedStock);
+            setExtraStock(extraStock);
             temp.push({break_here: 1});
             setProductList(temp);
             setExtraPurchased(result.extraPurchased);
-            // console.log(result)
             setIsLoading(false);
         }catch(e){
             console.log('Error...',e);
         }
     }
+    
 
     const handleQuantityChange = (e) => {
-        let tempProd = [...productList];
         let id =  (e.target.name).split('-')[1];
-        let quantity = e.target.value;
-        tempProd.map((data) => {            
-            if(data.product_id == id){
-                let available = (isNotEmpty(data.paid_quantity)) ? Number(data.purchased_quantity - data.paid_quantity).toFixed(3) : Number(data.purchased_quantity).toFixed(3) ;
-                if(Number(available) < Number(quantity)){
-                    data.will_give = '';
-                    data.price = '';
-                    data.is_delivered = 0;
-                    alert('input quantity is out of stock');
-                }else{
-                    let price = (data.cost / data.purchased_quantity) * quantity ;
-                    data.price = Number(price).toFixed(2);
-                    data.will_give = quantity;
-                    data.is_delivered = 1;
+        let quantity = document.getElementById('provideQuantity-'+id).value;
+        let unit = document.getElementById('unitSelection-'+id).value;
+
+        let tempProd = [...productList];
+        tempProd.map((data) => {
+            if(data.product_id === Number(id)){
+                let stock = purchasedStock.find(e => {return e.product_id === data.product_id && e.unit_id === Number(unit)});
+
+                if(unit !== "" && quantity !== ""){
+                    if(Number(quantity) <= stock.available_quantity){
+                        data.will_give = Number(quantity);
+                        data.price = ((stock.cost / stock.quantity) * Number(quantity)).toFixed(2);
+                        data.selected_unit_id = unit;
+                    }else{
+                        data.will_give = "";
+                        data.price = 0;                        
+                        alert('input quantity is out of stock');
+                    }
+                }else if(unit === ""){
+                    data.will_give = Number(quantity);
+                    data.price = 0;
+                    data.selected_unit_id = "";
+                }else if(quantity === ""){
+                    data.will_give = "";
+                    data.price = 0;
                 }
             }
         })
@@ -77,21 +152,23 @@ export default function DeliveryForm(props) {
         try{
             let productData = [];
             productList.map((data) => {
-                if(data.is_delivered === 1){
-                    productData.push({
-                        order_id : order.id,
-                        ordered_id : data.id,
-                        product_id : data.product_id,
-                        tracking_id : data.tracking_id,
-                        delivery_date : getDate(new Date()),
-                        order_date : getDate(order.order_date),
-                        paid_quantity : data.will_give,
-                        unit_id : data.purchased_unit_id,
-                        price : data.price,
-                        created_by : userId,
-                    })
-                }
-            });            
+                if(isNullOrUndefined(data.break_here)){
+                    if(Number(data.will_give) !== 0){
+                        productData.push({
+                            order_id : order.id,
+                            ordered_id : data.id,
+                            product_id : data.product_id,
+                            tracking_id : data.tracking_id,
+                            delivery_date : getDate(new Date()),
+                            order_date : getDate(order.order_date),
+                            paid_quantity : data.will_give,
+                            unit_id : data.selected_unit_id,
+                            price : data.price,
+                        })
+                    }
+                } 
+            });
+            // console.log(productData)
             const result = await OrderAPI.submitDeliveryDetails({productData: productData, orderId : order.id});
             setIsLoading(false);    
             setIsSubmitting(false);
@@ -106,7 +183,7 @@ export default function DeliveryForm(props) {
     }
 
     const extraSelectionHandler = (data) =>{
-        let isExist = productList.find(ele => ele.product_id === data.product_id);
+        let isExist = productList.find(ele => ele.product_id === data.product_id);        
         if(!(isExist)){
             let temp = [...productList];
             temp.push({
@@ -114,7 +191,7 @@ export default function DeliveryForm(props) {
                 product_id : data.product_id,
                 tracking_id : (Math.ceil(Math.random() *1000000000)).toString(),
                 product_name: data.product_name,
-                quantity : 0,
+                quantity : '',
                 purchased_unit_id : data.purchased_unit_id,
                 ordered_unit_name : data.purchased_unit_name,
                 purchased_quantity : data.purchased_quantity,
@@ -124,6 +201,25 @@ export default function DeliveryForm(props) {
                 add_remove : 1,
             });
             setProductList(temp);
+            
+            let isUnitExist = purchasedStock.filter(e => {return e.product_id === data.product_id});
+            if(isUnitExist.length === 0){
+                let tempUnits = [...purchasedStock];
+                let units = extraStock.map((e) => {
+                    if(e.product_id === data.product_id){
+                        tempUnits.push({
+                            product_id : e.product_id,
+                            unit_id : e.unit_id,
+                            quantity : e.quantity,
+                            unit_name : e.unit_name,
+                            cost : e.cost,
+                            cost_of_each : e.cost_of_each,
+                            available_quantity : e.available_quantity,
+                        });
+                    }
+                });
+                setPurchasedStock(tempUnits);
+            }
         }
     }
 
@@ -202,10 +298,7 @@ export default function DeliveryForm(props) {
                                                 </thead>
                                                     <tbody >
                                                         {(productList.length >0 ? productList :[]).map((data, index) => {    
-                                                            let available =  
-                                                                (data.purchased_quantity  === null) ? 0.00 : 
-                                                                (isNotEmpty(data.paid_quantity)) ?
-                                                                Number(data.purchased_quantity - data.paid_quantity).toFixed(3) : Number(data.purchased_quantity).toFixed(3)
+                                                            let units = purchasedStock.filter(e => { return (e.product_id == data.product_id)});
                                                             if(data.break_here === 1){
                                                                 return(
                                                                     <tr>
@@ -219,28 +312,43 @@ export default function DeliveryForm(props) {
                                                                     <tr>
                                                                         <td>{data.product_name}</td>
                                                                         <td>{data.quantity+ ' ' + data.ordered_unit_name}</td>
-                                                                        <td>
-                                                                            {(available > 0 )  ? available + " " + data.purchased_unit_name: "Not available"}
+                                                                        <td>{(isNotEmpty(units)) &&
+                                                                                units.map((row, index) => {
+                                                                                return( row.available_quantity + '  ' + row.unit_name + ', ' )
+                                                                            })}
                                                                         </td>
                                                                         <td>
-                                                                            <div class="d-flex justify-content-center">
-                                                                                <input type="number" name={"provideQuantity-"+data.product_id} value={data.will_give} class="cost-input" id={"provideQuantity-"+data.product_id} min="0" step="0.01" onChange={handleQuantityChange} required disabled={(available <= 0) }/>
-                                                                                {(available > 0) ? <p class="cost-input-adoptment"> {data.purchased_unit_name} </p> :''}                                                                    
+                                                                            <div class="d-flex">
+                                                                                <input type="number" name={"provideQuantity-"+data.product_id} value={data.will_give} class="cost-input" id={"provideQuantity-"+data.product_id} min="0" step="0.01" onChange={handleQuantityChange} required disabled={units.length === 0} />
+                                                                                <select id={"unitSelection-" + data.product_id}  name={"unitSelection-" + data.product_id} class="cost-input" required={Number(data.will_give) !== 0} onChange={handleQuantityChange} disabled={units.length === 0}>
+                                                                                    <option  value = "">Select Any One</option>
+                                                                                        {(units.length > 0 ? units : [] ).map((unit, index)=>{
+                                                                                        return(
+                                                                                            <option id={unit.unit_id} value={unit.unit_id} selected = {unit.unit_id === data.unit_id} >{unit.unit_name}</option>
+                                                                                        )
+                                                                                        })}
+                                                                                </select>
                                                                             </div>
                                                                         </td>
-                                                                        <td colSpan={!(data.add_remove === 1) ? 2 : 0}><p  id={"productPrice-"+data.product_id} >{data.price}</p></td>
-                                                                        {data.add_remove === 1 && <td class="product-remove"><a onClick={() => {removeAdditionalProduct(index)}}><span class="ion-ios-close"></span></a></td>}
-                                                                        
+                                                                        <td colSpan={!(data.add_remove === 1) ? 2 : 0}>
+                                                                            <p  id={"productPrice-"+data.product_id} >{data.price}</p>
+                                                                        </td>
+                                                                        {data.add_remove === 1 && 
+                                                                            <td class="product-remove">
+                                                                                <a onClick={() => {removeAdditionalProduct(index)}}>
+                                                                                    <span class="ion-ios-close"></span>
+                                                                                </a>
+                                                                            </td>
+                                                                        }
                                                                     </tr>
-                                                                    )
+                                                                )
                                                             }
-                                                        })
-                                                    }
+                                                        })}
                                                     </tbody>
                                                 </table>                                               
                                             </div>
                                             <div class="form-group p-4">
-                                                {((productList.find(ele => {return ele.purchased_quantity !== null && (ele.purchased_quantity - ele.paid_quantity > 0)})) ===  undefined) 
+                                                {(productList.find(p => {let stock = purchasedStock.filter(s => {return s.product_id === p.product_id}); return stock.length > 0}) === undefined)
                                                     ?   <input type="button" value="Go Back" class="btn  px-4 btn-primary" onClick={handleGoBack}/>
                                                     :   <input type="submit" value="Submit" class="btn  px-4 btn-primary" disabled={isSubmitting} />
                                                 }
@@ -262,22 +370,26 @@ export default function DeliveryForm(props) {
                                             </thead>
                                             <tbody>
                                                 {(extraPurchased.length >0 ? extraPurchased :[]).map((data, index) => {    
-                                                    let available =  
-                                                        (data.purchased_quantity  === null) ? 0.00 : 
-                                                        (isNotEmpty(data.paid_quantity)) ?
-                                                        Number(data.purchased_quantity - data.paid_quantity).toFixed(3) : Number(data.purchased_quantity).toFixed(3)
-                                                return(
-                                                    <tr>
-                                                        <td>{data.product_name}</td>                                                        
-                                                        <td>
-                                                            {(available > 0 )  ? available + " " + data.purchased_unit_name : "Not available"}
-                                                        </td>
-                                                        <td>
-                                                            {data.cost_of_each * available}
-                                                        </td>
-                                                        <td class="product-remove"><a onClick={()=>{extraSelectionHandler(data)}}><span>+</span></a></td>                                                     
-                                                    </tr>
-                                                    )
+                                                    let units = extraStock.filter(e => { return (e.product_id == data.product_id)});
+                                                    if(units.length > 0){
+                                                        return(
+                                                            <tr>
+                                                                <td>{data.product_name}</td>
+                                                                <td>{(isNotEmpty(units)) &&
+                                                                        units.map((row, index) => {
+                                                                        return( row.available_quantity + '  ' + row.unit_name + ', ' )
+                                                                    })}
+                                                                </td>
+                                                                <td>{(isNotEmpty(units)) &&
+                                                                       units.map((row, index) => {
+                                                                       return( (row.cost_of_each * row.quantity) + ', ')
+                                                                    })}
+                                                                </td>
+                                                                <td class="product-remove"><a onClick={()=>{extraSelectionHandler(data)}}><span>+</span></a></td>                                                     
+                                                            </tr>
+                                                        )
+                                                    }
+                                                
                                                 })
                                             }
                                             </tbody>

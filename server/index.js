@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
-
+const fs = require('fs');
 
 const app = express();
 
@@ -52,13 +52,18 @@ app.use('/units', require('./routes/units'));
 app.use('/api/images', function (req, res, next) {
   try {
     const fileName = (req.query.path).toString().split('/').pop();
-
     let file = '';
 
-    if(fileName === 'null'){
-        file = `${__dirname}/files/fileNotAvailabe.jpg`;
-    }else{
-        file = `${__dirname}/files/${req.query.path}`;
+    try {
+      if(fileName === 'null'){
+          file = `${__dirname}/files/fileNotAvailabe.jpg`;
+      }else if (fs.existsSync(`${__dirname}/files/${req.query.path}`)) {
+          file = `${__dirname}/files/${req.query.path}`;
+      }else {
+          file = `${__dirname}/files/fileNotAvailabe.jpg`;
+      }
+    } catch(err) {
+      console.error(err)
     }
 
     res.download(file); // Set disposition and send it.

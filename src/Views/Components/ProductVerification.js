@@ -18,6 +18,7 @@ export default function DeliveryForm(props) {
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // console.log(productList)
     useEffect(()=>{
         getProductUnitList();
     },[]);
@@ -25,7 +26,7 @@ export default function DeliveryForm(props) {
     const getProductUnitList = async () => {
         try{
             const result = await StaticAPI.getProductUnitList();
-            setProductUnitList(result.productUnitList);            
+            setProductUnitList(result.productUnitList);     
         }catch(e){
             console.log('Error...',e);
         }
@@ -127,31 +128,33 @@ export default function DeliveryForm(props) {
                                                     <tr class="text-center">
                                                         <th style={{minWidth : '200px'}}>Product</th>
                                                         <th style={{minWidth : '150px'}}> Received Quantity</th>
-                                                        {/* <th>Unit</th> */}
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                {(productList.length >0 ? productList :[]).map((data, index) => {
+                                                {(productList.length >0 ? productList :[]).map((data, index) => {                                                    
                                                     return(
                                                         <tr>
                                                             <td>{data.product_name}</td>
                                                             <td>
-                                                                <div class="d-flex justify-content-center">
+                                                                <div class="d-flex">
                                                                     <input type="number" name={"provideQuantity-"+data.product_id} class="cost-input" id={"provideQuantity-"+data.product_id} min="0" step="0.01" required/>
                                                                     <p class="cost-input-adoptment"> {data.unit_name} </p>
                                                                 </div>
                                                             </td>
                                                             {/* <td>
-                                                                <select id={"productUnit-"+data.product_id} class="select-verified-product" required>
-                                                                    <option  value = "">Select any one</option>
-                                                                    {(productUnitList.length > 0 ? productUnitList : [] ).map((data)=>{
-                                                                        return(
-                                                                            data.is_bundle === 0 ? <option id={data.id} value={data.id} >{data.unit_name}</option> :null
-                                                                        )
-                                                                    })
-                                                                    }
-                                                                </select>
-                                                            </td> */}
+                                                                <div class="d-flex" style={{maxWidth : '400px'}}>
+                                                                    
+                                                                    <input type="number" name={"provideQuantity-"+data.product_id}  class="cost-input" id={"provideQuantity-"+data.product_id} min="0" step="0.01" required />
+                                                                    <select id={"unitSelection-" + data.product_id}  name={"unitSelection-" + data.product_id} class="cost-input" required >
+                                                                        <option  value = "">Select Any One</option>
+                                                                            {(units.length > 0 ? units : [] ).map((unit, index)=>{
+                                                                            return(
+                                                                                <option id={unit.unit_id} value={unit.unit_id} selected = {unit.unit_id === data.unit_id} >{unit.unit_name}</option>
+                                                                            )
+                                                                            })}
+                                                                    </select>
+                                                                </div>
+                                                            </td> */}                                                           
                                                         </tr>
                                                         )
                                                     })

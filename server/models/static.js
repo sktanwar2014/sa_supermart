@@ -4,6 +4,7 @@ const {dbName} = require("../lib/connection.js");
 const StaticModel = function (params) {
   this.id = params.id;
   this.is_bundle = params.is_bundle;
+  this.productId = params.productId;
 };
 
 
@@ -61,6 +62,29 @@ StaticModel.prototype.getMainUnitRelateRecords = function () {
       }else if(that.is_bundle === 1){
         Query = `SELECT * FROM unit_records WHERE is_bundle = 0`;
       }
+      connection.query(Query, function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(rows);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
+
+
+
+
+StaticModel.prototype.getMeasuredUnitofProduct = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+
+      let Query = `SELECT ur.id, ur.unit_name  FROM products_measurement as pm INNER JOIN unit_records as ur ON ur.id = pm.unit_id WHERE product_id = ${that.productId} ORDER BY unit_name;`;
       connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);

@@ -12,6 +12,20 @@ const getProductUnitList = async function (req, res, next) {
 }
 
 
+
+const getMeasuredUnitofProduct = async function (req, res, next) {
+    try {
+        const StaticModel = new Static({productId: req.body.productId});
+        const productUnitList = await StaticModel.getMeasuredUnitofProduct();
+        
+        res.send({ productUnitList: productUnitList});
+    } catch (err) {
+        next(err);
+    }
+}
+
+
+
 const getOrderStatusList = async function (req, res, next) {
     try {
         const StaticModel = new Static({});
@@ -44,4 +58,5 @@ module.exports = {
     getProductUnitList : getProductUnitList,    
     getMainUnitRelateRecords : getMainUnitRelateRecords,
     getOrderStatusList: getOrderStatusList,
+    getMeasuredUnitofProduct : getMeasuredUnitofProduct,
 };

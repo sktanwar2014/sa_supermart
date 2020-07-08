@@ -35,6 +35,20 @@ export default {
     }
   },
 
+  getMeasuredUnitofProduct:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/staticrecords/getMeasuredUnitofProduct`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
   getOrderStatusList:async () => {
     const URL = `${c.API_CONSUMER}/staticrecords/getOrderStatusList`;
     try {

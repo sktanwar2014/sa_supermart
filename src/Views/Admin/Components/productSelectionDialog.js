@@ -81,7 +81,7 @@ export default function ProductSelectionDialog({open, setProductSelectionDialog,
         let productId = document.getElementById('products').value;
         if(isNotEmpty(productId)){
             const product = productsList.find(ele => ele.id == productId);
-            handleProductSelection(product);            
+            handleProductSelection(product);
         }
     setIsSubmitting(false);
     }catch(e){

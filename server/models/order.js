@@ -73,7 +73,7 @@ Order.prototype.getInvoiceDetails = function () {
             // connection.query(`SELECT op.id, (CASE op.status WHEN 6 THEN dp.paid_quantity WHEN 5 THEN vp.quantity END) as quantity, (CASE op.status WHEN 6 THEN dp.unit_id WHEN 5 THEN vp.unit_id END) as unit_id, (CASE op.status WHEN 6 THEN ur.unit_name WHEN 5 THEN ur2.unit_name END) as unit_name, p.product_name FROM ordered_product as op INNER JOIN  products as p ON op.product_id = p.id LEFT JOIN delivered_product as dp ON op.id = dp.ordered_id LEFT JOIN verified_product as vp ON op.id = vp.ordered_id LEFT JOIN unit_records as ur ON ur.id = dp.unit_id LEFT JOIN unit_records as ur2 ON ur2.id = vp.unit_id WHERE op.order_id = ${that.orderId} AND op.status IN(5,6)`, function (error, productDetails, fields) {              
             // connection.query(`SELECT op.id, o.id as order_id, o.order_date, pr.purchase_date, pr.purchased_quantity, pr.purchased_unit_id, pr.cost, (CASE op.status WHEN 6 THEN dp.paid_quantity WHEN 5 THEN vp.quantity END) as quantity, (CASE op.status WHEN 6 THEN dp.unit_id WHEN 5 THEN vp.unit_id END) as unit_id, (CASE op.status WHEN 6 THEN ur.unit_name WHEN 5 THEN ur2.unit_name END) as unit_name, p.product_name FROM ordered_product as op INNER JOIN  products as p ON op.product_id = p.id LEFT JOIN delivered_product as dp ON op.id = dp.ordered_id LEFT JOIN verified_product as vp ON op.id = vp.ordered_id LEFT JOIN unit_records as ur ON ur.id = dp.unit_id LEFT JOIN unit_records as ur2 ON ur2.id = vp.unit_id INNER JOIN orders as o ON o.id = op.order_id LEFT  JOIN purchase_register as pr ON (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d')) = (DATE_FORMAT(o.order_date, '%Y-%m-%d')) AND pr.product_id = op.product_id AND pr.is_active = 1 WHERE op.order_id = ${that.orderId} AND op.status IN(5,6)`, function (error, productDetails, fields) {
               // connection.query(`SELECT (CASE op.status WHEN 6 THEN dp.paid_quantity WHEN 5 THEN vp.quantity END) as quantity, (CASE op.status WHEN 6 THEN ur.unit_name WHEN 5 THEN ur2.unit_name END) as unit_name, (CASE op.status WHEN 6 THEN dp.price WHEN 5 THEN ((pr.cost / pr.purchased_quantity) * vp.quantity) END) as price, p.product_name FROM ordered_product as op INNER JOIN  products as p ON op.product_id = p.id LEFT JOIN delivered_product as dp ON op.id = dp.ordered_id LEFT JOIN verified_product as vp ON op.id = vp.ordered_id LEFT JOIN unit_records as ur ON ur.id = dp.unit_id LEFT JOIN unit_records as ur2 ON ur2.id = vp.unit_id INNER JOIN orders as o ON o.id = op.order_id LEFT  JOIN purchase_register as pr ON (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d')) = (DATE_FORMAT(o.order_date, '%Y-%m-%d')) AND pr.product_id = op.product_id AND pr.is_active = 1 WHERE op.order_id = ${that.orderId} AND op.status IN(5,6)`, function (error, productDetails, fields) {
-              connection.query(`SELECT (CASE dp.status WHEN 6 THEN dp.paid_quantity WHEN 5 THEN vp.quantity END) as quantity, (CASE dp.status WHEN 6 THEN ur.unit_name WHEN 5 THEN ur2.unit_name END) as unit_name, (CASE dp.status WHEN 6 THEN dp.price WHEN 5 THEN (pr.cost_of_each * vp.quantity) END) as price, p.product_name FROM delivered_product as dp INNER JOIN  products as p ON dp.product_id = p.id LEFT JOIN verified_product as vp ON dp.id = vp.delivered_id LEFT JOIN unit_records as ur ON ur.id = dp.unit_id LEFT JOIN unit_records as ur2 ON ur2.id = vp.unit_id INNER JOIN orders as o ON o.id = dp.order_id LEFT  JOIN purchase_register as pr ON (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d')) = (DATE_FORMAT(o.order_date, '%Y-%m-%d')) AND pr.product_id = dp.product_id AND pr.is_active = 1 WHERE dp.order_id = ${that.orderId} AND dp.status IN(5,6)`, function (error, productDetails, fields) {                
+              connection.query(`SELECT (CASE dp.status WHEN 6 THEN dp.paid_quantity WHEN 5 THEN vp.quantity END) as quantity, (CASE dp.status WHEN 6 THEN ur.unit_name WHEN 5 THEN ur2.unit_name END) as unit_name, (CASE dp.status WHEN 6 THEN dp.price WHEN 5 THEN (pr.cost_of_each * vp.quantity) END) as price, p.product_name FROM delivered_product as dp INNER JOIN  products as p ON dp.product_id = p.id LEFT JOIN verified_product as vp ON dp.id = vp.delivered_id LEFT JOIN unit_records as ur ON ur.id = dp.unit_id LEFT JOIN unit_records as ur2 ON ur2.id = vp.unit_id INNER JOIN orders as o ON o.id = dp.order_id LEFT  JOIN purchase_register as pr ON (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d')) = (DATE_FORMAT(o.order_date, '%Y-%m-%d')) AND pr.product_id = dp.product_id AND pr.purchased_unit_id = dp.unit_id AND pr.is_active = 1 WHERE dp.order_id = ${that.orderId} AND dp.status IN(5,6)`, function (error, productDetails, fields) {                
               if (error) {  console.log("Error...", error); reject(error);  }
                 resolve({companyDetail: companyDetail, shippingDetail: shippingDetail, productDetails: productDetails});
             });
@@ -176,7 +176,7 @@ Order.prototype.submitDeliveryDetails = function () {
       connection.changeUser({database : dbName});
       
         Object.values(that.formData).map((data, index) => {
-          let VALUES = [data.order_id, data.ordered_id, data.product_id, data.tracking_id, data.order_date, data.delivery_date,  data.paid_quantity, data.unit_id, data.price, 2, 1, data.created_by];
+          let VALUES = [data.order_id, data.ordered_id, data.product_id, data.tracking_id, data.order_date, data.delivery_date,  data.paid_quantity, data.unit_id, data.price, 2, 1, that.createdBy];
           connection.query(`INSERT INTO delivered_product(order_id, ordered_id, product_id, tracking_id, order_date, delivery_date, paid_quantity, unit_id, price, status, is_active, created_by) VALUES (?) `, [VALUES], function (error, rows, fields) {
             if (error) {  console.log("Error...", error); reject(error);  }
             resolve(rows);
@@ -197,10 +197,41 @@ Order.prototype.fetchDeliveryFormData = function () {
         throw error;
       }
       connection.changeUser({database : dbName});
-      let Query = `SELECT SUM(dp.paid_quantity) AS paid_quantity,  op.id, op.tracking_id, p.product_name, unit.unit_name as ordered_unit_name, op.product_id, op.quantity, op.unit_id,  op.status, pr.purchased_quantity, pr.purchased_unit_id, pr.cost, unit2.unit_name as purchased_unit_name FROM ordered_product as op INNER JOIN products as p ON p.id = op.product_id  INNER JOIN unit_records as unit ON unit.id = op.unit_id LEFT JOIN purchase_register as pr ON pr.product_id  = op.product_id AND pr.is_active =  1 AND (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d') = '${that.order_date}')  LEFT JOIN unit_records as unit2 ON pr.purchased_unit_id = unit2.id LEFT JOIN delivered_product as dp ON op.product_id = dp.product_id  AND (DATE_FORMAT(dp.order_date, '%Y-%m-%d') = '${that.order_date}') WHERE op.order_id = ${that.orderId} GROUP BY op.product_id`
-      let Query2 = `SELECT pr.product_id, pr.purchased_quantity, pr.purchased_unit_id, pr.cost, pr.cost_of_each, pr.is_extra, pr.status,
-                    p.product_name, ur.unit_name as purchased_unit_name, SUM(dp.paid_quantity) AS paid_quantity FROM purchase_register as pr INNER JOIN products as p ON p.id = pr.product_id LEFT JOIN unit_records as ur ON pr.purchased_unit_id = ur.id LEFT JOIN delivered_product as dp ON pr.product_id = dp.product_id AND (DATE_FORMAT(dp.order_date, '%Y-%m-%d') = '${that.order_date}') WHERE pr.is_active =  1 AND (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d') = '${that.order_date}') AND pr.is_extra = 1 GROUP BY pr.product_id`;
-      // console.log(Query)
+      // let Query = `SELECT SUM(dp.paid_quantity) AS paid_quantity,  op.id, op.tracking_id, p.product_name, unit.unit_name as ordered_unit_name, op.product_id, op.quantity, op.unit_id,  op.status, pr.purchased_quantity, pr.purchased_unit_id, pr.cost, unit2.unit_name as purchased_unit_name FROM ordered_product as op INNER JOIN products as p ON p.id = op.product_id  INNER JOIN unit_records as unit ON unit.id = op.unit_id LEFT JOIN purchase_register as pr ON pr.product_id  = op.product_id AND pr.is_active =  1 AND (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d') = '${that.order_date}')  LEFT JOIN unit_records as unit2 ON pr.purchased_unit_id = unit2.id LEFT JOIN delivered_product as dp ON op.product_id = dp.product_id  AND (DATE_FORMAT(dp.order_date, '%Y-%m-%d') = '${that.order_date}') WHERE op.order_id = ${that.orderId} GROUP BY op.product_id`
+      // let Query2 = `SELECT pr.product_id, pr.purchased_quantity, pr.purchased_unit_id, pr.cost, pr.cost_of_each, pr.is_extra, pr.status,
+      //               p.product_name, ur.unit_name as purchased_unit_name, SUM(dp.paid_quantity) AS paid_quantity FROM purchase_register as pr INNER JOIN products as p ON p.id = pr.product_id LEFT JOIN unit_records as ur ON pr.purchased_unit_id = ur.id LEFT JOIN delivered_product as dp ON pr.product_id = dp.product_id AND (DATE_FORMAT(dp.order_date, '%Y-%m-%d') = '${that.order_date}') WHERE pr.is_active =  1 AND (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d') = '${that.order_date}') AND pr.is_extra = 1 GROUP BY pr.product_id`;
+
+      // let Query = `SELECT GROUP_CONCAT(dp.paid_quantity) AS paid_quantity, op.id, op.tracking_id, p.product_name, unit.unit_name as ordered_unit_name, op.product_id, op.quantity, op.unit_id,  op.status, GROUP_CONCAT(pr.purchased_quantity) as purchased_quantity, GROUP_CONCAT(pr.purchased_unit_id) as purchased_unit_id, GROUP_CONCAT(pr.cost) as cost, GROUP_CONCAT(unit2.unit_name) as purchased_unit_name FROM ordered_product as op INNER JOIN products as p ON p.id = op.product_id  INNER JOIN unit_records as unit ON unit.id = op.unit_id LEFT JOIN purchase_register as pr ON pr.product_id  = op.product_id AND pr.is_active =  1 AND (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d') = '${that.order_date}')  LEFT JOIN unit_records as unit2 ON pr.purchased_unit_id = unit2.id LEFT JOIN delivered_product as dp ON op.product_id = dp.product_id AND dp.unit_id = op.unit_id AND (DATE_FORMAT(dp.order_date, '%Y-%m-%d') = '${that.order_date}') WHERE op.order_id = ${that.orderId} GROUP BY op.product_id;`;
+      // let Query2 = `SELECT pr.product_id, GROUP_CONCAT(pr.purchased_quantity) as purchased_quantity, GROUP_CONCAT(pr.purchased_unit_id) as purchased_unit_id, GROUP_CONCAT(pr.cost) as cost, GROUP_CONCAT(pr.cost_of_each) as cost_of_each, pr.is_extra, pr.status, p.product_name, GROUP_CONCAT(ur.unit_name) as purchased_unit_name, SUM(dp.paid_quantity) AS paid_quantity FROM purchase_register as pr INNER JOIN products as p ON p.id = pr.product_id LEFT JOIN unit_records as ur ON pr.purchased_unit_id = ur.id LEFT JOIN delivered_product as dp ON pr.product_id = dp.product_id AND (DATE_FORMAT(dp.order_date, '%Y-%m-%d') = '${that.order_date}') WHERE pr.is_active =  1 AND (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d') = '${that.order_date}') AND pr.is_extra = 1 GROUP BY pr.product_id;`;
+
+      let Query = `SELECT GROUP_CONCAT(CASE WHEN (paid.paid_quantity IS NULL OR paid.paid_quantity = 0) THEN 0 ELSE paid.paid_quantity END) AS paid_quantity, 
+                  GROUP_CONCAT(CASE WHEN (paid.paid_quantity IS NULL OR paid.paid_quantity = 0) THEN pr.purchased_quantity ELSE pr.purchased_quantity - paid.paid_quantity END) AS available,
+                  op.id, op.tracking_id, p.product_name, unit.unit_name as ordered_unit_name, op.product_id, op.quantity, op.unit_id,  op.status, 
+                  GROUP_CONCAT(pr.purchased_quantity) as purchased_quantity, 
+                  GROUP_CONCAT(pr.purchased_unit_id) as purchased_unit_id, 
+                  GROUP_CONCAT(pr.cost) as cost, 
+                  GROUP_CONCAT(unit2.unit_name) as purchased_unit_name 
+                  FROM ordered_product as op 
+                  INNER JOIN products as p ON p.id = op.product_id  
+                  INNER JOIN unit_records as unit ON unit.id = op.unit_id 
+                  LEFT JOIN purchase_register as pr ON pr.product_id  = op.product_id AND pr.is_active =  1 AND (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d') = '${that.order_date}')  
+                  LEFT JOIN unit_records as unit2 ON pr.purchased_unit_id = unit2.id 
+                  LEFT JOIN (SELECT dp.product_id, dp.unit_id, SUM(dp.paid_quantity) as paid_quantity FROM delivered_product as dp INNER JOIN ordered_product as op ON op.product_id = dp.product_id AND dp.order_date LIKE '${that.order_date}%' WHERE op.order_id = ${that.orderId} GROUP BY dp.product_id, dp.unit_id) as paid ON paid.product_id = pr.product_id AND paid.unit_id = pr.purchased_unit_id 
+                  WHERE op.order_id = ${that.orderId} 
+                  GROUP BY op.product_id;`;
+      
+      let Query2 = `SELECT pr.product_id, GROUP_CONCAT(pr.purchased_quantity) as purchased_quantity, GROUP_CONCAT(pr.purchased_unit_id) as purchased_unit_id, GROUP_CONCAT(pr.cost) as cost, GROUP_CONCAT(pr.cost_of_each) as cost_of_each, 
+                    pr.is_extra, pr.status, p.product_name, GROUP_CONCAT(ur.unit_name) as purchased_unit_name,  
+                    GROUP_CONCAT(CASE WHEN (paid.paid_quantity IS NULL OR paid.paid_quantity = 0) THEN 0 ELSE paid.paid_quantity END) AS paid_quantity,
+                    GROUP_CONCAT(CASE WHEN (paid.paid_quantity IS NULL OR paid.paid_quantity = 0) THEN pr.purchased_quantity ELSE pr.purchased_quantity - paid.paid_quantity END) AS available
+                    FROM purchase_register as pr 
+                    INNER JOIN products as p ON p.id = pr.product_id
+                    LEFT JOIN unit_records as ur ON pr.purchased_unit_id = ur.id 
+                    LEFT JOIN (SELECT dp.product_id, dp.unit_id, SUM(dp.paid_quantity) as paid_quantity FROM delivered_product as dp INNER JOIN purchase_register as pr ON dp.product_id = pr.product_id AND pr.purchase_date LIKE '${that.order_date}%' GROUP BY dp.product_id, dp.unit_id) AS paid ON paid.product_id = pr.product_id AND paid.unit_id = pr.purchased_unit_id
+                    WHERE pr.is_active =  1 AND (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d') = '${that.order_date}') AND pr.is_extra = 1
+                    GROUP BY pr.product_id`;
+
+      // console.log(Query2)
       connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         connection.query(Query2, function (error, result, fields) {
@@ -220,15 +251,11 @@ Order.prototype.handlePurchasedRecord = function () {
   const that = this;
   return new Promise(function (resolve, reject) {
     connection.getConnection(function (error, connection) {
-      if (error) {
-        throw error;
-      }
+      if (error) { throw error; }
       connection.changeUser({database : dbName});
-      
-      
+       
       Object.values(that.formData).map((data) => {
-        // console.log(data);
-        connection.query(`SELECT * FROM purchase_register WHERE product_id = ${data.product_id} AND purchase_date = '${data.purchase_date}' AND is_active = 1`, function (error, rows, fields) {
+        connection.query(`SELECT * FROM purchase_register WHERE product_id = ${data.product_id} AND purchased_unit_id = '${data.purchased_unit_id}' AND purchase_date = '${data.purchase_date}' AND is_active = 1`, function (error, rows, fields) {
           if (error) {  console.log("Error...", error); reject(error); }
           
           let insertValues = [data.product_id, data.purchase_date, data.required_quantity, data.required_unit_id, data.purchased_quantity, data.purchased_unit_id, data.cost, data.cost_of_each, data.is_extra, 1, 1, data.createdBy];
@@ -239,7 +266,7 @@ Order.prototype.handlePurchasedRecord = function () {
               connection.query(`UPDATE purchase_register SET is_active = 0, status = 2, updated_by = ${data.createdBy},  updated_at = now() WHERE id = ${prod.id}`, function (error, updateResult, fields) {
                 if (error) {  console.log("Error...", error); reject(error);  }
               });
-
+              
               
               connection.query(`INSERT INTO purchase_register(product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, cost_of_each, is_extra, status, is_active, created_by) VALUES (?)`, [insertValues], function (error, rows, fields) {
                 if (error) {  console.log("Error...", error); reject(error);  }
@@ -789,12 +816,24 @@ Order.prototype.getOrderedProductListSingleDay = function () {
       }
       connection.changeUser({database : dbName});
       // let Query = `SELECT op.id, op.user_id, op.order_id, op.tracking_id, op.product_id, op.quantity, op.unit_id, op.status, op.is_active, p.product_name, p.main_unit_id, unit.unit_name, unit.id as unit_table_id, unit.equal_value_of_parent, pm.unit_value, pm.price, pm.is_packet, pm.packet_weight, pm.packet_unit_id from ordered_product as op INNER JOIN products AS p ON p.id = op.product_id INNER JOIN unit_records as unit ON unit.id = p.main_unit_id INNER JOIN products_measurement as pm ON pm.product_id = op.product_id AND pm.unit_id = op.unit_id AND pm.is_active = 1 WHERE op.order_id IN(SELECT id FROM orders WHERE is_active = 1 AND (DATE_FORMAT(order_date, '%Y-%m-%d')  = '${that.date}'))`;
-      let Query = `SELECT op.product_id, p.product_name, 
-      SUM(CASE pm.is_packet WHEN 1 THEN (pm.packet_weight * op.quantity) WHEN 0 THEN op.quantity END) as quantity, 
-      (CASE pm.is_packet WHEN 1 THEN pm.packet_unit_id WHEN 0 THEN op.unit_id END) as unit_id, 
-      p.main_unit_id, p.sub_category_id, p.category_id, pm.price FROM orders as o INNER JOIN ordered_product as op ON o.id = op.order_id INNER JOIN products AS p ON p.id = op.product_id INNER JOIN products_measurement as  pm ON pm.product_id = op.product_id AND pm.unit_id = op.unit_id AND pm.is_active = 1
-      WHERE (DATE_FORMAT(o.order_date, '%Y-%m-%d') = '${that.date}') AND o.status = 1 GROUP BY product_id, unit_id ORDER BY op.product_id ASC`;
-      // console.log(Query)
+      // let Query = `SELECT op.product_id, p.product_name, 
+      // SUM(CASE pm.is_packet WHEN 1 THEN (pm.packet_weight * op.quantity) WHEN 0 THEN op.quantity END) as quantity, 
+      // (CASE pm.is_packet WHEN 1 THEN pm.packet_unit_id WHEN 0 THEN op.unit_id END) as unit_id, 
+      // p.main_unit_id, p.sub_category_id, p.category_id, pm.price FROM orders as o INNER JOIN ordered_product as op ON o.id = op.order_id INNER JOIN products AS p ON p.id = op.product_id INNER JOIN products_measurement as  pm ON pm.product_id = op.product_id AND pm.unit_id = op.unit_id AND pm.is_active = 1
+      // WHERE (DATE_FORMAT(o.order_date, '%Y-%m-%d') = '${that.date}') AND o.status = 1 GROUP BY product_id, unit_id ORDER BY op.product_id ASC`;
+
+      // let Query = `SELECT op.product_id, p.product_name, SUM(op.quantity) as quantity, op.unit_id, p.main_unit_id, p.sub_category_id,
+      //     p.category_id, pm.price, pm.price_per_unit, pm.is_packet FROM orders as o INNER JOIN ordered_product as op ON o.id = op.order_id
+      //     INNER JOIN products AS p ON p.id = op.product_id INNER JOIN products_measurement as  pm ON pm.product_id = op.product_id 
+      //     AND pm.unit_id = op.unit_id AND pm.is_active = 1 WHERE (DATE_FORMAT(o.order_date, '%Y-%m-%d') = '${that.date}') AND o.status = 1
+      //     GROUP BY product_id, unit_id ORDER BY op.product_id ASC`
+
+      let Query = `SELECT op.product_id, p.product_name, SUM(op.quantity) as quantity, op.unit_id, ur.unit_name, p.main_unit_id, ur2.unit_name as main_unit_name, 
+          p.sub_category_id, p.category_id, pm.price, pm.price_per_unit, pm.is_packet FROM orders as o INNER JOIN ordered_product as op ON o.id = op.order_id
+          INNER JOIN products AS p ON p.id = op.product_id INNER JOIN products_measurement as pm ON pm.product_id = op.product_id AND pm.unit_id = op.unit_id AND pm.is_active = 1 
+          INNER JOIN unit_records as ur ON ur.id = op.unit_id INNER JOIN unit_records as ur2 ON ur2.id = p.main_unit_id WHERE (DATE_FORMAT(o.order_date, '%Y-%m-%d') = '${that.date}') 
+          GROUP BY product_id, unit_id ORDER BY op.id ASC`;
+      console.log(Query)
       connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);
@@ -818,7 +857,8 @@ Order.prototype.getDailyPurchaseRecords = function () {
       connection.changeUser({database : dbName});
       // let Query = `SELECT id, product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, cost_of_each, status, is_active FROM purchase_register WHERE is_active = 1 AND product_id IN(${that.product_id}) AND (DATE_FORMAT(purchase_date, '%Y-%m-%d')  = '${that.date}')`;
       // let Query = `SELECT id, product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, cost_of_each, status, is_active FROM purchase_register WHERE is_active = 1 AND (DATE_FORMAT(purchase_date, '%Y-%m-%d')  = '${that.date}')`;
-      let Query = `SELECT pr.id, pr.product_id, pr.purchase_date, pr.required_quantity, pr.required_unit_id, pr.purchased_quantity, pr.purchased_unit_id, pr.cost, pr.cost_of_each, pr.is_extra, pr.status, pr.is_active, p.category_id, p.sub_category_id, p.main_unit_id, p.product_name, ur.unit_name FROM purchase_register as pr INNER JOIN products as p ON p.id = pr.product_id INNER JOIN unit_records as ur ON ur.id = p.main_unit_id WHERE pr.is_active = 1 AND (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d')  = '${that.date}')`
+      // let Query = `SELECT pr.id, pr.product_id, pr.purchase_date, pr.required_quantity, pr.required_unit_id, pr.purchased_quantity, pr.purchased_unit_id, pr.cost, pr.cost_of_each, pr.is_extra, pr.status, pr.is_active, p.category_id, p.sub_category_id, p.main_unit_id, p.product_name, ur.unit_name FROM purchase_register as pr INNER JOIN products as p ON p.id = pr.product_id INNER JOIN unit_records as ur ON ur.id = p.main_unit_id WHERE pr.is_active = 1 AND (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d')  = '${that.date}')`
+      let Query = `SELECT pr.id, pr.product_id, pr.purchase_date, pr.required_quantity, pr.required_unit_id, pr.purchased_quantity, pr.purchased_unit_id, pr.cost, pr.cost_of_each, pr.is_extra, pr.status, pr.is_active, p.category_id, p.sub_category_id, p.main_unit_id, p.product_name, ur.unit_name as main_unit_name, ur2.unit_name, pm.price  FROM purchase_register as pr INNER JOIN products as p ON p.id = pr.product_id INNER JOIN unit_records as ur ON ur.id = p.main_unit_id INNER JOIN unit_records as ur2 ON ur2.id = pr.purchased_unit_id LEFT JOIN products_measurement as pm ON pm.product_id = pr.product_id AND pm.unit_id = pr.purchased_unit_id WHERE pr.is_active = 1 AND (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d')  = '${that.date}');`;
       // console.log(Query)
       connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }

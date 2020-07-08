@@ -241,75 +241,105 @@ const getOrderedProductListSingleDay = async function (req, res, next) {
         const result = await Model.getOrderedProductListSingleDay();
         const purchaseRecord = await Model.getDailyPurchaseRecords();
         const staticRecords = await new Static({}).getAllUnitList();
-        
+        // console.log(result)
         const prodIds = [...new Set(result.map(dist => dist.product_id))];
         let returnValues  = [];
 
         prodIds.map((prodId) => {
             const mainUnit = Object.values(result).find((prod) => { return prod.product_id === prodId})
             const unit = Object.values(staticRecords).find((unit) => {return unit.id === mainUnit.main_unit_id});
-            const unitList = Object.values(staticRecords).filter((ele) => {return ele.group_id === unit.group_id})
-            const purchase = purchaseRecord.find(ele => {return ele.product_id === prodId})
+            const unitList = Object.values(staticRecords).filter((ele) => {return ele.group_id === unit.group_id});                        
 
             let weight =  0;
+            let check = 0;
             let product = {};
-            let row = {};
 
+            const assignRow = (product, isMain = 0) =>{
+                let purchase = {};
+                if(isMain === 1){
+                    purchase = purchaseRecord.find(ele => {return ele.product_id === product.product_id && (ele.purchased_unit_id === product.main_unit_id)});
+                }else{
+                    purchase = purchaseRecord.find(ele => {return ele.product_id === product.product_id && (ele.purchased_unit_id === product.unit_id)});
+                }
+                
+                // console.log(purchase)
+                let row = {};
+                    row.id = product.product_id;
+                    row.product_name = product.product_name;
+                    row.quantity = product.is_packet === 1 ? product.quantity : weight,
+                    row.main_unit_id = product.main_unit_id;
+                    row.unit_id = (isMain === 1) ? unit.id : product.unit_id;
+                    row.unit_name = (isMain === 1) ? unit.unit_name : product.unit_name;
+                    row.main_unit_name = product.main_unit_name;
+                    row.sub_category_id = product.sub_category_id;
+                    row.category_id = product.category_id;
+                    row.price = product.price;
+                if(isNotEmpty(purchase)){
+                    row.purchased_quantity = purchase.purchased_quantity;
+                    row.purchased_unit_id = purchase.purchased_unit_id;
+                    row.cost = purchase.cost;
+                    row.cost_of_each = purchase.cost_of_each;
+                    row.purchased_status = purchase.status;
+                    row.is_extra = purchase.is_extra;
+                }else{
+                    row.purchased_quantity = '';
+                    row.purchased_unit_id = '';
+                    row.cost = '';
+                    row.cost_of_each = '',
+                    row.purchased_status = '';
+                    row.is_extra = 0;
+                }
+                // console.log(row)
+
+                returnValues.push(row);
+            }
+
+            
             Object.values(result).map((prod) => {
                 if(prodId === prod.product_id){
-                    product = prod;
-                    let mainWeight =  calTotalUnit(unitList, prod.unit_id, prod.quantity, unit.sequence, mainUnit.main_unit_id);
-                    weight = weight +  mainWeight;
+                    // console.log(prod, prodId, prod.product_id, prod.is_packet, mainUnit.main_unit_id, prod.unit_id)
+                    if(prod.is_packet === 0){
+                        // if(mainUnit.main_unit_id === prod.unit_id) {
+                            product = prod;
+                        // }
+                        let mainWeight =  calTotalUnit(unitList, prod.unit_id, prod.quantity, unit.sequence, mainUnit.main_unit_id);
+                        weight = weight +  mainWeight;
+                        check = 1;
+                    }else{
+                        assignRow(prod);
+                    }
                 }
             });
-            
-                row.id = product.product_id;
-                row.product_name = product.product_name;
-                row.quantity = weight;
-                row.main_unit_id= product.main_unit_id;
-                row.unit_name= unit.unit_name;
-                row.sub_category_id = product.sub_category_id;
-                row.category_id = product.category_id;
-                row.price = product.price;
-            if(isNotEmpty(purchase)){
-                row.purchased_quantity = purchase.purchased_quantity;
-                row.purchased_unit_id = purchase.purchased_unit_id;
-                row.cost = purchase.cost;
-                row.cost_of_each = purchase.cost_of_each;
-                row.purchased_status = purchase.status;
-                row.is_extra = purchase.is_extra;
-            }else{
-                row.purchased_quantity = '';
-                row.purchased_unit_id = '';
-                row.cost = '';
-                row.cost_of_each = '',
-                row.purchased_status = '';
-                row.is_extra = 0;
-            }
-            returnValues.push(row);
+            if(check===1){assignRow(product, 1)}
         });
         
         Object.values(purchaseRecord).map(data => {
-            let found = prodIds.find(ele=> ele === data.product_id);
+            let found = prodIds.find(ele=> ele === data.product_id && data.is_extra === 0);
+            // console.log(found)
             if(!(found)){
+            // console.log(data)
+
                 returnValues.push({
                     id : data.product_id,
                     product_name : data.product_name,
                     quantity : data.required_quantity,
-                    main_unit_id: data.required_unit_id,
-                    unit_name: data.unit_name,
+                    main_unit_id: data.main_unit_id,
+                    main_unit_name: data.main_unit_name,
                     sub_category_id : data.sub_category_id,
                     category_id : data.category_id,
-                    price : 0,
+                    price : data.price,
                     is_extra : data.is_extra,
                     purchased_quantity : data.purchased_quantity,
                     purchased_unit_id : data.purchased_unit_id,
                     cost : data.cost,
                     cost_of_each : data.cost_of_each,
                     purchased_status : data.status,
+                    unit_id : data.purchased_unit_id,
+                    unit_name :  data.unit_name,
                 });
             }
         })
+
         res.send({orderedProductListSingleDay: returnValues});        
     } catch (err) {
         next(err);
@@ -446,9 +476,11 @@ const generatePDFOfOrderedProducts = async function (req, res, next) {
 
 
 const submitDeliveryDetails = async function (req, res, next) {  
+    console.log(req.decoded)
     const params = {
         formData : req.body.productData,
-        orderId : req.body.orderId,
+        orderId : req.body.orderId,        
+        createdBy : req.decoded.id,
     }
     
     try {
