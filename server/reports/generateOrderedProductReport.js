@@ -83,7 +83,7 @@ const setTopMarginOfCellForVerticalCentering = (ri, node) => {
 
 
 function pageTables(fromDate, toDate, orderedProductList, subCategoryIdList, userIdList){
-    const totalUserIdList = [...userIdList];
+    const totalUserIdList = [...userIdList];    
     let isFirstPage = 1;
     let idArray = [];
     let tables = [];
@@ -115,7 +115,9 @@ function pageTables(fromDate, toDate, orderedProductList, subCategoryIdList, use
           border: [true, false, true, true],
           table: {
             widths: widths,
+            headerRows: 2,
             body: buildProductRecordTable(fromDate, toDate, orderedProductList, subCategoryIdList, idArray, isFirstPage, totalUserIdList),
+            dontBreakRows: true,
           },
           layout: {paddingTop: function (i, node) { return 20; }},
           pageBreak: (userIdList.length>0) ? "after" : "",
@@ -154,7 +156,7 @@ function buildProductRecordTable(fromDate, toDate, orderedProductList, subCatego
   (userIdList.length > 0 ? userIdList : []).map(userId => {
       let userName = orderedProductList.find(ele => {return ele.user_id === userId})
         headerRow.push(
-          { text: userName.user_name, style: styles.productTableSubHeader }
+          { text: userName.login_id, style: styles.productTableSubHeader }
         );
   });
 

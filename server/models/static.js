@@ -84,7 +84,7 @@ StaticModel.prototype.getMeasuredUnitofProduct = function () {
       }
       connection.changeUser({database : dbName});
 
-      let Query = `SELECT ur.id, ur.unit_name  FROM products_measurement as pm INNER JOIN unit_records as ur ON ur.id = pm.unit_id WHERE product_id = ${that.productId} ORDER BY unit_name;`;
+      let Query = `SELECT ur.id, ur.unit_name  FROM products_measurement as pm INNER JOIN unit_records as ur ON ur.id = pm.unit_id AND pm.is_active = 1 WHERE product_id = ${that.productId} ORDER BY unit_name;`;
       connection.query(Query, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);

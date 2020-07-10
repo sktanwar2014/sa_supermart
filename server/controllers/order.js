@@ -219,10 +219,11 @@ const handlePurchasedRecord = async function (req, res, next) {
     const params = {
         formData : req.body.formData,
     }
-    
+    // console.log(params.formData)
     try {
         const Model = new Order(params);
         const result = await Model.handlePurchasedRecord();
+        const result2 = await Model.updateProductPrice();
 
         res.send({result});
     } catch (err) {
@@ -242,6 +243,7 @@ const getOrderedProductListSingleDay = async function (req, res, next) {
         const purchaseRecord = await Model.getDailyPurchaseRecords();
         const staticRecords = await new Static({}).getAllUnitList();
         // console.log(result)
+        // console.log(purchaseRecord)
         const prodIds = [...new Set(result.map(dist => dist.product_id))];
         let returnValues  = [];
 
@@ -274,6 +276,7 @@ const getOrderedProductListSingleDay = async function (req, res, next) {
                     row.sub_category_id = product.sub_category_id;
                     row.category_id = product.category_id;
                     row.price = product.price;
+                    row.price_per_unit = product.price_per_unit;
                 if(isNotEmpty(purchase)){
                     row.purchased_quantity = purchase.purchased_quantity;
                     row.purchased_unit_id = purchase.purchased_unit_id;
@@ -328,6 +331,7 @@ const getOrderedProductListSingleDay = async function (req, res, next) {
                     sub_category_id : data.sub_category_id,
                     category_id : data.category_id,
                     price : data.price,
+                    price_per_unit : data.price_per_unit,
                     is_extra : data.is_extra,
                     purchased_quantity : data.purchased_quantity,
                     purchased_unit_id : data.purchased_unit_id,
@@ -415,7 +419,7 @@ const generatePDFOfOrderedProducts = async function (req, res, next) {
         const Model = new Order(params);
         const staticRecords = await new Static({}).getAllUnitList();
         const result = await Model.getOrderedProductList();
-        
+        // console.log(result)
         const prodIds = [...new Set(result.map(dist => dist.product_id))];
         const userIds = [...new Set(result.map(dist => dist.user_id))];
         const subCategoryIdList = [...new Set(result.map(dist => dist.sub_category_id))];
@@ -441,6 +445,7 @@ const generatePDFOfOrderedProducts = async function (req, res, next) {
                     returnValues.push({
                         product_id : product.product_id,
                         user_id : product.user_id,
+                        login_id : product.login_id,
                         user_name : product.user_name,
                         ordered_unit_id : product.ordered_unit_id,
                         ordered_unit_name : product.ordered_unit_name,

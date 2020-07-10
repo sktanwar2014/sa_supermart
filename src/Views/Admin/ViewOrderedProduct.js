@@ -1,5 +1,5 @@
 import React, {useState, useEffect, Fragment} from 'react';
-
+import 'util';
 //Components 
 import Header from '../Partials/Header.js';
 import Footer from '../Partials/Footer.js';
@@ -12,6 +12,7 @@ import DialogChooseAdditionalUnit from './Components/DialogChooseAdditionalUnit.
 import {getDateInDDMMYYYY, getDate} from '../../common/moment.js';
 import {SimpleAlert} from '../../common/Alert.js'
 import {isNotEmpty} from '../../utils/conditionChecker.js';
+import { isNullOrUndefined } from 'util';
 
 
 const RESET_VALUES = {
@@ -47,7 +48,7 @@ export default function ViewOrderedProduct() {
             const result = await OrderAPI.getOrderedProductListSingleDay({
                 date : getDate(inputs.date),
             });
-            
+            // console.log(result)
             setProdIds([...new Set(result.orderedProductListSingleDay.map(dist => dist.id))]);
             let temp = [...result.orderedProductListSingleDay];
             
@@ -55,8 +56,8 @@ export default function ViewOrderedProduct() {
                 data.add_remove = 0;
                 data.break_here = 0;
                 data.purchased_quantity = data.purchased_quantity === "" ? data.quantity : data.purchased_quantity;
-                data.productCostEach = data.cost_of_each === "" ? isNaN(data.price / data.quantity) ? 0 : (data.price / data.quantity) : data.cost_of_each;
-                data.productCost = data.cost === "" ? data.price : data.cost;
+                data.productCostEach = data.cost_of_each === "" ? isNaN(data.price_per_unit) ? 0 : (data.price_per_unit ) : data.cost_of_each;
+                data.productCost = data.cost === "" ? isNaN(data.price_per_unit * data.quantity) ? 0 : (data.price_per_unit * data.quantity) : data.cost;
             });
             temp.push({break_here: 1});
             setOrderedProductList(temp);
@@ -114,6 +115,7 @@ export default function ViewOrderedProduct() {
 	}
 
     const handleProductSelection = (product) => {
+        console.log(product)
         if(!(orderedProductList.find(ele => ele.id === product.id))){
             let temp = [...orderedProductList];
             temp.push({
@@ -125,18 +127,17 @@ export default function ViewOrderedProduct() {
                 main_unit_id: product.main_unit_id,
                 unit_id: product.main_unit_id,
                 price: product.price,
+                price_per_unit: product.price_per_unit,
                 product_name: product.product_name,
-                purchased_quantity: "",
-                productCostEach :"",
-                productCost : "",
+                purchased_quantity: 1,
+                productCostEach : (isNaN(product.price_per_unit) || isNullOrUndefined(product.price_per_unit)) ? 0 : product.price_per_unit,
+                productCost : (isNaN(product.price_per_unit) || isNullOrUndefined(product.price_per_unit)) ? 0 : product.price_per_unit,
                 purchased_status: "",
                 purchased_unit_id: "",
                 unit_name: product.main_unit_name,
                 main_unit_name: product.main_unit_name,
                 quantity: 0,
                 add_remove: 1,
-                // category_id: 114
-                // sub_category_id: 115
             });
             setProdIds([...new Set(temp.map(dist => dist.id))]);
             setOrderedProductList(temp);

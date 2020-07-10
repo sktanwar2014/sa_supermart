@@ -21,10 +21,11 @@ const styles = {
     fontSize: 7
   },
   productTableSubHeader:{
-    margin: [10,0,0,0],
+    fillColor: '#e9e9e9',
+    margin: [10,0,10,0],
     bold: true,
     alignment: 'center',
-    fontSize: 9,
+    fontSize: 7,
   },
   Header3: {
     fontSize: 9,
