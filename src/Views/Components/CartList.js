@@ -15,7 +15,7 @@ export default function CartList() {
 	
     const [cartList, setCartList] = useState([]);
 	const [productUnitList, setProductUnitList] = useState([]);
-
+ 
 	useEffect(()=>{
 		setCartList(CART_TOKEN.get().cart);
 		getProductUnitList();
@@ -31,12 +31,12 @@ export default function CartList() {
         }
 	}
 	
-	const removeProductInCart =async (productId) => {		
+	const removeProductInCart =async (productId) => {
+		setCartList([]);
 		CART_TOKEN.removeProduct({productId : productId});
 		setCartList(CART_TOKEN.get().cart);
 	}
-
-
+	
 	
 	const getProductPacketInfo = async(unitId,  productId) => {
 		try{
@@ -98,7 +98,20 @@ export default function CartList() {
 		window.location.pathname = '/proceed-to-checkout';
 	}
 
+	const handleQuantityChange = (e) => {
+		let name = String(e.target.name);
+		const prodId = Number(name.split('-')[1]);
+		const value = e.target.value;
+		let tempCart = [...cartList];
 
+		(tempCart.length > 0 ? tempCart : []).map((data, index) => {
+			if(data.id === prodId){
+				data.quantity = value;
+				CART_TOKEN.set({product : data});
+			}
+		})
+		setCartList(tempCart);
+	}
 
     return(
 		<Fragment>
@@ -149,7 +162,7 @@ export default function CartList() {
 														
 														<td class="quantity">
 															<div class="input-group">
-																<input type="number" id={"productQuantity-"+data.id} name="quantity" class="quantity form-control input-number"  defaultValue={data.quantity ? data.quantity : ''} min="0" step="0.1" required />
+																<input type="number" id={"productQuantity-"+data.id} name={"productQuantity-"+data.id} class="quantity form-control input-number"  value={data.quantity ? data.quantity : ''} min="0" step="0.1" required onChange={handleQuantityChange} />
 															</div>								  
 														</td>
 														<td class="quantity" id={'productUnitTd-'+data.id}>

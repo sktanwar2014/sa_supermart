@@ -127,20 +127,22 @@ export default function DeliveryForm(props) {
                                                 <thead class="thead-primary">
                                                     <tr class="text-center">
                                                         <th style={{minWidth : '200px'}}>Product</th>
-                                                        <th style={{minWidth : '150px'}}> Received Quantity</th>
+                                                        <th style={{minWidth : '15px'}}> Cost of Each</th>
+                                                        <th style={{minWidth : '150px'}}> Received Quantity</th>                                                        
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                {(productList.length >0 ? productList :[]).map((data, index) => {                                                    
+                                                {(productList.length >0 ? productList :[]).map((data, index) => {  
                                                     return(
                                                         <tr>
                                                             <td>{data.product_name}</td>
+                                                            <td>{`$` + (data.price / data.quantity)}</td>
                                                             <td>
                                                                 <div class="d-flex">
                                                                     <input type="number" name={"provideQuantity-"+data.product_id} class="cost-input" id={"provideQuantity-"+data.product_id} min="0" step="0.01" required/>
                                                                     <p class="cost-input-adoptment"> {data.unit_name} </p>
                                                                 </div>
-                                                            </td>
+                                                            </td>                                                            
                                                             {/* <td>
                                                                 <div class="d-flex" style={{maxWidth : '400px'}}>
                                                                     
