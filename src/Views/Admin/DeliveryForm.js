@@ -71,34 +71,39 @@ export default function DeliveryForm(props) {
                     }
                 });
             });
+            let uniqueExtras = [];
             temp2.map((data) => {
-                let purchased_unit_id =  !(isNullOrUndefined(data.purchased_unit_id)) ? Object.values((data.purchased_unit_id).split(',')) : [];
-                let purchased_quantity = !(isNullOrUndefined(data.purchased_quantity)) ? Object.values((data.purchased_quantity).split(',')) : [];
-                let purchased_unit_name = !(isNullOrUndefined(data.purchased_unit_name)) ? Object.values((data.purchased_unit_name).split(',')) : [];
-                let cost = !(isNullOrUndefined(data.cost)) ? Object.values((data.cost).split(',')) : [];
-                let cost_of_each = !(isNullOrUndefined(data.cost_of_each)) ? Object.values((data.cost_of_each).split(',')) : [];
-                let available_quantity = !(isNullOrUndefined(data.available)) ? Object.values((data.available).split(',')) : [];
-
-                purchased_unit_id.map((unit, index) => {
-                    if(Number(available_quantity[index]) !== 0){
-                        extraStock.push({
-                            product_id : Number(data.product_id),
-                            unit_id : Number(unit),
-                            quantity : Number(purchased_quantity[index]),
-                            unit_name : purchased_unit_name[index],
-                            cost : Number(cost[index]),
-                            cost_of_each : Number(cost_of_each[index]),
-                            available_quantity : Number(available_quantity[index]),
-                        });
-                    }
-                });
+                let extras = temp.find(e => {return e.product_id === data.product_id});
+                if(isNullOrUndefined(extras)){
+                    let purchased_unit_id =  !(isNullOrUndefined(data.purchased_unit_id)) ? Object.values((data.purchased_unit_id).split(',')) : [];
+                    let purchased_quantity = !(isNullOrUndefined(data.purchased_quantity)) ? Object.values((data.purchased_quantity).split(',')) : [];
+                    let purchased_unit_name = !(isNullOrUndefined(data.purchased_unit_name)) ? Object.values((data.purchased_unit_name).split(',')) : [];
+                    let cost = !(isNullOrUndefined(data.cost)) ? Object.values((data.cost).split(',')) : [];
+                    let cost_of_each = !(isNullOrUndefined(data.cost_of_each)) ? Object.values((data.cost_of_each).split(',')) : [];
+                    let available_quantity = !(isNullOrUndefined(data.available)) ? Object.values((data.available).split(',')) : [];
+    
+                    purchased_unit_id.map((unit, index) => {
+                        if(Number(available_quantity[index]) !== 0){
+                            extraStock.push({
+                                product_id : Number(data.product_id),
+                                unit_id : Number(unit),
+                                quantity : Number(purchased_quantity[index]),
+                                unit_name : purchased_unit_name[index],
+                                cost : Number(cost[index]),
+                                cost_of_each : Number(cost_of_each[index]),
+                                available_quantity : Number(available_quantity[index]),
+                            });
+                        }
+                    });
+                    uniqueExtras.push(data);
+                }
             });
             
             setPurchasedStock(purchasedStock);
             setExtraStock(extraStock);
             temp.push({break_here: 1});
             setProductList(temp);
-            setExtraPurchased(result.extraPurchased);
+            setExtraPurchased(uniqueExtras);
             setIsLoading(false);
         }catch(e){
             console.log('Error...',e);

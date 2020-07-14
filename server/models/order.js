@@ -228,7 +228,7 @@ Order.prototype.fetchDeliveryFormData = function () {
                     INNER JOIN products as p ON p.id = pr.product_id
                     LEFT JOIN unit_records as ur ON pr.purchased_unit_id = ur.id 
                     LEFT JOIN (SELECT dp.product_id, dp.unit_id, SUM(dp.paid_quantity) as paid_quantity FROM delivered_product as dp INNER JOIN purchase_register as pr ON dp.product_id = pr.product_id AND pr.purchase_date = dp.order_date WHERE pr.purchase_date LIKE '${that.order_date}%' GROUP BY dp.product_id, dp.unit_id) AS paid ON paid.product_id = pr.product_id AND paid.unit_id = pr.purchased_unit_id
-                    WHERE pr.is_active =  1 AND (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d') = '${that.order_date}') AND pr.is_extra = 1
+                    WHERE pr.is_active =  1 AND (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d') = '${that.order_date}') AND (pr.is_extra = 1 OR pr.purchased_quantity > pr.required_quantity)
                     GROUP BY pr.product_id`;
 
       // console.log(Query)
