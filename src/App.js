@@ -31,6 +31,7 @@ const ViewProductDetails = lazy(()=> import('./Views/Admin/ViewProductDetails.js
 const ProductDetails = lazy(()=> import('./Views/Components/CustomerViewProductDetails.js'));
 const AlterUnits = lazy(()=> import('./Views/Admin/AlterUnits.js'));
 const ClientsList = lazy(()=> import('./Views/Admin/ClientsList.js'));
+const AutomationSettings = lazy(()=> import('./Views/Settings/AutomationSettings.js'));
 
 
 function App() {
@@ -251,7 +252,7 @@ function App() {
                     return (!APP_TOKEN.notEmpty)
                     ? <Redirect to="/login" />
                     : <ProductDetails {...props} /> 
-                  }}                    
+                  }}
                 />
                 <Route 
                   exact 
@@ -261,8 +262,17 @@ function App() {
                     <ChangePassword {...props} />
                   }}
                 />
+                <Route 
+                  exact 
+                  path="/auto-settings"
+                  render = { props => {
+                    return (!APP_TOKEN.notEmpty)
+                    ? <Redirect to="/login" />
+                    : (!APP_TOKEN.isAdmin) &&
+                    <AutomationSettings {...props} /> 
+                  }}
+                />
                 
-               
                
                 <Route exact path="/login"  render={props =>  <Login {...props} /> } />
                 <Route exact path="/sign-up"  render={props =>  <Signup {...props} /> } />

@@ -1,10 +1,11 @@
 const Order = require('../models/order.js');
+const Settings = require('../models/settings.js');
 const {isNotEmpty} = require('../utils/conditionChecker.js');
 const Static = require('../models/static.js')
 const Auth = require('../models/auth.js')
 const invoiceReport  = require('../reports/generateInvoice.js')
 const generateOrderedProductReport  = require('../reports/generateOrderedProductReport.js')
-
+const {isNullOrUndefined} = require('util');
 
 
 
@@ -481,7 +482,6 @@ const generatePDFOfOrderedProducts = async function (req, res, next) {
 
 
 const submitDeliveryDetails = async function (req, res, next) {  
-    console.log(req.decoded)
     const params = {
         formData : req.body.productData,
         orderId : req.body.orderId,        
@@ -493,6 +493,19 @@ const submitDeliveryDetails = async function (req, res, next) {
         const submit = await Model.proceedToDelivered();
         const update = await Model.updatePurchaseRegister();
         const result = await Model.submitDeliveryDetails();
+
+        const settings = await new Settings({orderId: params.orderId}).checkUserAutomationSettings(); 
+        if(!isNullOrUndefined(settings)){
+            if(settings.length > 0){                
+                if(settings[0].is_active === 1){
+                    const deliveryData = await Model.getDeliveryData();
+                    Model.formData = deliveryData;
+                    await Model.orderVerificationByCustomer();
+                }
+            }
+            
+        }
+
         if(isNotEmpty(result)){
             res.send(true);
         }else{

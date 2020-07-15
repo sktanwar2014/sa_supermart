@@ -46,6 +46,7 @@ app.use('/auth', require('./routes/auth'));
 app.use('/cart', require('./routes/cart'));
 app.use('/order', require('./routes/order'));
 app.use('/units', require('./routes/units'));
+app.use('/settings', require('./routes/settings'));
 
 
 

@@ -734,8 +734,6 @@ Order.prototype.getCustomerOrderList = function () {
 
 
 
-
-
 Order.prototype.orderVerificationByCustomer = function () {
   const that = this;
   return new Promise(function (resolve, reject) {
@@ -791,6 +789,27 @@ Order.prototype.fetchPreviousBillingAddresss = function () {
   });
 } 
 
+
+
+
+
+Order.prototype.getDeliveryData = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+      connection.query(`SELECT id AS delivered_id, product_id, unit_id, paid_quantity AS quantity FROM delivered_product WHERE order_id = ${that.orderId}`, function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(rows);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
 
 
 
