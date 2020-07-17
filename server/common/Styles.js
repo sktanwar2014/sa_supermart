@@ -27,7 +27,18 @@ const styles = {
     alignment: 'center',
     fontSize: 7,
   },
+  PurchaseTableRow:{
+    margin: [10,0,0,0],
+    bold: true,
+    alignment: 'left',
+    fontSize: 8
+  },
   Header3: {
+    fontSize: 9,
+    alignment: 'center',
+  },
+  PurchaseHeader: {
+    bold: true,
     fontSize: 9,
     alignment: 'center',
   },

@@ -47,7 +47,7 @@ Order.prototype.getCompanyDetails = function () {
       }
       connection.changeUser({database : dbName});
 
-      connection.query(`SELECT first_name, email, mobile, address, city, postcode FROM profile WHERE user_id = 1 AND is_active = 1`, function (error, companyDetail, fields) {
+      connection.query(`SELECT first_name, email, mobile, address, city, state, postcode FROM profile WHERE user_id = 1 AND is_active = 1`, function (error, companyDetail, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
           resolve(companyDetail);
       });
@@ -66,7 +66,7 @@ Order.prototype.getInvoiceDetails = function () {
       }
       connection.changeUser({database : dbName});
 
-      connection.query(`SELECT first_name, email, mobile, address, city, postcode FROM profile WHERE user_id = 1 AND is_active = 1`, function (error, companyDetail, fields) {
+      connection.query(`SELECT first_name, email, mobile, state, address, city, postcode FROM profile WHERE user_id = 1 AND is_active = 1`, function (error, companyDetail, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         connection.query(`SELECT o.order_id, o.order_date, sd.full_name,  sd.mobile, sd.email, sd.pincode, sd.flat_add, sd.street_add, sd.city, sd.state, dp.delivery_date FROM orders AS o INNER JOIN shipping_details AS sd ON sd.id = o.shipping_id LEFT JOIN ordered_product as op ON o.id = op.order_id LEFT JOIN delivered_product as dp ON dp.ordered_id = op.id  WHERE o.id = ${that.orderId} GROUP BY op.order_id`, function (error, shippingDetail, fields) {
           if (error) {  console.log("Error...", error); reject(error);  }

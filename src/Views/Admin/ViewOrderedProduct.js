@@ -1,5 +1,8 @@
 import React, {useState, useEffect, Fragment} from 'react';
 import 'util';
+import pdfmake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
+
 //Components 
 import Header from '../Partials/Header.js';
 import Footer from '../Partials/Footer.js';
@@ -35,32 +38,38 @@ export default function ViewOrderedProduct() {
     const [existUnit, setExistUnit] = useState([]);
     
     useEffect(()=>{
-		getOrderedProductListSingleDay();
+		getOrderedProductListSingleDay('View');
     },[]);
 
     
 
-    const getOrderedProductListSingleDay = async () => {
+    const getOrderedProductListSingleDay = async (operation) => {
         setIsLoading(true);
         setShowAlert(false);
         setOrderedProductList([]);
         try{
             const result = await OrderAPI.getOrderedProductListSingleDay({
                 date : getDate(inputs.date),
+                operation : operation,
             });
-            // console.log(result)
-            setProdIds([...new Set(result.orderedProductListSingleDay.map(dist => dist.id))]);
-            let temp = [...result.orderedProductListSingleDay];
-            
-            (temp.length > 0 ? temp : []).map(data => {
-                data.add_remove = 0;
-                data.break_here = 0;
-                data.purchased_quantity = data.purchased_quantity === "" ? data.quantity : data.purchased_quantity;
-                data.productCostEach = data.cost_of_each === "" ? isNaN(data.price_per_unit) ? 0 : (data.price_per_unit ) : data.cost_of_each;
-                data.productCost = data.cost === "" ? isNaN(data.price_per_unit * data.quantity) ? 0 : (data.price_per_unit * data.quantity) : data.cost;
-            });
-            temp.push({break_here: 1});
-            setOrderedProductList(temp);
+            if(operation === 'View'){
+                // console.log(result)
+                setProdIds([...new Set(result.orderedProductListSingleDay.map(dist => dist.id))]);
+                let temp = [...result.orderedProductListSingleDay];
+
+                (temp.length > 0 ? temp : []).map(data => {
+                    data.add_remove = 0;
+                    data.break_here = 0;
+                    data.purchased_quantity = data.purchased_quantity === "" ? data.quantity : data.purchased_quantity;
+                    data.productCostEach = data.cost_of_each === "" ? isNaN(data.price_per_unit) ? 0 : (data.price_per_unit ) : data.cost_of_each;
+                    data.productCost = data.cost === "" ? isNaN(data.price_per_unit * data.quantity) ? 0 : (data.price_per_unit * data.quantity) : data.cost;
+                });
+                temp.push({break_here: 1});
+                setOrderedProductList(temp);
+            }else if(operation === 'Download'){
+                pdfmake.vfs = pdfFonts.pdfMake.vfs;
+                pdfmake.createPdf(result).open();
+            }
             setIsLoading(false);
         }catch(e){
             console.log('Error...',e);
@@ -114,8 +123,7 @@ export default function ViewOrderedProduct() {
 		setInputs({...inputs, [e.target.name]: e.target.value});
 	}
 
-    const handleProductSelection = (product) => {
-        console.log(product)
+    const handleProductSelection = (product) => {        
         if(!(orderedProductList.find(ele => ele.id === product.id))){
             let temp = [...orderedProductList];
             temp.push({
@@ -174,7 +182,7 @@ export default function ViewOrderedProduct() {
                     setShowAlert(true);
                 }
             }
-            getOrderedProductListSingleDay();
+            getOrderedProductListSingleDay('View');
             setIsLoading(false);
         }catch(e){
             console.log(e);
@@ -207,7 +215,7 @@ export default function ViewOrderedProduct() {
 			<Header />
 			<section className="ftco-section">
                 <div class="container">
-                <h3>Ordered Products </h3>
+                <h3>Purchase Register </h3>
                 <div class="row justify-content-center p-bottom-30">
                         <div class="col-xl-12 ftco-animate fadeInUp ftco-animated">
                             <div class="p-5 bg-light b-top-dark">
@@ -222,7 +230,7 @@ export default function ViewOrderedProduct() {
                                         <div class="col-md-3 m-bottom-20">
                                             <div class="form-group">
                                                 <div class="d-flex f-right">
-                                                <button class="btn btn-primary px-4" onClick={getOrderedProductListSingleDay}> Click to view</button>
+                                                <button class="btn btn-primary px-4" onClick={() => {getOrderedProductListSingleDay('View')}}> Click to view</button>
                                                 </div>
                                             </div>
                                         </div> 
@@ -298,8 +306,9 @@ export default function ViewOrderedProduct() {
                                         <div class="col-md-12 m-top">
                                             <div class="form-group">
                                                 <div class="d-flex f-right">
-                                                    <button class="btn btn-primary px-4 mx-3" onClick={() => {setProductSelectionDialog(true)}}> Add Extra Purchase </button> 
-                                                    <button type="submit" class="btn btn-primary px-4" onClick={handlePurchasedRecord}> Update </button> 
+                                                    <button class="btn btn-primary px-4 mx-3" onClick={() => {setProductSelectionDialog(true)}}> Add Extra Purchase </button>
+                                                    <button class="btn btn-primary px-4 mx-3" onClick={() => {getOrderedProductListSingleDay('Download')}}> Download  </button>
+                                                    <button type="submit" class="btn btn-primary px-4" onClick={handlePurchasedRecord}> Update </button>
                                                 </div>
                                             </div>
                                         </div> 

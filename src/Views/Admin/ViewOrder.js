@@ -102,7 +102,7 @@ export default function ViewOrder(props) {
 			<Header />
 			<section className="ftco-section">
                 <div class="container">
-                <h3>Modify Orders</h3>
+                <h3>Daily Orders</h3>
                 <div class="row justify-content-center p-bottom-30">
                         <div class="col-xl-12 ftco-animate fadeInUp ftco-animated">
                             <div class="p-5 bg-light b-top-dark">

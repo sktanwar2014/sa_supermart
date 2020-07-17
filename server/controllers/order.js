@@ -5,6 +5,7 @@ const Static = require('../models/static.js')
 const Auth = require('../models/auth.js')
 const invoiceReport  = require('../reports/generateInvoice.js')
 const generateOrderedProductReport  = require('../reports/generateOrderedProductReport.js')
+const generatePurchasedItemCostReport  = require('../reports/generatePurchasedItemCostReport.js')
 const {isNullOrUndefined} = require('util');
 
 
@@ -236,6 +237,7 @@ const handlePurchasedRecord = async function (req, res, next) {
 const getOrderedProductListSingleDay = async function (req, res, next) {
     const params = {
         date :  req.body.date,
+        operation: req.body.operation,
     }
     try {
      
@@ -344,8 +346,15 @@ const getOrderedProductListSingleDay = async function (req, res, next) {
                 });
             }
         })
-
-        res.send({orderedProductListSingleDay: returnValues});        
+        
+        if(params.operation === 'View'){
+            res.send({orderedProductListSingleDay: returnValues}); 
+        }else if(params.operation === 'Download'){
+            const company = await Model.getCompanyDetails();            
+            let DD = generatePurchasedItemCostReport({records: returnValues, company: company[0], costingDate: params.date});
+            res.send(DD);
+        }
+        
     } catch (err) {
         next(err);
     }

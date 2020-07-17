@@ -385,9 +385,9 @@ module.exports = function generateOrderedProductReport(params) {
             columns: [
               [
                 { text: 'SA SUPERMART' , style: styles.Header1},
-                { text: [
+                { lineHeight: '1.4', text: [
                      { text: '\n' + company.address + ', ', style: styles.Header1Child,  bold: true },
-                     { text: company.city + ' - ' + company.postcode, style: styles.Header1Child, bold: true },
+                     { text: company.city + ', ' + company.state + ' - ' + company.postcode, style: styles.Header1Child, bold: true },
                      { text: '\n[PH]:', style: styles.Header1Child, bold: true },
                      { text: company.mobile + '\n', style: styles.Header1Child },
                      { text: 'Email: ', style: styles.Header1Child, bold: true },
