@@ -38,13 +38,13 @@ function buildProductRecordTable(data, columns, costingDate){
       let dataRow = [];
       
       if(rowSpanNo !== 0){
-        dataRow.push({ text: (index + 1), margin: [0,7,0,0], style: styles.PurchaseTableRow, rowSpan: rowSpanNo, });
-        dataRow.push({ text: data.product_name, margin: [0,7,0,0], style: styles.PurchaseTableRow, rowSpan: rowSpanNo, });
+        dataRow.push({ text: (index + 1), style: styles.PurchaseTableRowCenter, rowSpan: rowSpanNo, });
+        dataRow.push({ text: data.product_name, style: styles.PurchaseTableRowLeft, rowSpan: rowSpanNo, });
       }else{
         dataRow.push({});
         dataRow.push({});
       }
-      dataRow.push({ text: costOfEach + '/' + data.unit_name, margin: [0,7,0,0], style: styles.PurchaseTableRow });
+      dataRow.push({ text: Number(costOfEach).toFixed(2) + '/' + data.unit_name, style: styles.PurchaseTableRowCenter });
     
       body.push(dataRow);
 
@@ -89,7 +89,7 @@ module.exports = function generatePurchasedItemCostReport({records, company, cos
             border: [true, false, true, true],
             table: {
               widths: ['15%','60%','25%'],
-              body: buildProductRecordTable(records, ['#', 'Products', 'Price ($)'], costingDate),
+              body: buildProductRecordTable(records, ['#', 'Products', 'Cost ($)'], costingDate),
             },
           },
       ],  
