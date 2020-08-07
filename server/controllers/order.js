@@ -7,7 +7,7 @@ const invoiceReport  = require('../reports/generateInvoice.js')
 const generateOrderedProductReport  = require('../reports/generateOrderedProductReport.js')
 const generatePurchasedItemCostReport  = require('../reports/generatePurchasedItemCostReport.js')
 const {isNullOrUndefined} = require('util');
-
+const {sortObject} =require('../utils/objectOperations.js');
 
 
 function calTotalUnit(unitList, unitId, quantity, mainSequence, mainUnitId ){
@@ -346,12 +346,26 @@ const getOrderedProductListSingleDay = async function (req, res, next) {
                 });
             }
         })
+
+        // const returns = returnValues.sort((a, b) => {
+        //     let v1 = String(a.product_name).toUpperCase();
+        //     let v2 = String(b.product_name).toUpperCase();
+        //     console.log(v1, v2)
+        //     if (v1.region < v2.region)
+        //       return -1;
+        //     if (v1.region > v2.region)
+        //       return 1;
+        //     return 0;
+        // });
         
+         
+         
+        const returns= returnValues.sort(sortObject('product_name', 'asc'));
         if(params.operation === 'View'){
-            res.send({orderedProductListSingleDay: returnValues}); 
+            res.send({orderedProductListSingleDay: returns}); 
         }else if(params.operation === 'Download'){
             const company = await Model.getCompanyDetails();            
-            let DD = generatePurchasedItemCostReport({records: returnValues, company: company[0], costingDate: params.date});
+            let DD = generatePurchasedItemCostReport({records: returns, company: company[0], costingDate: params.date});
             res.send(DD);
         }
         

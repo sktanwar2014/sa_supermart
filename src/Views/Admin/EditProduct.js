@@ -471,7 +471,7 @@ export default function AddProduct(props) {
                                                                 <td>
                                                                     <div class="d-flex">
                                                                         <p class="cost-input-adoptment"> $ </p>
-                                                                        <input type="number" name={"price-"+data.id} class="cost-input" id={"price-"+data.id} defaultValue={data.price } min="0" onChange={handleUnitUpdation} />
+                                                                        <input type="number" name={"price-"+data.id} class="cost-input" id={"price-"+data.id} defaultValue={data.price } min="0" step="0.01" onChange={handleUnitUpdation} />
                                                                         {/* onChange={handleCostChange}  */}
                                                                     </div>
                                                                 </td>
