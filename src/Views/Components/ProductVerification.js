@@ -1,7 +1,7 @@
 import React, {useState, useEffect, Fragment} from 'react';
 
 //Components 
-import {APP_TOKEN} from '../../api/config/Constants.js';
+
 import StaticAPI from '../../api/static.js';
 import OrderAPI from '../../api/order.js';
 import Header from '../Partials/Header.js';

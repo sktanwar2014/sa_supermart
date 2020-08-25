@@ -57,7 +57,7 @@ Order.prototype.getCompanyDetails = function () {
   });
 } 
 
-Order.prototype.getInvoiceDetails = function () {
+Order.prototype.getLastestOrderInvoiceDetails = function () {
   const that = this;
   return new Promise(function (resolve, reject) {
     connection.getConnection(function (error, connection) {
@@ -65,7 +65,7 @@ Order.prototype.getInvoiceDetails = function () {
         throw error;
       }
       connection.changeUser({database : dbName});
-
+      
       connection.query(`SELECT first_name, email, mobile, state, address, city, postcode FROM profile WHERE user_id = 1 AND is_active = 1`, function (error, companyDetail, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         connection.query(`SELECT o.order_id, o.order_date, sd.full_name,  sd.mobile, sd.email, sd.pincode, sd.flat_add, sd.street_add, sd.city, sd.state, dp.delivery_date FROM orders AS o INNER JOIN shipping_details AS sd ON sd.id = o.shipping_id LEFT JOIN ordered_product as op ON o.id = op.order_id LEFT JOIN delivered_product as dp ON dp.ordered_id = op.id  WHERE o.id = ${that.orderId} GROUP BY op.order_id`, function (error, shippingDetail, fields) {
@@ -73,7 +73,9 @@ Order.prototype.getInvoiceDetails = function () {
             // connection.query(`SELECT op.id, (CASE op.status WHEN 6 THEN dp.paid_quantity WHEN 5 THEN vp.quantity END) as quantity, (CASE op.status WHEN 6 THEN dp.unit_id WHEN 5 THEN vp.unit_id END) as unit_id, (CASE op.status WHEN 6 THEN ur.unit_name WHEN 5 THEN ur2.unit_name END) as unit_name, p.product_name FROM ordered_product as op INNER JOIN  products as p ON op.product_id = p.id LEFT JOIN delivered_product as dp ON op.id = dp.ordered_id LEFT JOIN verified_product as vp ON op.id = vp.ordered_id LEFT JOIN unit_records as ur ON ur.id = dp.unit_id LEFT JOIN unit_records as ur2 ON ur2.id = vp.unit_id WHERE op.order_id = ${that.orderId} AND op.status IN(5,6)`, function (error, productDetails, fields) {              
             // connection.query(`SELECT op.id, o.id as order_id, o.order_date, pr.purchase_date, pr.purchased_quantity, pr.purchased_unit_id, pr.cost, (CASE op.status WHEN 6 THEN dp.paid_quantity WHEN 5 THEN vp.quantity END) as quantity, (CASE op.status WHEN 6 THEN dp.unit_id WHEN 5 THEN vp.unit_id END) as unit_id, (CASE op.status WHEN 6 THEN ur.unit_name WHEN 5 THEN ur2.unit_name END) as unit_name, p.product_name FROM ordered_product as op INNER JOIN  products as p ON op.product_id = p.id LEFT JOIN delivered_product as dp ON op.id = dp.ordered_id LEFT JOIN verified_product as vp ON op.id = vp.ordered_id LEFT JOIN unit_records as ur ON ur.id = dp.unit_id LEFT JOIN unit_records as ur2 ON ur2.id = vp.unit_id INNER JOIN orders as o ON o.id = op.order_id LEFT  JOIN purchase_register as pr ON (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d')) = (DATE_FORMAT(o.order_date, '%Y-%m-%d')) AND pr.product_id = op.product_id AND pr.is_active = 1 WHERE op.order_id = ${that.orderId} AND op.status IN(5,6)`, function (error, productDetails, fields) {
               // connection.query(`SELECT (CASE op.status WHEN 6 THEN dp.paid_quantity WHEN 5 THEN vp.quantity END) as quantity, (CASE op.status WHEN 6 THEN ur.unit_name WHEN 5 THEN ur2.unit_name END) as unit_name, (CASE op.status WHEN 6 THEN dp.price WHEN 5 THEN ((pr.cost / pr.purchased_quantity) * vp.quantity) END) as price, p.product_name FROM ordered_product as op INNER JOIN  products as p ON op.product_id = p.id LEFT JOIN delivered_product as dp ON op.id = dp.ordered_id LEFT JOIN verified_product as vp ON op.id = vp.ordered_id LEFT JOIN unit_records as ur ON ur.id = dp.unit_id LEFT JOIN unit_records as ur2 ON ur2.id = vp.unit_id INNER JOIN orders as o ON o.id = op.order_id LEFT  JOIN purchase_register as pr ON (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d')) = (DATE_FORMAT(o.order_date, '%Y-%m-%d')) AND pr.product_id = op.product_id AND pr.is_active = 1 WHERE op.order_id = ${that.orderId} AND op.status IN(5,6)`, function (error, productDetails, fields) {
-              connection.query(`SELECT (CASE dp.status WHEN 6 THEN dp.paid_quantity WHEN 5 THEN vp.quantity END) as quantity, (CASE dp.status WHEN 6 THEN ur.unit_name WHEN 5 THEN ur2.unit_name END) as unit_name, (CASE dp.status WHEN 6 THEN dp.price WHEN 5 THEN (pr.cost_of_each * vp.quantity) END) as price, p.product_name FROM delivered_product as dp INNER JOIN  products as p ON dp.product_id = p.id LEFT JOIN verified_product as vp ON dp.id = vp.delivered_id LEFT JOIN unit_records as ur ON ur.id = dp.unit_id LEFT JOIN unit_records as ur2 ON ur2.id = vp.unit_id INNER JOIN orders as o ON o.id = dp.order_id LEFT  JOIN purchase_register as pr ON (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d')) = (DATE_FORMAT(o.order_date, '%Y-%m-%d')) AND pr.product_id = dp.product_id AND pr.purchased_unit_id = dp.unit_id AND pr.is_active = 1 WHERE dp.order_id = ${that.orderId} AND dp.status IN(5,6)`, function (error, productDetails, fields) {                
+                connection.query(`SELECT (CASE dp.status WHEN 6 THEN dp.paid_quantity WHEN 5 THEN vp.quantity END) as quantity, (CASE dp.status WHEN 6 THEN ur.unit_name WHEN 5 THEN ur2.unit_name END) as unit_name, (CASE dp.status WHEN 6 THEN dp.price WHEN 5 THEN (pr.cost_of_each * vp.quantity) END) as price, p.product_name FROM delivered_product as dp INNER JOIN  products as p ON dp.product_id = p.id LEFT JOIN verified_product as vp ON dp.id = vp.delivered_id LEFT JOIN unit_records as ur ON ur.id = dp.unit_id LEFT JOIN unit_records as ur2 ON ur2.id = vp.unit_id INNER JOIN orders as o ON o.id = dp.order_id LEFT  JOIN purchase_register as pr ON (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d')) = (DATE_FORMAT(o.order_date, '%Y-%m-%d')) AND pr.product_id = dp.product_id AND pr.purchased_unit_id = dp.unit_id AND pr.is_active = 1 WHERE dp.order_id = ${that.orderId} AND dp.status IN(5,6)`, function (error, productDetails, fields) {
+                // connection.query(`SELECT (CASE dp.status WHEN 6 THEN dp.paid_quantity WHEN 5 THEN vp.quantity END) as quantity, (CASE dp.status WHEN 6 THEN ur.unit_name WHEN 5 THEN ur2.unit_name END) as unit_name, (CASE dp.status WHEN 6 THEN (dp.price / dp.paid_quantity) WHEN 5 THEN pr.cost_of_each END) as unit_price, (CASE dp.status WHEN 6 THEN dp.price WHEN 5 THEN (pr.cost_of_each * vp.quantity) END) as total_amt,  (CASE dp.status WHEN 6 THEN dp.unit_id WHEN 5 THEN vp.unit_id END) as unit_id, p.product_name, p.id AS product_id FROM delivered_product as dp INNER JOIN  products as p ON dp.product_id = p.id LEFT JOIN verified_product as vp ON dp.id = vp.delivered_id LEFT JOIN unit_records as ur ON ur.id = dp.unit_id LEFT JOIN unit_records as ur2 ON ur2.id = vp.unit_id INNER JOIN orders as o ON o.id = dp.order_id LEFT  JOIN purchase_register as pr ON (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d')) = (DATE_FORMAT(o.order_date, '%Y-%m-%d')) AND pr.product_id = dp.product_id AND pr.purchased_unit_id = dp.unit_id AND pr.is_active = 1 WHERE dp.order_id = ${that.orderId} AND dp.status IN(5,6)`, function (error, productDetails, fields) {
+                // console.log(`SELECT (CASE dp.status WHEN 6 THEN dp.paid_quantity WHEN 5 THEN vp.quantity END) as quantity, (CASE dp.status WHEN 6 THEN ur.unit_name WHEN 5 THEN ur2.unit_name END) as unit_name, (CASE dp.status WHEN 6 THEN dp.price WHEN 5 THEN (pr.cost_of_each * vp.quantity) END) as price, p.product_name FROM delivered_product as dp INNER JOIN  products as p ON dp.product_id = p.id LEFT JOIN verified_product as vp ON dp.id = vp.delivered_id LEFT JOIN unit_records as ur ON ur.id = dp.unit_id LEFT JOIN unit_records as ur2 ON ur2.id = vp.unit_id INNER JOIN orders as o ON o.id = dp.order_id LEFT  JOIN purchase_register as pr ON (DATE_FORMAT(pr.purchase_date, '%Y-%m-%d')) = (DATE_FORMAT(o.order_date, '%Y-%m-%d')) AND pr.product_id = dp.product_id AND pr.purchased_unit_id = dp.unit_id AND pr.is_active = 1 WHERE dp.order_id = ${that.orderId} AND dp.status IN(5,6)`)
               if (error) {  console.log("Error...", error); reject(error);  }
                 resolve({companyDetail: companyDetail, shippingDetail: shippingDetail, productDetails: productDetails});
             });
@@ -83,8 +85,28 @@ Order.prototype.getInvoiceDetails = function () {
         console.log('Process Complete %d', connection.threadId);
     });
   });
-} 
+}
 
+
+
+Order.prototype.getItemListForFirstInvoicing = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) { throw error; }
+
+      connection.changeUser({database : dbName});
+      let Query = 'SELECT (CASE dp.status WHEN 6 THEN dp.paid_quantity WHEN 5 THEN vp.quantity END) as quantity, (CASE dp.status WHEN 6 THEN ur.unit_name WHEN 5 THEN ur2.unit_name END) as unit_name, (CASE dp.status WHEN 6 THEN (dp.price / dp.paid_quantity) WHEN 5 THEN pr.cost_of_each END) as unit_price, (CASE dp.status WHEN 6 THEN dp.price WHEN 5 THEN (pr.cost_of_each * vp.quantity) END) as total_amt, (CASE dp.status WHEN 6 THEN dp.unit_id WHEN 5 THEN vp.unit_id END) AS unit_id, p.product_name AS item_name, p.id AS item_id FROM delivered_product as dp INNER JOIN  products as p ON dp.product_id = p.id LEFT JOIN verified_product as vp ON dp.id = vp.delivered_id LEFT JOIN unit_records as ur ON ur.id = dp.unit_id LEFT JOIN unit_records as ur2 ON ur2.id = vp.unit_id INNER JOIN orders as o ON o.id = dp.order_id LEFT  JOIN purchase_register as pr ON (DATE_FORMAT(pr.purchase_date, "%Y-%m-%d")) = (DATE_FORMAT(o.order_date, "%Y-%m-%d")) AND pr.product_id = dp.product_id AND pr.purchased_unit_id = dp.unit_id AND pr.is_active = 1 WHERE dp.order_id = "'+ that.orderId + '" AND dp.status IN(5,6);';
+      // console.log(Query);
+      connection.query(Query, function (error, result, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }          
+          resolve(result);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+}
 
 Order.prototype.proceedToDelivered = function () {
   const that = this;
@@ -130,7 +152,7 @@ Order.prototype.handleOrderConfirmation = function () {
       });
 
       Object.values(that.formData).map((data, index) => {
-        connection.query(`UPDATE delivered_product SET status = ${data.status} WHERE id = ${data.delivered_id}`, function (error, rows, fields) {
+        connection.query('UPDATE delivered_product SET status = "'+ data.status +'" WHERE id = "'+ data.delivered_id +'";', function (error, rows, fields) {
           if (error) {  console.log("Error...", error); reject(error);  }
           resolve(rows);
         });
@@ -742,24 +764,23 @@ Order.prototype.orderVerificationByCustomer = function () {
         throw error;
       }
       connection.changeUser({database : dbName});
-      Object.values(that.formData).map((data, index) => {
-        connection.query(`INSERT INTO verified_product(order_id, delivered_id, product_id, quantity, unit_id, is_active) VALUES (?) `, [[ that.orderId, data.delivered_id, data.product_id,  data.quantity, data.unit_id, 1]], function (error, rows, fields) {
-          if (error) {  console.log("Error...", error); reject(error);  }
-          resolve(rows);
-        });
-      })
+      connection.query(`UPDATE orders SET status = 3 WHERE id = ${that.orderId}`, function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        
+        Object.values(that.formData).map((data, index) => {
+          
+          connection.query('INSERT INTO verified_product(order_id, delivered_id, product_id, quantity, unit_id, is_active) VALUES (?, ?, ?, ?, ?, ?);', [ that.orderId, data.delivered_id, data.product_id,  data.quantity, data.unit_id, 1], function (error, rows, fields) {
+            if (error) {  console.log("Error...", error); reject(error);  }
+            
+            connection.query('UPDATE delivered_product SET status = "4" WHERE id = "' + data.delivered_id + '";', function (error, rows, fields) {
+              if (error) {  console.log("Error...", error); reject(error);  }
+              resolve(rows);
+            });          
 
-      Object.values(that.formData).map((data, index) => {
-        connection.query(`UPDATE delivered_product SET status = '4' WHERE id = ${data.delivered_id}`, function (error, rows, fields) {
-          if (error) {  console.log("Error...", error); reject(error);  }
-          resolve(rows);
+          });
         });
       });
       
-      connection.query(`UPDATE orders SET status = 3 WHERE id = ${that.orderId}`, function (error, rows, fields) {
-        if (error) {  console.log("Error...", error); reject(error);  }
-        resolve(rows);
-      });
         connection.release();
         console.log('Process Complete %d', connection.threadId);
     });

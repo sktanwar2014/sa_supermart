@@ -7,6 +7,11 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const fs = require('fs');
 
+const { env } = require("./lib/database");
+const {mysqlEvents} = require("./controllers/mysqlEvents.js");
+var router = express.Router()
+
+
 const app = express();
 
 app.use(cors());
@@ -27,7 +32,6 @@ app.use(session({
 }));
 
 
-const { env } = require("./lib/database");
 
 if (env === 'dev' || env === 'uat' || env === 'prod') {
     app.use('/', express.static(path.join(__dirname, 'dist')));
@@ -39,6 +43,7 @@ if (env === 'dev' || env === 'uat' || env === 'prod') {
 
 const mainRoute = require('./routes/mainRoute');
 
+// app.use('*',mysqlEvents);
 
 app.use('/staticrecords', require('./routes/static'));
 app.use('/categories', require('./routes/categories'));
@@ -74,9 +79,7 @@ app.use('/api/images', function (req, res, next) {
 });
 
 
-
 app.use('/',mainRoute);
-
 
 
 let port ='';
@@ -92,3 +95,39 @@ const server = http.createServer(app);
 server.listen(port, () => {
     console.log('server is running on port: ', port);    
 });
+
+
+
+
+const mysql = require('mysql');
+const MySQLEvents = require('@rodrigogs/mysql-events');
+ 
+const program = async () => {
+  const connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: '',
+  });
+ 
+  const instance = new MySQLEvents(connection, {
+    startAtEnd: true,    
+  });
+ 
+  await instance.start();
+ 
+  instance.addTrigger({
+    name: 'a1abiliti_sa_supermart',
+    expression: 'a1abiliti_sa_supermart.*',
+    statement: MySQLEvents.STATEMENTS.ALL,
+    onEvent: (event) => { // You will receive the events here
+      console.log(event);
+    },
+  });
+  
+  instance.on(MySQLEvents.EVENTS.CONNECTION_ERROR, console.error);
+  instance.on(MySQLEvents.EVENTS.ZONGJI_ERROR, console.error);
+};
+ 
+program()
+  .then(() => console.log('Waiting for database events...'))
+  .catch(console.error);

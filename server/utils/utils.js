@@ -3,6 +3,18 @@ var fs = require('fs');
 const handlebars = require('handlebars');
 
 module.exports = {
+  invoiceNoGenerator:(invoiceId, version) => {
+    let inv = 'INV';
+    const zero = 7 - (invoiceId.toString().length);
+    let zeroStr = '';
+    for(let i=0; i< zero ; i++){ zeroStr += '0'; }
+    inv = String(inv + zeroStr + invoiceId).toUpperCase();
+      if(version !== ""){
+        inv = inv + 'v' + version;
+      }
+    return inv;
+  },
+
   readHTMLFile: (path, callback) => {
     fs.readFile(path, { encoding: 'utf-8' }, function (err, html) {
       if (err) {

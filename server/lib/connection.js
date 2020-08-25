@@ -1,4 +1,5 @@
 const MySQL = require("mysql");
+const MySQLEvents = require('@rodrigogs/mysql-events');
 
 const { env, dbName } = require("./database");
 let dbOptions = '';
@@ -16,6 +17,7 @@ if (env === 'prod') {
       host: 'localhost',
       user: 'root',
       password: '',
+      port: 3306
    };
 }
 
@@ -28,4 +30,4 @@ const getConnection = async function (done) {
       throw ex;
    }
 };
-module.exports = { getConnection: getConnection, dbName: dbName };
+module.exports = { connectionPool: connectionPool, dbOptions: dbOptions, getConnection: getConnection, dbName: dbName };

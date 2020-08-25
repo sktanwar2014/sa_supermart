@@ -76,7 +76,7 @@ export default function ViewCustomerOrder() {
         setIsLoading(true);
         pdfmake.vfs = pdfFonts.pdfMake.vfs;
         try{
-            const result = await OrderAPI.generateInvoice({orderId : id});
+            const result = await OrderAPI.getOrderInvoiceLatestVersion({orderId : id});
             pdfmake.createPdf(result).open();
             setIsLoading(false);
 

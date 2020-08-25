@@ -1,9 +1,11 @@
 const Order = require('../models/order.js');
+const Invoices = require('../models/Invoices.js');
 const Settings = require('../models/settings.js');
 const {isNotEmpty} = require('../utils/conditionChecker.js');
 const Static = require('../models/static.js')
-const Auth = require('../models/auth.js')
-const invoiceReport  = require('../reports/generateInvoice.js')
+const Auth = require('../models/auth.js');
+// const invoiceReport  = require('../reports/generateInvoice.js')
+const orderInvoiceLatestVersion  = require('../reports/orderInvoiceLatestVersion.js');
 const generateOrderedProductReport  = require('../reports/generateOrderedProductReport.js')
 const generatePurchasedItemCostReport  = require('../reports/generatePurchasedItemCostReport.js')
 const {isNullOrUndefined} = require('util');
@@ -32,17 +34,21 @@ function calTotalUnit(unitList, unitId, quantity, mainSequence, mainUnitId ){
 
 
 
-const generateInvoice = async function (req, res, next) {
+const getOrderInvoiceLatestVersion = async function (req, res, next) {
     const params = {
         orderId : req.body.orderId,
     }
 
     try {
         const Model = new Order(params);
-        const result = await Model.getInvoiceDetails();
+        // const result = await Model.getInvoiceDetails();
+        // // console.log(result)
+
+        // let DD = invoiceReport(result);
+        const result = await Model.getLastestOrderInvoiceDetails();
         // console.log(result)
 
-        let DD = invoiceReport(result);
+        let DD = orderInvoiceLatestVersion(result);
         res.send(DD);
     } catch (err) {
         next(err);
@@ -525,8 +531,7 @@ const submitDeliveryDetails = async function (req, res, next) {
                     Model.formData = deliveryData;
                     await Model.orderVerificationByCustomer();
                 }
-            }
-            
+            }            
         }
 
         if(isNotEmpty(result)){
@@ -547,11 +552,38 @@ const handleOrderConfirmation = async function (req, res, next) {
     const params = {
         formData : req.body.productData,
         orderId : req.body.orderId,
+        customer_type : 1, // Franchise User
+        invoice_type : 1, // Franchise invoice  
+        customer_id: req.body.customer_id,
+        created_by : req.decoded.id,
     }
     // console.log(params)
     try {
         const Model = new Order(params);
         const result = await Model.handleOrderConfirmation();
+        const itemList = await Model.getItemListForFirstInvoicing();
+        // console.log('***Controller***', itemList.length);
+        
+        const InvoiceModel = new Invoices(params);
+        const invoiceId = await InvoiceModel.generateInvoice();
+        
+        InvoiceModel.invoice_id = invoiceId;
+        const invoiceVersionId = await InvoiceModel.generateNewVersionOfInvoice();
+        
+        InvoiceModel.invoice_version_id = invoiceVersionId;        
+        InvoiceModel.itemList = itemList;
+
+        const itemResponse = await InvoiceModel.generateInvoiceItems();
+
+
+        InvoiceModel.sub_total = Object.values(itemList).reduce((acc, data, index )=> { return acc + data.total_amt }, 0);
+        InvoiceModel.total_subtraction = 0;
+        InvoiceModel.total_addition = 0;
+        InvoiceModel.total = (InvoiceModel.sub_total + InvoiceModel.total_addition - InvoiceModel.total_subtraction).toFixed(2);
+
+        
+        const billingId = await InvoiceModel.generateInvoiceBilling();
+
         if(isNotEmpty(result)){
             res.send(true);
         }else {
@@ -683,5 +715,5 @@ module.exports = {
     submitDeliveryDetails : submitDeliveryDetails,
     orderVerificationByCustomer: orderVerificationByCustomer,
     handleOrderConfirmation: handleOrderConfirmation,
-    generateInvoice: generateInvoice,
+    getOrderInvoiceLatestVersion: getOrderInvoiceLatestVersion,
 };

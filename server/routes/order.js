@@ -19,7 +19,9 @@ Router.route("/fetchDeliveryFormData").post(validateToken, Order.fetchDeliveryFo
 Router.route("/submitDeliveryDetails").post(validateToken, Order.submitDeliveryDetails);
 Router.route("/handleOrderConfirmation").post(validateToken, Order.handleOrderConfirmation);
 Router.route("/orderVerificationByCustomer").post(validateToken, Order.orderVerificationByCustomer);
-Router.route("/generateInvoice").post(validateToken, Order.generateInvoice);
+Router.route("/getOrderInvoiceLatestVersion").post(validateToken, Order.getOrderInvoiceLatestVersion);
+
+// Router.route("/generateInvoice").post(validateToken, Order.generateInvoice);
 
 
 

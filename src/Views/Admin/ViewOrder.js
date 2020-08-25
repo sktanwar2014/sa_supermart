@@ -79,7 +79,7 @@ export default function ViewOrder(props) {
         setIsLoading(true);
         pdfmake.vfs = pdfFonts.pdfMake.vfs;
         try{
-            const result = await OrderAPI.generateInvoice({orderId : id});
+            const result = await OrderAPI.getOrderInvoiceLatestVersion({orderId : id});
             pdfmake.createPdf(result).open();
             setIsLoading(false);
 
@@ -92,6 +92,7 @@ export default function ViewOrder(props) {
     const handleOrderConfirmation = async (data) =>{
         setOrderProps({
             order_id: data[0].id,
+            user_id: data[0].user_id,
             products: data
         });
         setDialogOpen(true);

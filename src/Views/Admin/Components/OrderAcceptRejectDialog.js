@@ -8,7 +8,7 @@ import OrderAPI from '../../../api/order.js';
 
 
 export default function OrderAcceptRejectDialog({open, setDialogOpen, props, isUpdatable, getOrderListOfSingleDay}) {
-
+// console.log(props)
   const [products, setProducts] = useState(props.products);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -31,7 +31,7 @@ export default function OrderAcceptRejectDialog({open, setDialogOpen, props, isU
                 status :  status,
             });
           });
-        const result = await OrderAPI.handleOrderConfirmation({orderId: props.order_id, productData: productData});
+        const result = await OrderAPI.handleOrderConfirmation({orderId: props.order_id, customer_id: props.user_id,  productData: productData});
         getOrderListOfSingleDay();
         setDialogOpen(false);
         setIsSubmitting(false);
