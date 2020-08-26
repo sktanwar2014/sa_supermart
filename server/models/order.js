@@ -34,6 +34,7 @@ const Order = function (params) {
   this.formData = params.formData;
   // this.is_date_range = params.is_date_range;
   this.user_ids = params.user_ids;
+  this.ordered_id = params.ordered_id;
 };
 
 
@@ -116,18 +117,14 @@ Order.prototype.proceedToDelivered = function () {
         throw error;
       }
       connection.changeUser({database : dbName});
-      connection.query(`UPDATE ordered_product as op INNER JOIN orders as o ON o.id = op.order_id SET op.status = '3', o.status = '2' WHERE o.id = ${that.orderId}`, function (error, rows, fields) {
+      connection.query(`UPDATE ordered_product SET status = '3' WHERE order_id = '${that.orderId}';`, function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
-          resolve(rows);
+          
+          connection.query('UPDATE ordered_product SET status = 2 WHERE id IN('+ that.ordered_id +');', function (error, rows, fields) {
+            if (error) {  console.log("Error...", error); reject(error);  }
+            resolve(rows);
+          });
       });
-
-      Object.values(that.formData).map((data, index) => {
-        connection.query(`UPDATE ordered_product SET status = '2' WHERE id = ${data.ordered_id}`, function (error, rows, fields) {
-          if (error) {  console.log("Error...", error); reject(error);  }
-          resolve(rows);
-        });
-      })
-      
         connection.release();
         console.log('Process Complete %d', connection.threadId);
     });
@@ -137,7 +134,26 @@ Order.prototype.proceedToDelivered = function () {
 
 
 
-Order.prototype.handleOrderConfirmation = function () {
+Order.prototype.handleOrderConfirmation = function (data) {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) { throw error; }
+
+      connection.changeUser({database : dbName});
+      connection.query('UPDATE delivered_product SET status = "'+ data.status +'" WHERE id = "'+ data.delivered_id +'";', function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(rows);              
+      });
+
+      connection.release();
+      console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
+
+
+Order.prototype.updatePurchaseRegister = function (data) {
   const that = this;
   return new Promise(function (resolve, reject) {
     connection.getConnection(function (error, connection) {
@@ -146,69 +162,37 @@ Order.prototype.handleOrderConfirmation = function () {
       }
       connection.changeUser({database : dbName});
       
-      connection.query('UPDATE orders SET status = 4 WHERE id = "'+that.orderId+'"', function (error, rows, fields) {
+      connection.query('UPDATE purchase_register SET status = 3 WHERE product_id = "'+ data.product_id +'" AND (DATE_FORMAT(purchase_date, \'%Y-%m-%d\') = "'+ data.order_date +'") AND is_active = 1;', function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);
       });
 
-      Object.values(that.formData).map((data, index) => {
-        connection.query('UPDATE delivered_product SET status = "'+ data.status +'" WHERE id = "'+ data.delivered_id +'";', function (error, rows, fields) {
-          if (error) {  console.log("Error...", error); reject(error);  }
-          resolve(rows);
-        });
-      })
-
         connection.release();
         console.log('Process Complete %d', connection.threadId);
     });
   });
-} 
+}
 
 
-Order.prototype.updatePurchaseRegister = function () {
+
+Order.prototype.submitDeliveryDetails = function (data) {
   const that = this;
   return new Promise(function (resolve, reject) {
     connection.getConnection(function (error, connection) {
-      if (error) {
-        throw error;
-      }
-      connection.changeUser({database : dbName});
+      if (error) { throw error; }
       
-      Object.values(that.formData).map((data, index) => {
-        connection.query('UPDATE purchase_register SET status = 3 WHERE product_id = "'+data.product_id+'" AND (DATE_FORMAT(purchase_date, \'%Y-%m-%d\') = "'+data.order_date+'") AND is_active = 1;', function (error, rows, fields) {
-          if (error) {  console.log("Error...", error); reject(error);  }
+      connection.changeUser({database : dbName});
+
+      let VALUES = [data.order_id, data.ordered_id, data.product_id, data.tracking_id, data.order_date, data.delivery_date,  data.paid_quantity, data.unit_id, data.price, 2, 1, that.createdBy];
+      connection.query(`INSERT INTO delivered_product(order_id, ordered_id, product_id, tracking_id, order_date, delivery_date, paid_quantity, unit_id, price, status, is_active, created_by) VALUES (?) `, [VALUES], function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
           resolve(rows);
-        });
-      })
+      });
         connection.release();
         console.log('Process Complete %d', connection.threadId);
     });
   });
-} 
-
-
-
-Order.prototype.submitDeliveryDetails = function () {
-  const that = this;
-  return new Promise(function (resolve, reject) {
-    connection.getConnection(function (error, connection) {
-      if (error) {
-        throw error;
-      }
-      connection.changeUser({database : dbName});
-      
-        Object.values(that.formData).map((data, index) => {
-          let VALUES = [data.order_id, data.ordered_id, data.product_id, data.tracking_id, data.order_date, data.delivery_date,  data.paid_quantity, data.unit_id, data.price, 2, 1, that.createdBy];
-          connection.query(`INSERT INTO delivered_product(order_id, ordered_id, product_id, tracking_id, order_date, delivery_date, paid_quantity, unit_id, price, status, is_active, created_by) VALUES (?) `, [VALUES], function (error, rows, fields) {
-            if (error) {  console.log("Error...", error); reject(error);  }
-            resolve(rows);
-          });
-        });
-        connection.release();
-        console.log('Process Complete %d', connection.threadId);
-    });
-  });
-} 
+}
 
 
 Order.prototype.fetchDeliveryFormData = function () {
@@ -270,45 +254,40 @@ Order.prototype.fetchDeliveryFormData = function () {
 
 
 
-Order.prototype.handlePurchasedRecord = function () {
+Order.prototype.handlePurchasedRecord = function (data) {
   const that = this;
   return new Promise(function (resolve, reject) {
     connection.getConnection(function (error, connection) {
       if (error) { throw error; }
+
       connection.changeUser({database : dbName});
-       
-      Object.values(that.formData).map((data) => {
-        connection.query(`SELECT * FROM purchase_register WHERE product_id = ${data.product_id} AND purchased_unit_id = '${data.purchased_unit_id}' AND purchase_date = '${data.purchase_date}' AND is_active = 1`, function (error, rows, fields) {
-          if (error) {  console.log("Error...", error); reject(error); }
-          
-          let insertValues = [data.product_id, data.purchase_date, data.required_quantity, data.required_unit_id, data.purchased_quantity, data.purchased_unit_id, data.cost, data.cost_of_each, data.is_extra, 1, 1, data.createdBy];
-          const prod = rows[0];
-          
-          if(rows.length > 0){
-            if(prod.purchased_quantity != data.purchased_quantity || prod.cost != data.cost || prod.cost_of_each != data.cost_of_each || prod.required_quantity != data.required_quantity){
-              connection.query(`UPDATE purchase_register SET is_active = 0, status = 2, updated_by = ${data.createdBy},  updated_at = now() WHERE id = ${prod.id}`, function (error, updateResult, fields) {
-                if (error) {  console.log("Error...", error); reject(error);  }
-              });
-              
-              
+        
+      connection.query(`SELECT * FROM purchase_register WHERE product_id = ${data.product_id} AND purchased_unit_id = '${data.purchased_unit_id}' AND purchase_date = '${data.purchase_date}' AND is_active = 1;`, function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error); }
+        
+        let insertValues = [data.product_id, data.purchase_date, data.required_quantity, data.required_unit_id, data.purchased_quantity, data.purchased_unit_id, data.cost, data.cost_of_each, data.is_extra, 1, 1, data.createdBy];
+        const prod = rows[0];
+        if(rows.length > 0){
+          if(prod.purchased_quantity != data.purchased_quantity || prod.cost != data.cost || prod.cost_of_each != data.cost_of_each || prod.required_quantity != data.required_quantity){
+            connection.query(`UPDATE purchase_register SET is_active = 0, status = 2, updated_by = ${data.createdBy},  updated_at = now() WHERE id = ${prod.id}`, function (error, updateResult, fields) {
+              if (error) {  console.log("Error...", error); reject(error);  }
               connection.query(`INSERT INTO purchase_register(product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, cost_of_each, is_extra, status, is_active, created_by) VALUES (?)`, [insertValues], function (error, rows, fields) {
                 if (error) {  console.log("Error...", error); reject(error);  }
                 resolve(rows.insertId)
               });
-            }else{
-              resolve()
-            }
-          }else{
-            connection.query(`INSERT INTO purchase_register(product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, cost_of_each, is_extra, status, is_active, created_by) VALUES (?)`, [insertValues], function (error, rows, fields) {
-              if (error) {  console.log("Error...", error); reject(error);  }
-              resolve(rows.insertId)
             });
+          }else{
+            resolve()
           }
-        });
+        }else{
+          connection.query(`INSERT INTO purchase_register(product_id, purchase_date, required_quantity, required_unit_id, purchased_quantity, purchased_unit_id, cost, cost_of_each, is_extra, status, is_active, created_by) VALUES (?)`, [insertValues], function (error, rows, fields) {
+            if (error) {  console.log("Error...", error); reject(error);  }
+            resolve(rows.insertId)
+          });
+        }
       });
-      
-        connection.release();
-        console.log('Process Complete %d', connection.threadId);
+      connection.release();
+      console.log('Process Complete %d', connection.threadId);
     });
   });
 } 
@@ -316,28 +295,26 @@ Order.prototype.handlePurchasedRecord = function () {
 
 
 
-Order.prototype.updateProductPrice = function () {
+Order.prototype.updateProductPrice = function (data) {
   const that = this;
   return new Promise(function (resolve, reject) {
     connection.getConnection(function (error, connection) {
       if (error) { throw error; }
       connection.changeUser({database : dbName});
        
-      Object.values(that.formData).map((data) => {
-        connection.query(`SELECT * FROM products_measurement WHERE product_id = ${data.product_id} AND unit_id = ${data.purchased_unit_id} AND is_active = 1 ;`, function (error, rows, fields) {
-          if (error) {  console.log("Error...", error); reject(error); }          
-          // console.log(rows, data)
+      connection.query(`SELECT * FROM products_measurement WHERE product_id = ${data.product_id} AND unit_id = ${data.purchased_unit_id} AND is_active = 1 ;`, function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error); }          
           const prod = rows[0];
           if(rows.length > 0){
             if(prod.price_per_unit !== data.cost_of_each){
               connection.query(`UPDATE products_measurement SET is_active = 0, updated_at = now() WHERE id = ${prod.id}`, function (error, updateResult, fields) {
                 if (error) {  console.log("Error...", error); reject(error);  }
-              });
-              
-              let insertValues = [prod.product_id, prod.unit_value, prod.unit_id, (prod.unit_value * data.cost_of_each), data.cost_of_each, prod.is_packet, prod.packet_weight, prod.packet_unit_id, 1];
-              connection.query(`INSERT INTO products_measurement (product_id, unit_value, unit_id, price, price_per_unit, is_packet, packet_weight, packet_unit_id, is_active) VALUES (?)`, [insertValues], function (error, rows, fields) {
-                if (error) {  console.log("Error...", error); reject(error);  }
-                resolve(rows.insertId)
+                
+                let insertValues = [prod.product_id, prod.unit_value, prod.unit_id, (prod.unit_value * data.cost_of_each), data.cost_of_each, prod.is_packet, prod.packet_weight, prod.packet_unit_id, 1];
+                connection.query(`INSERT INTO products_measurement (product_id, unit_value, unit_id, price, price_per_unit, is_packet, packet_weight, packet_unit_id, is_active) VALUES (?)`, [insertValues], function (error, rows, fields) {
+                  if (error) {  console.log("Error...", error); reject(error);  }
+                  resolve(rows.insertId)
+                });
               });
             }else{
               resolve()
@@ -346,10 +323,8 @@ Order.prototype.updateProductPrice = function () {
             resolve()
           }
         });
-      });
-      
-        connection.release();
-        console.log('Process Complete %d', connection.threadId);
+      connection.release();
+      console.log('Process Complete %d', connection.threadId);
     });
   });
 } 
@@ -456,24 +431,21 @@ Order.prototype.insertOrderDetails = function () {
 // } 
 
 
-Order.prototype.insertOrderedProduct = function () {
+Order.prototype.insertOrderedProduct = function (data) {
   const that = this;
   return new Promise(function (resolve, reject) {
     connection.getConnection(function (error, connection) {
-      if (error) {
-        throw error;
-      }
+      if (error) { throw error; }
       connection.changeUser({database : dbName});
 
-      that.cartItems.map((data, index) => {
-        let product = [that.createdBy, that.order_id, Math.ceil(Math.random() *1000000000), data.id, data.quantity, data.selected_unit_id, 1, 1, that.createdBy]
-        connection.query('INSERT INTO `ordered_product`( `user_id`, `order_id`, `tracking_id`, `product_id`, `quantity`, `unit_id`, `status`, `is_active`, `created_by`) VALUES (?)', [product], function (error, rows, fields) {
-          if (error) {  console.log("Error...", error); reject(error);}
-            resolve(rows);
-        });
-      })
-        connection.release();
-        console.log('Process Complete %d', connection.threadId);
+      let product = [that.createdBy, that.order_id, Math.ceil(Math.random() *1000000000), data.id, data.quantity, data.selected_unit_id, 1, 1, that.createdBy]
+      connection.query('INSERT INTO `ordered_product`( `user_id`, `order_id`, `tracking_id`, `product_id`, `quantity`, `unit_id`, `status`, `is_active`, `created_by`) VALUES (?)', [product], function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);}
+          resolve(rows);
+      });
+
+    connection.release();
+    console.log('Process Complete %d', connection.threadId);
     });
   });
 } 
@@ -756,36 +728,45 @@ Order.prototype.getCustomerOrderList = function () {
 
 
 
-Order.prototype.orderVerificationByCustomer = function () {
+Order.prototype.orderVerificationByCustomer = function (data) {
   const that = this;
   return new Promise(function (resolve, reject) {
     connection.getConnection(function (error, connection) {
-      if (error) {
-        throw error;
-      }
-      connection.changeUser({database : dbName});
-      connection.query(`UPDATE orders SET status = 3 WHERE id = ${that.orderId}`, function (error, rows, fields) {
-        if (error) {  console.log("Error...", error); reject(error);  }
-        
-        Object.values(that.formData).map((data, index) => {
-          
-          connection.query('INSERT INTO verified_product(order_id, delivered_id, product_id, quantity, unit_id, is_active) VALUES (?, ?, ?, ?, ?, ?);', [ that.orderId, data.delivered_id, data.product_id,  data.quantity, data.unit_id, 1], function (error, rows, fields) {
-            if (error) {  console.log("Error...", error); reject(error);  }
-            
-            connection.query('UPDATE delivered_product SET status = "4" WHERE id = "' + data.delivered_id + '";', function (error, rows, fields) {
-              if (error) {  console.log("Error...", error); reject(error);  }
-              resolve(rows);
-            });          
+      if (error) { throw error; }
 
-          });
+      connection.changeUser({database : dbName});
+      
+      connection.query('INSERT INTO verified_product(order_id, delivered_id, product_id, quantity, unit_id, is_active) VALUES (?, ?, ?, ?, ?, ?);', [ that.orderId, data.delivered_id, data.product_id,  data.quantity, data.unit_id, 1], function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        connection.query('UPDATE delivered_product SET status = "4" WHERE id = "' + data.delivered_id + '";', function (error, rows, fields) {
+          if (error) {  console.log("Error...", error); reject(error);  }
+          resolve(rows);
         });
+      });
+    connection.release();
+    console.log('Process Complete %d', connection.threadId);
+    });
+  });
+}
+
+
+Order.prototype.changeOrderStatus = function (data) {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) { throw error; }
+
+      connection.changeUser({database : dbName});
+      connection.query(`UPDATE orders SET status = '${data.status}' WHERE id = '${data.orderId}';`, function (error, rows, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(rows);
       });
       
         connection.release();
         console.log('Process Complete %d', connection.threadId);
     });
   });
-} 
+}
 
 
 

@@ -114,7 +114,12 @@ const orderVerificationByCustomer = async function (req, res, next) {
     }
     try {
         const Model = new Order(params);
-        const result = await Model.orderVerificationByCustomer();
+        
+        await Model.changeOrderStatus({status: 3, orderId: params.orderId});
+        const result = Object.values(params.formData).map(async (data, index) => {
+            await Model.orderVerificationByCustomer(data);
+        });
+
         if(isNotEmpty(result)){
             res.send(true);
         }else{
@@ -156,7 +161,9 @@ const addNewOrder = async function (req, res, next) {
         Model.order_id = orderId;
         
         // await Model.insertBillingDetails();
-        const result = await Model.insertOrderedProduct();
+        const result = Object.values(params.cartItems).map(async (data, index) => {
+            await Model.insertOrderedProduct(data);
+        });
 
         if(result !== null && result !== undefined && result !== ""){
             res.send(true);
@@ -226,14 +233,16 @@ const fetchDeliveryFormData = async function (req, res, next) {
 const handlePurchasedRecord = async function (req, res, next) {
     const params = {
         formData : req.body.formData,
-    }
-    // console.log(params.formData)
+    }    
     try {
         const Model = new Order(params);
-        const result = await Model.handlePurchasedRecord();
-        const result2 = await Model.updateProductPrice();
+        
+        Object.values(params.formData).map(async (data) => {
+            const result = await Model.handlePurchasedRecord(data);
+            const result2 = await Model.updateProductPrice(data);
+        });
 
-        res.send({result});
+        res.send({isEmpty: false});
     } catch (err) {
         next(err);
     }
@@ -516,29 +525,41 @@ const submitDeliveryDetails = async function (req, res, next) {
         orderId : req.body.orderId,        
         createdBy : req.decoded.id,
     }
+
+    let ordered_id = [];
+    Object.values(params.formData).map(async (data, index) => {
+        ordered_id.push(data.ordered_id);
+    });
     
     try {
         const Model = new Order(params);
-        const submit = await Model.proceedToDelivered();
-        const update = await Model.updatePurchaseRegister();
-        const result = await Model.submitDeliveryDetails();
+        
+        Model.ordered_id = ordered_id.join(',');        
+        await Model.changeOrderStatus({status: 2, orderId: params.orderId});
+        await Model.proceedToDelivered();
+
+        Object.values(params.formData).map(async (data, index) => {
+            await Model.updatePurchaseRegister(data);
+            await Model.submitDeliveryDetails(data);
+        });
+        
 
         const settings = await new Settings({orderId: params.orderId}).checkUserAutomationSettings(); 
         if(!isNullOrUndefined(settings)){
-            if(settings.length > 0){                
+            if(settings.length > 0){
                 if(settings[0].is_active === 1){
+                    await Model.changeOrderStatus({status: 3, orderId: params.orderId});
+
                     const deliveryData = await Model.getDeliveryData();
-                    Model.formData = deliveryData;
-                    await Model.orderVerificationByCustomer();
+                    console.log('deliveryData', deliveryData);
+                    Object.values(deliveryData).map(async (data, index) => {                        
+                        await Model.orderVerificationByCustomer(data);
+                    });
                 }
             }            
         }
 
-        if(isNotEmpty(result)){
-            res.send(true);
-        }else{
-            res.send(false);
-        }
+        res.send(true);
     } catch (err) {
         next(err);
     }
@@ -560,7 +581,15 @@ const handleOrderConfirmation = async function (req, res, next) {
     // console.log(params)
     try {
         const Model = new Order(params);
-        const result = await Model.handleOrderConfirmation();
+
+        await Model.changeOrderStatus({status: 4, orderId: params.orderId});
+
+        const result = Object.values(params.formData).map(async (data, index) => {
+            await Model.handleOrderConfirmation(data);
+        });
+
+
+
         const itemList = await Model.getItemListForFirstInvoicing();
         // console.log('***Controller***', itemList.length);
         
@@ -570,10 +599,11 @@ const handleOrderConfirmation = async function (req, res, next) {
         InvoiceModel.invoice_id = invoiceId;
         const invoiceVersionId = await InvoiceModel.generateNewVersionOfInvoice();
         
-        InvoiceModel.invoice_version_id = invoiceVersionId;        
-        InvoiceModel.itemList = itemList;
+        InvoiceModel.invoice_version_id = invoiceVersionId;       
 
-        const itemResponse = await InvoiceModel.generateInvoiceItems();
+        const itemResponse =  Object.values(itemList).map(async(data, index) => {
+            await InvoiceModel.generateInvoiceItems(data);
+        });
 
 
         InvoiceModel.sub_total = Object.values(itemList).reduce((acc, data, index )=> { return acc + data.total_amt }, 0);

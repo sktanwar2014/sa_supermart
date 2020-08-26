@@ -80,21 +80,20 @@ Invoices.prototype.generateNewVersionOfInvoice = function () {
 
 
 
-Invoices.prototype.generateInvoiceItems = function () {
+Invoices.prototype.generateInvoiceItems = function (data) {
   const that = this;
   return new Promise(function (resolve, reject) {
     connection.getConnection(function (error, connection) {
       if (error) { throw error; }
       
       connection.changeUser({database : dbName});
-      let Query = `INSERT INTO invoice_items(invoice_id, invoice_version_id, item_type_id, item_id, unit_id, item_name, unit_name, unit_price, quantity, total_amt, is_active) VALUES (?);`
       
-      Object.values(that.itemList).map((data, index) => {
-        let Values = [that.invoice_id, that.invoice_version_id, 1, data.item_id, data.unit_id, data.item_name, data.unit_name, data.unit_price, data.quantity, data.total_amt, 1];
-        connection.query(Query, [Values], function (error, result, fields) {
+      let Query = `INSERT INTO invoice_items(invoice_id, invoice_version_id, item_type_id, item_id, unit_id, item_name, unit_name, unit_price, quantity, total_amt, is_active) VALUES (?);`
+      let Values = [that.invoice_id, that.invoice_version_id, 1, data.item_id, data.unit_id, data.item_name, data.unit_name, data.unit_price, data.quantity, data.total_amt, 1];
+
+      connection.query(Query, [Values], function (error, result, fields) {
           if (error) {  console.log("Error...", error); reject(error);  }
           resolve(result);
-        });
       });
         
         connection.release();
