@@ -97,7 +97,7 @@ Order.prototype.getItemListForFirstInvoicing = function () {
       if (error) { throw error; }
 
       connection.changeUser({database : dbName});
-      let Query = 'SELECT (CASE dp.status WHEN 6 THEN dp.paid_quantity WHEN 5 THEN vp.quantity END) as quantity, (CASE dp.status WHEN 6 THEN ur.unit_name WHEN 5 THEN ur2.unit_name END) as unit_name, (CASE dp.status WHEN 6 THEN (dp.price / dp.paid_quantity) WHEN 5 THEN pr.cost_of_each END) as unit_price, (CASE dp.status WHEN 6 THEN dp.price WHEN 5 THEN (pr.cost_of_each * vp.quantity) END) as total_amt, (CASE dp.status WHEN 6 THEN dp.unit_id WHEN 5 THEN vp.unit_id END) AS unit_id, p.product_name AS item_name, p.id AS item_id FROM delivered_product as dp INNER JOIN  products as p ON dp.product_id = p.id LEFT JOIN verified_product as vp ON dp.id = vp.delivered_id LEFT JOIN unit_records as ur ON ur.id = dp.unit_id LEFT JOIN unit_records as ur2 ON ur2.id = vp.unit_id INNER JOIN orders as o ON o.id = dp.order_id LEFT  JOIN purchase_register as pr ON (DATE_FORMAT(pr.purchase_date, "%Y-%m-%d")) = (DATE_FORMAT(o.order_date, "%Y-%m-%d")) AND pr.product_id = dp.product_id AND pr.purchased_unit_id = dp.unit_id AND pr.is_active = 1 WHERE dp.order_id = "'+ that.orderId + '" AND dp.status IN(5,6);';
+      let Query = 'SELECT dp.id, (CASE dp.status WHEN 6 THEN dp.paid_quantity WHEN 5 THEN vp.quantity END) as quantity, (CASE dp.status WHEN 6 THEN ur.unit_name WHEN 5 THEN ur2.unit_name END) as unit_name, (CASE dp.status WHEN 6 THEN (dp.price / dp.paid_quantity) WHEN 5 THEN pr.cost_of_each END) as unit_price, (CASE dp.status WHEN 6 THEN dp.price WHEN 5 THEN (pr.cost_of_each * vp.quantity) END) as total_amt, (CASE dp.status WHEN 6 THEN dp.unit_id WHEN 5 THEN vp.unit_id END) AS unit_id, p.product_name AS item_name, p.id AS item_id FROM delivered_product as dp INNER JOIN  products as p ON dp.product_id = p.id LEFT JOIN verified_product as vp ON dp.id = vp.delivered_id LEFT JOIN unit_records as ur ON ur.id = dp.unit_id LEFT JOIN unit_records as ur2 ON ur2.id = vp.unit_id INNER JOIN orders as o ON o.id = dp.order_id LEFT  JOIN purchase_register as pr ON (DATE_FORMAT(pr.purchase_date, "%Y-%m-%d")) = (DATE_FORMAT(o.order_date, "%Y-%m-%d")) AND pr.product_id = dp.product_id AND pr.purchased_unit_id = dp.unit_id AND pr.is_active = 1 WHERE dp.order_id = "'+ that.orderId + '" AND dp.status IN(5,6);';
       // console.log(Query);
       connection.query(Query, function (error, result, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }          
@@ -803,8 +803,9 @@ Order.prototype.getDeliveryData = function () {
         throw error;
       }
       connection.changeUser({database : dbName});
-      connection.query(`SELECT id AS delivered_id, product_id, unit_id, paid_quantity AS quantity FROM delivered_product WHERE order_id = ${that.orderId}`, function (error, rows, fields) {
+      connection.query('SELECT id, id AS delivered_id, product_id, unit_id, paid_quantity AS quantity FROM delivered_product WHERE order_id = '+ that.orderId + ';', function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
+        console.log(rows.length)
         resolve(rows);
       });
         connection.release();

@@ -551,7 +551,7 @@ const submitDeliveryDetails = async function (req, res, next) {
                     await Model.changeOrderStatus({status: 3, orderId: params.orderId});
 
                     const deliveryData = await Model.getDeliveryData();
-                    console.log('deliveryData', deliveryData);
+                    console.log('deliveryData', deliveryData.length);
                     Object.values(deliveryData).map(async (data, index) => {                        
                         await Model.orderVerificationByCustomer(data);
                     });
@@ -591,7 +591,7 @@ const handleOrderConfirmation = async function (req, res, next) {
 
 
         const itemList = await Model.getItemListForFirstInvoicing();
-        // console.log('***Controller***', itemList.length);
+        console.log('***Controller***', itemList.length);
         
         const InvoiceModel = new Invoices(params);
         const invoiceId = await InvoiceModel.generateInvoice();
