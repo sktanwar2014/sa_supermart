@@ -1,5 +1,4 @@
 const MySQL = require("mysql");
-const MySQLEvents = require('@rodrigogs/mysql-events');
 
 const { env, dbName } = require("./database");
 
