@@ -166,10 +166,11 @@ const addNewOrder = async function (req, res, next) {
         const orderId = await Model.insertOrderDetails();
         Model.order_id = orderId;
         
-        // await Model.insertBillingDetails();
+        let Values = [];
         const result = Object.values(params.cartItems).map(async (data, index) => {
-            await Model.insertOrderedProduct(data);
+            Values.push([params.createdBy, orderId, `O${orderId}P${data.id}U${data.selected_unit_id}-${Math.floor(Math.random()*10000)}`, data.id, data.quantity, data.selected_unit_id, 1, 1, params.createdBy]);
         });
+        await Model.insertOrderedProduct(Values);
 
         if(result !== null && result !== undefined && result !== ""){
             res.send(true);

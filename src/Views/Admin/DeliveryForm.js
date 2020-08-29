@@ -163,7 +163,7 @@ export default function DeliveryForm(props) {
                             order_id : order.id,
                             ordered_id : data.id,
                             product_id : data.product_id,
-                            tracking_id : data.tracking_id,
+                            tracking_id : data.tracking_id !== "" ? data.tracking_id : `O${order.id}P${data.product_id}U${data.selected_unit_id}-${Math.floor(Math.random()*10000)}`,
                             delivery_date : getDate(new Date()),
                             order_date : getDate(order.order_date),
                             paid_quantity : data.will_give,
@@ -193,8 +193,8 @@ export default function DeliveryForm(props) {
             let temp = [...productList];
             temp.push({
                 id : 0,
-                product_id : data.product_id,
-                tracking_id : (Math.ceil(Math.random() *1000000000)).toString(),
+                product_id : data.product_id,                
+                tracking_id : '',
                 product_name: data.product_name,
                 quantity : '',
                 purchased_unit_id : data.purchased_unit_id,

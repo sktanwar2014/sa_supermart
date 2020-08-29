@@ -397,9 +397,14 @@ Order.prototype.insertOrderDetails = function () {
       if (error) {
         throw error;
       }
-        connection.changeUser({database : dbName});
-        const orderDetails=[Math.ceil(Math.random() *1000000000), that.createdBy, that.shipping_id, that.order_date, 1, 1, that.createdBy]
-        connection.query('INSERT INTO `orders`(`order_id`, `user_id`, `shipping_id`, `order_date`, `status`, `is_active`, `created_by`) VALUES (?)', [orderDetails], function (error, orderResult, fields) {
+        connection.changeUser({database : dbName});        
+        connection.query(`INSERT INTO orders(order_id, user_id, shipping_id, order_date, status, is_active, created_by) 
+                          VALUES ((SELECT UPPER(CONCAT('O',
+                          CASE LENGTH(CONVERT(((SELECT o.id FROM orders as o ORDER BY o.id DESC LIMIT 1) + 1), CHAR)) 
+                          WHEN 1 THEN '000000' WHEN 2 THEN '00000' WHEN 3 THEN '0000' WHEN 4 THEN '000' WHEN 5 THEN '00' WHEN 6 THEN '0' WHEN 7 THEN '' END,
+                          CONVERT(((SELECT o.id FROM orders as o ORDER BY o.id DESC LIMIT 1) + 1), CHAR)))),
+                          ${that.createdBy}, ${that.shipping_id}, '${that.order_date}', 1, 1, ${that.createdBy});`, 
+          function (error, orderResult, fields) {
           if (error) {  console.log("Error...", error); reject(error);  }
           resolve(orderResult.insertId)
         });
@@ -431,15 +436,16 @@ Order.prototype.insertOrderDetails = function () {
 // } 
 
 
-Order.prototype.insertOrderedProduct = function (data) {
+Order.prototype.insertOrderedProduct = function (Values) {
   const that = this;
   return new Promise(function (resolve, reject) {
     connection.getConnection(function (error, connection) {
       if (error) { throw error; }
       connection.changeUser({database : dbName});
 
-      let product = [that.createdBy, that.order_id, Math.ceil(Math.random() *1000000000), data.id, data.quantity, data.selected_unit_id, 1, 1, that.createdBy]
-      connection.query('INSERT INTO `ordered_product`( `user_id`, `order_id`, `tracking_id`, `product_id`, `quantity`, `unit_id`, `status`, `is_active`, `created_by`) VALUES (?)', [product], function (error, rows, fields) {
+      // let product = [that.createdBy, that.order_id, Math.ceil(Math.random() *1000000000), data.id, data.quantity, data.selected_unit_id, 1, 1, that.createdBy]
+
+      connection.query('INSERT INTO ordered_product( user_id, order_id, tracking_id, product_id, quantity, unit_id, status, is_active, created_by) VALUES ?', [Values], function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);}
           resolve(rows);
       });
