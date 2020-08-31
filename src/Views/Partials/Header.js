@@ -66,6 +66,7 @@ export default function Header() {
                                 <a className="dropdown-item" href="/view-ordered-product-report">Ordered Product Report</a>
                             </div>
                         </li>
+                        <li className="nav-item"><a href="/invoices" className="nav-link">Invoices</a></li>
                         <li className="nav-item dropdown">
                             <a className="nav-link dropdown-toggle" href="#" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Settings</a>
                             <div className="dropdown-menu" aria-labelledby="dropdown04">
@@ -87,6 +88,7 @@ export default function Header() {
                                 <a className="dropdown-item" href="/view-user-order-list">View </a>
                             </div>
                         </li>
+                        <li className="nav-item"><a href="/invoices" className="nav-link">Invoices</a></li>
                         <li className="nav-item dropdown">
                             <a className="nav-link dropdown-toggle" href="#" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Settings</a>
                             <div className="dropdown-menu" aria-labelledby="dropdown04">

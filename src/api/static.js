@@ -60,4 +60,14 @@ export default {
     }
   },
 
+  getInvoiceStateList:async () => {
+    const URL = `${c.API_CONSUMER}/staticrecords/getInvoiceStateList`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'GET' })));
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
 };

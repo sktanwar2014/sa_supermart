@@ -21,7 +21,7 @@ export default function OrderAcceptRejectDialog({open, setDialogOpen, props, isU
             let isComponentExist = document.querySelector(`input[name="action-${data.delivered_id}"]:checked`);
             let status = '';
             if(isComponentExist === null){
-              status = 5;
+              status = '5';
             }else if(isComponentExist !== ""){
               status = isComponentExist.value;
             }

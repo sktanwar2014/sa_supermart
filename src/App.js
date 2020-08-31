@@ -33,6 +33,9 @@ const AlterUnits = lazy(()=> import('./Views/Admin/AlterUnits.js'));
 const ClientsList = lazy(()=> import('./Views/Admin/ClientsList.js'));
 const AutomationSettings = lazy(()=> import('./Views/Settings/AutomationSettings.js'));
 
+// Invoices 
+const MainInvoices = lazy(()=> import('./Views/Invoices/MainInvoices.js'));
+const InvoiceUpdateRequest  = lazy(()=> import('./Views/Invoices/Franchise/UpdateRequest.js'));
 
 function App() {
   return (
@@ -272,8 +275,25 @@ function App() {
                     <AutomationSettings {...props} /> 
                   }}
                 />
-                
-               
+                <Route 
+                  exact 
+                  path="/invoices"
+                  render = { props => {
+                    return (!APP_TOKEN.notEmpty)
+                    ? <Redirect to="/login" />
+                    : <MainInvoices {...props} />
+                  }}
+                /> 
+                <Route 
+                  exact 
+                  path="/invoices/update-request"
+                  render = { props => {
+                    return (!APP_TOKEN.notEmpty)
+                    ? <Redirect to="/login" />
+                    : (!APP_TOKEN.isAdmin) &&
+                    <InvoiceUpdateRequest {...props} /> 
+                  }}
+                />
                 <Route exact path="/login"  render={props =>  <Login {...props} /> } />
                 <Route exact path="/sign-up"  render={props =>  <Signup {...props} /> } />
                 <Route exact path="/logout" render={props =>  <Redirect to="/login" /> }/>

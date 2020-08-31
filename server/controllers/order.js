@@ -592,40 +592,57 @@ const handleOrderConfirmation = async function (req, res, next) {
         customer_id: req.body.customer_id,
         created_by : req.decoded.id,
     }
-    // console.log(params)
+    
     try {
         const Model = new Order(params);
-
-        await Model.changeOrderStatus({status: 4, orderId: params.orderId});
-
-        const result = Object.values(params.formData).map(async (data, index) => {
-            await Model.handleOrderConfirmation(data);
+        let accepted = [];
+        let rejected = [];
+        
+        const result = Object.values(params.formData).map(async (data, index) => {            
+            if(data.status == '5'){ // Accepted - accept the changes in product quantity by franchise
+                accepted.push(data.delivered_id);
+            }else if(data.status == '6'){ // Rejected - reject the changes in product quantity by franchise
+                rejected.push(data.delivered_id);
+            }
         });
-
-
-
-        // const itemList = await Model.getItemListForFirstInvoicing();
-        // console.log('***Controller***', itemList.length);
         
-        // const InvoiceModel = new Invoices(params);
-        // const invoiceId = await InvoiceModel.generateInvoice();
+        await Model.changeOrderStatus({status: 4, orderId: params.orderId});
         
-        // InvoiceModel.invoice_id = invoiceId;
-        // const invoiceVersionId = await InvoiceModel.generateNewVersionOfInvoice();
+        if(accepted.length > 0){
+            await Model.handleOrderConfirmation({status: 5, delivered_id: accepted.join(',')});
+        }
+        if(rejected.length > 0){
+            await Model.handleOrderConfirmation({status: 6, delivered_id: rejected.join(',')});
+        }
         
-        // InvoiceModel.invoice_version_id = invoiceVersionId;       
-
-        // const itemResponse =  Object.values(itemList).map(async(data, index) => {
-        //     await InvoiceModel.generateInvoiceItems(data);
-        // });
-
-        // InvoiceModel.sub_total = Object.values(itemList).reduce((acc, data, index )=> { return acc + data.total_amt }, 0);
-        // InvoiceModel.total_subtraction = 0;
-        // InvoiceModel.total_addition = 0;
-        // InvoiceModel.total = (InvoiceModel.sub_total + InvoiceModel.total_addition - InvoiceModel.total_subtraction).toFixed(2);
 
         
-        // const billingId = await InvoiceModel.generateInvoiceBilling();
+        const itemList = await Model.getItemListForFirstInvoicing();
+        
+        console.log('***Controller***', itemList.length);
+        
+        const InvoiceModel = new Invoices(params);
+        const invoiceId = await InvoiceModel.generateInvoice();
+        
+        InvoiceModel.invoice_id = invoiceId;
+        const invoiceVersionId = await InvoiceModel.generateNewVersionOfInvoice();
+        
+        InvoiceModel.invoice_version_id = invoiceVersionId;       
+        
+        const itemListValues = [];
+        Object.values(itemList).map(async (data, index) => {
+            itemListValues.push([invoiceId, invoiceVersionId, 1, data.item_id, data.unit_id, data.item_name, data.unit_name, data.unit_price, data.quantity, data.total_amt, 7, 1]);
+        });
+        
+        await InvoiceModel.generateInvoiceItems(itemListValues);
+
+        InvoiceModel.sub_total = Object.values(itemList).reduce((acc, data, index )=> { return acc + data.total_amt }, 0);
+        InvoiceModel.total_subtraction = 0;
+        InvoiceModel.total_addition = 0;
+        InvoiceModel.total = (InvoiceModel.sub_total + InvoiceModel.total_addition - InvoiceModel.total_subtraction).toFixed(2);
+
+        
+        const billingId = await InvoiceModel.generateInvoiceBilling();
 
         if(isNotEmpty(result)){
             res.send(true);

@@ -9,7 +9,7 @@ import CallLoader from '../../common/Loader.js';
 // APIs
 import SettingsAPI from '../../api/settings.js';
 
-export default function AlterUnits(props) {
+export default function AutomationSettings(props) {
 
     const [settingList, setSettingList] = useState([]);
     const [isLoading, setIsLoading] = useState(false);

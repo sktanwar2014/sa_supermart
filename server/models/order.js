@@ -142,7 +142,7 @@ Order.prototype.handleOrderConfirmation = function (data) {
       if (error) { throw error; }
 
       connection.changeUser({database : dbName});
-      connection.query('UPDATE delivered_product SET status = "'+ data.status +'" WHERE id = "'+ data.delivered_id +'";', function (error, rows, fields) {
+      connection.query('UPDATE delivered_product SET status = "'+ data.status +'" WHERE id IN('+ data.delivered_id +');', function (error, rows, fields) {
         if (error) {  console.log("Error...", error); reject(error);  }
         resolve(rows);
       });
@@ -412,7 +412,7 @@ Order.prototype.insertOrderDetails = function () {
         console.log('Process Complete %d', connection.threadId);
     });
   });
-} 
+}
 
 
 

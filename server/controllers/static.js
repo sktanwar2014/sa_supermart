@@ -26,6 +26,7 @@ const getMeasuredUnitofProduct = async function (req, res, next) {
 
 
 
+
 const getOrderStatusList = async function (req, res, next) {
     try {
         const StaticModel = new Static({});
@@ -52,6 +53,15 @@ const getMainUnitRelateRecords = async function (req, res, next) {
 }
 
 
+const getInvoiceStateList = async function (req, res, next) {
+    try {
+        const StaticModel = new Static({});
+        const invoiceStateList = await StaticModel.getInvoiceStateList();
+        res.send({ invoiceStateList: invoiceStateList});
+    } catch (err) {
+        next(err);
+    }
+}
 
 
 module.exports = {    
@@ -59,4 +69,5 @@ module.exports = {
     getMainUnitRelateRecords : getMainUnitRelateRecords,
     getOrderStatusList: getOrderStatusList,
     getMeasuredUnitofProduct : getMeasuredUnitofProduct,
+    getInvoiceStateList: getInvoiceStateList,
 };
