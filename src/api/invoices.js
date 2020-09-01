@@ -38,6 +38,47 @@ export default {
     }
   },
   
+  postItemUpdateRequest:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/invoices/postItemUpdateRequest`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
+  postInvoiceUpdateRequest:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/invoices/postInvoiceUpdateRequest`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
+  payInvoiceBill:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/invoices/payInvoiceBill`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
 
   // getMeasuredUnitofProduct:async ({...payload }) => {
   //   const URL = `${c.API_CONSUMER}/staticrecords/getMeasuredUnitofProduct`;

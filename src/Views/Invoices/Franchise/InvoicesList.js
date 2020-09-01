@@ -28,7 +28,8 @@ export default function InvoicesList({stateList}) {
     useEffect(() => {
         getInvoicesList();
     }, []);
-	const  handleInputChange = (e) => {
+    
+    const  handleInputChange = (e) => {
 		setInputs({...inputs, [e.target.name]: e.target.value});
     }
     
@@ -44,7 +45,6 @@ export default function InvoicesList({stateList}) {
             setInvoiceList(result.invoiceList);
             setCurrentStatus(Number(inputs.status));
             setIsLoading(false);
-            console.log(result)
         }catch(e){
             console.log(e);
         }
@@ -79,7 +79,7 @@ export default function InvoicesList({stateList}) {
                                                 <option id={"0"} value={"0"} >All</option>
                                                 {(stateList.length > 0 ? stateList : [] ).map((data, index)=>{
                                                     return(
-                                                        (data.id === 1 || data.id === 2) ?   <option id={data.id} value={data.id} >{data.state_name}</option> : null
+                                                        (data.id === 1 || data.id === 2 || data.id === 3) ?   <option id={data.id} value={data.id} >{data.state_name}</option> : null
                                                     )
                                                     })
                                                 }
@@ -88,7 +88,7 @@ export default function InvoicesList({stateList}) {
                                     </div> 
                                     <div class="col-md-8">
                                         <div class="form-group">                                            
-                                            <input id="productName" type="text" class="form-control" placeholder="Search by invoice id, order id or customer name..." name = "searchText" value={inputs.searchText} onChange={handleInputChange} required/>
+                                            <input id="productName" type="text" class="form-control" placeholder="Search by invoice id, order id..." name = "searchText" value={inputs.searchText} onChange={handleInputChange} required/>
                                         </div>
                                     </div>
                                     <div class="col-md-4" style={{alignSelf: 'center'}}>
@@ -97,9 +97,10 @@ export default function InvoicesList({stateList}) {
                                                 <button class="btn btn-primary px-4" onClick={getInvoicesList}>Get Filtered</button>
                                             </div>
                                         </div>
-                                    </div>                                    
+                                    </div>
                                     <div class="w-100 table-div">
-                                        {(currentStatus === 0) && <AllInvoices invoiceList={invoiceList} />}
+                                        <AllInvoices invoiceList={invoiceList} />
+                                        {/* {(currentStatus === 0) && <AllInvoices invoiceList={invoiceList} />} */}
                                         {/* {(orderStatus == 2) && <DeliveredOrderTable orderIdsArray={orderIdsArray} orderList = {orderList} />} */}
                                         {/* {(orderStatus == 3) && <VerifiedOrderTable orderIdsArray={orderIdsArray} orderList = {orderList}  handleGenerateInvoice={handleGenerateInvoice} />} */}
                                     </div>

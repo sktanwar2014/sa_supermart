@@ -178,7 +178,7 @@ const updateProduct = async function (req, res, next) {
         if(params.picType === 1 && params.document !== ""){
             const base64Data = req.body.document.data.split(';base64,').pop();
             let name = req.body.document.name.split('.')[0] + "_" + Date.now() + '.' + req.body.document.name.split('.')[1];
-        
+            name = name.replace(/\s/g, '');
             await uploadDocument(`./files/productImages/${name}`, base64Data).catch(error => {
                 console.error(error);
                 throw (error);

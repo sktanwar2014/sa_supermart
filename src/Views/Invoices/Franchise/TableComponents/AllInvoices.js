@@ -7,7 +7,6 @@ import {getDateInDDMMYYYY, getDate} from '../../../../common/moment.js';
 // APIs
 
 export default function AllInvoices({invoiceList}) {
-    console.log(invoiceList)
     return(
         <table  className="table table-td">
             <thead class="thead-primary">
@@ -36,14 +35,21 @@ export default function AllInvoices({invoiceList}) {
                                     <li class="nav-item dropdown">
                                         <a class="nav-link dropdown-toggle" href="#"  id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Options</a>
                                         <div class="dropdown-menu" aria-labelledby="dropdown04">                                            
-                                            <a class="dropdown-item" style={{cursor: 'pointer'}}> View </a>
-                                            <a class="dropdown-item" style={{cursor: 'pointer'}}> Pay</a>
-                                            {/* <a class="dropdown-item" style={{cursor: 'pointer'}}> Request to update</a> */}
-                                            <Link 
-                                                class="dropdown-item" style={{cursor: 'pointer'}}
-                                                to={{pathname: '/invoices/update-request', 
-                                                state:{invoice: data}}}
-                                            >Request to Update</Link>
+                                            <a class="dropdown-item" style={{cursor: 'pointer'}} disabled> View </a>
+                                            {data.status ===1 &&
+                                                <Fragment>
+                                                    <Link 
+                                                        class="dropdown-item" style={{cursor: 'pointer'}}
+                                                        to={{pathname: '/invoices/billpay', 
+                                                        state:{invoice: data}}}                                                
+                                                    >Pay</Link>
+                                                    <Link 
+                                                        class="dropdown-item" style={{cursor: 'pointer'}}
+                                                        to={{pathname: '/invoices/update-request', 
+                                                        state:{invoice: data}}}
+                                                    >Request to Update</Link>
+                                                </Fragment>
+                                            }                                            
                                         </div>
                                     </li>
                                 </ul>
