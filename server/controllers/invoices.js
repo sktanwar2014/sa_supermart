@@ -17,12 +17,14 @@ const getInvoiceList = async function (req, res, next) {
         searchText: req.body.searchText,
         userId: req.decoded.id,
         userRole: req.decoded.role,
+        pageNo : Number(req.body.pageNo),
     }
     // console.log(params)
     try {
         const Model = new Invoices(params);
         const invoiceList = await Model.getInvoiceList();
-        res.send({ invoiceList: invoiceList});
+        const invoiceListCount = await Model.getInvoiceListCount();
+        res.send({ invoiceList: invoiceList, invoiceListCount: invoiceListCount.length});
     } catch (err) {
         next(err);
     }
@@ -42,6 +44,33 @@ const getItemsForUpdateRequest = async function (req, res, next) {
         const Model = new Invoices(params);
         const itemList = await Model.getItemsForUpdateRequest();
         res.send({ itemList: itemList});        
+    } catch (err) {
+        next(err);
+    }
+}
+
+
+
+
+const getItemsToHandleRequest = async function (req, res, next) {    
+    const params = {
+        invoice_id: req.body.invoice_id,
+        invoice_version_id: req.body.invoice_version_id,
+    }
+    // console.log(params)
+    try {
+        const Model = new Invoices(params);
+        const CommonModel = new Common(params);
+
+        const itemList = await Model.getItemsToHandleRequest();
+
+        CommonModel.tableId = 12 // invoice_versions
+        CommonModel.rowId = params.invoice_version_id;
+        CommonModel.commentType = 1;
+        CommonModel.isActive = 1;
+
+        const comment =  await CommonModel.getSingleComment();
+        res.send({ itemList: itemList, comment: comment});
     } catch (err) {
         next(err);
     }
@@ -80,7 +109,7 @@ const postInvoiceUpdateRequest = async function (req, res, next) {
         created_by : req.decoded.id,
         comment: req.body.commonComment,
         commentType: 1,
-        tableId: req.body.invoice_version_id,        
+        rowId: req.body.invoice_version_id,
     }
     // console.log(params)
     try {
@@ -94,7 +123,7 @@ const postInvoiceUpdateRequest = async function (req, res, next) {
             items.push([data.id, data.new_quantity, data.unit_id, data.new_total_amt, data.comment, 1, params.created_by ]);
         });
         
-        CommonModal.tableName = 'invoice_versions';
+        CommonModal.tableId = 12; //invoice_versions
         const commentResult = await CommonModal.postComment();
         
         if(params.itemList.length > 0 && items.length > 0){
@@ -134,6 +163,7 @@ const payInvoiceBill = async function (req, res, next) {
         status: 2,
         documentName: docName,
     };
+    // console.log(params);
     try {        
         const Model = new Invoices(params);        
 
@@ -143,8 +173,8 @@ const payInvoiceBill = async function (req, res, next) {
 
         if(req.body.document !== ""){
             const CommonModal = new Common(params);
-            CommonModal.tableId = result.insertId;
-            CommonModal.tableName = 'invoice_transactions';
+            CommonModal.rowId = result.insertId;
+            CommonModal.tableId =  10;    //'invoice_transactions';
             CommonModal.docType = 2;
 
             await CommonModal.insertDocumentEntry();
@@ -157,10 +187,60 @@ const payInvoiceBill = async function (req, res, next) {
 }
 
 
+
+
+const getTransactionDetails = async function (req, res, next) {    
+    const params = {
+        invoice_version_id: req.body.invoice_version_id,
+        invoice_id: req.body.invoice_id,
+        created_by : req.decoded.id,
+    }
+    // console.log(params)
+    try {
+        const Model = new Invoices(params);
+        const result = await Model.getTransactionDetails();
+        res.send({ transaction: result});
+    } catch (err) {
+        next(err);
+    }
+}
+
+
+const handleReqestRejection = async function (req, res, next) {    
+    const params = {
+        invoice_version_id: req.body.invoice_version_id,
+        invoice_id: req.body.invoice_id,
+        commentId: req.body.comment_id,
+        isActive: 0,
+    }
+    // console.log(params)
+    try {
+        const Model = new Invoices(params);
+        const CommonModel = new Common(params);
+
+        Model.status = 5; // Request Rejected
+        await Model.updateInvoiceVersionStatus();
+        
+        Model.status = 9; // Active Invoice
+        await Model.updateInvoiceVersionStatus();
+
+        
+        await CommonModel.handleActivationOfSingleComment();
+
+        res.send({ isUpdated: true});
+    } catch (err) {
+        next(err);
+    }
+}
+
+
 module.exports = {    
     getInvoiceList: getInvoiceList,
     getItemsForUpdateRequest: getItemsForUpdateRequest,
     postItemUpdateRequest: postItemUpdateRequest,
     postInvoiceUpdateRequest: postInvoiceUpdateRequest,
     payInvoiceBill: payInvoiceBill,
+    getTransactionDetails: getTransactionDetails,
+    getItemsToHandleRequest: getItemsToHandleRequest,
+    handleReqestRejection: handleReqestRejection,
 };

@@ -9,6 +9,11 @@ Router.route("/getItemsForUpdateRequest").post(validateToken, InvoiceController.
 Router.route("/postItemUpdateRequest").post(validateToken, InvoiceController.postItemUpdateRequest);
 Router.route("/postInvoiceUpdateRequest").post(validateToken, InvoiceController.postInvoiceUpdateRequest);
 Router.route("/payInvoiceBill").post(validateToken, InvoiceController.payInvoiceBill);
+Router.route("/getTransactionDetails").post(validateToken, InvoiceController.getTransactionDetails);
+Router.route("/getItemsToHandleRequest").post(validateToken, InvoiceController.getItemsToHandleRequest);
+Router.route("/handleReqestRejection").post(validateToken, InvoiceController.handleReqestRejection);
+
+
 
 
 module.exports = Router;

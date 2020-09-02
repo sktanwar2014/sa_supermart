@@ -37,6 +37,9 @@ const AutomationSettings = lazy(()=> import('./Views/Settings/AutomationSettings
 const MainInvoices = lazy(()=> import('./Views/Invoices/MainInvoices.js'));
 const InvoiceUpdateRequest  = lazy(()=> import('./Views/Invoices/Franchise/UpdateRequest.js'));
 const InvoicePaymentPanel  = lazy(()=> import('./Views/Invoices/Franchise/PaymentPanel.js'));
+const ViewTransactionReceipt  = lazy(()=> import('./Views/Invoices/Admin/ViewTransactionReceipt.js'));
+const HandleInvoiceRequest  = lazy(()=> import('./Views/Invoices/Admin/HandleInvoiceRequest.js'));
+
 
 function App() {
   return (
@@ -303,6 +306,26 @@ function App() {
                     ? <Redirect to="/login" />
                     : (!APP_TOKEN.isAdmin) &&
                     <InvoicePaymentPanel {...props} /> 
+                  }}
+                />
+                <Route 
+                  exact 
+                  path="/invoices/viewTransactionReceipt"
+                  render = { props => {
+                    return (!APP_TOKEN.notEmpty)
+                    ? <Redirect to="/login" />
+                    : (APP_TOKEN.isAdmin) &&
+                    <ViewTransactionReceipt {...props} /> 
+                  }}
+                />
+                <Route 
+                  exact 
+                  path="/invoices/handleInvoiceRequest"
+                  render = { props => {
+                    return (!APP_TOKEN.notEmpty)
+                    ? <Redirect to="/login" />
+                    : (APP_TOKEN.isAdmin) &&
+                    <HandleInvoiceRequest {...props} />
                   }}
                 />
 

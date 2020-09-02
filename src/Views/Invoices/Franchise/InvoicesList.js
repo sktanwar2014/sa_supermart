@@ -1,4 +1,6 @@
 import React, {useState, useEffect, Fragment} from 'react';
+import Pagination from '@material-ui/lab/Pagination';
+
 
 //Components 
 import {getDateInDDMMYYYY, getDate} from '../../../common/moment.js';
@@ -24,7 +26,9 @@ export default function InvoicesList({stateList}) {
     const [isLoading, setIsLoading] = useState(false);
     const [currentStatus, setCurrentStatus] = useState(0);
     const [invoiceList, setInvoiceList] = useState([]);
-
+    const [pageCount, setPageCount] = useState(0);
+    const [pageNo, setPageNo] = useState(1);
+    
     useEffect(() => {
         getInvoicesList();
     }, []);
@@ -33,16 +37,24 @@ export default function InvoicesList({stateList}) {
 		setInputs({...inputs, [e.target.name]: e.target.value});
     }
     
-    const getInvoicesList = async (e) => {
+    
+	const handlePagination = (event, page) => {
+		setPageNo(page);
+		getInvoicesList(page);
+    }
+    
+    const getInvoicesList = async ( page=1,) => {
         setIsLoading(true);        
         try{
             const result = await InvoiceAPI.getInvoiceList({
                 from_date: getDate(inputs.fromDate) === 'Invalid date' ? "" : getDate(inputs.fromDate),
                 to_date: getDate(inputs.toDate) === 'Invalid date' ? "" : getDate(inputs.toDate),
                 status: inputs.status,
-                searchText: inputs.searchText,                
+                searchText: inputs.searchText,   
+                pageNo: page,             
             });
             setInvoiceList(result.invoiceList);
+            setPageCount(result.invoiceListCount);
             setCurrentStatus(Number(inputs.status));
             setIsLoading(false);
         }catch(e){
@@ -79,7 +91,7 @@ export default function InvoicesList({stateList}) {
                                                 <option id={"0"} value={"0"} >All</option>
                                                 {(stateList.length > 0 ? stateList : [] ).map((data, index)=>{
                                                     return(
-                                                        (data.id === 1 || data.id === 2 || data.id === 3) ?   <option id={data.id} value={data.id} >{data.state_name}</option> : null
+                                                        (data.id === 9 || data.id === 2 || data.id === 3 || data.id === 10) ?   <option id={data.id} value={data.id} >{data.state_name}</option> : null
                                                     )
                                                     })
                                                 }
@@ -94,7 +106,7 @@ export default function InvoicesList({stateList}) {
                                     <div class="col-md-4" style={{alignSelf: 'center'}}>
                                         <div class="form-group"> 
                                             <div class="d-flex f-right">
-                                                <button class="btn btn-primary px-4" onClick={getInvoicesList}>Get Filtered</button>
+                                                <button class="btn btn-primary px-4" onClick={() => {getInvoicesList();}}>Get Filtered</button>
                                             </div>
                                         </div>
                                     </div>
@@ -107,6 +119,9 @@ export default function InvoicesList({stateList}) {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div  className="row" style={{ justifyContent: 'center'}}>
+                        <Pagination count={Math.ceil(pageCount/20)} page={pageNo} showFirstButton showLastButton onChange={handlePagination} />
                     </div>
             </div>
         </section>            

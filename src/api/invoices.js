@@ -37,6 +37,20 @@ export default {
       throw error;
     }
   },
+
+  getItemsToHandleRequest:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/invoices/getItemsToHandleRequest`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
   
   postItemUpdateRequest:async ({...payload }) => {
     const URL = `${c.API_CONSUMER}/invoices/postItemUpdateRequest`;
@@ -68,6 +82,34 @@ export default {
 
   payInvoiceBill:async ({...payload }) => {
     const URL = `${c.API_CONSUMER}/invoices/payInvoiceBill`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
+  getTransactionDetails:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/invoices/getTransactionDetails`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
+  handleReqestRejection:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/invoices/handleReqestRejection`;
     try {
       const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
         data: payload,

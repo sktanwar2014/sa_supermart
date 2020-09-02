@@ -41,12 +41,7 @@ const getOrderInvoiceLatestVersion = async function (req, res, next) {
 
     try {
         const Model = new Order(params);
-        // const result = await Model.getInvoiceDetails();
-        // // console.log(result)
-
-        // let DD = invoiceReport(result);
         const result = await Model.getLastestOrderInvoiceDetails();
-        // console.log(result)
 
         let DD = orderInvoiceLatestVersion(result);
         res.send(DD);
@@ -618,8 +613,6 @@ const handleOrderConfirmation = async function (req, res, next) {
 
         
         const itemList = await Model.getItemListForFirstInvoicing();
-        
-        console.log('***Controller***', itemList.length);
         
         const InvoiceModel = new Invoices(params);
         const invoiceId = await InvoiceModel.generateInvoice();

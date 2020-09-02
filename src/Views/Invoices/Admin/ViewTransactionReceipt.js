@@ -2,11 +2,11 @@ import React, {useState, useEffect, Fragment} from 'react';
 import {isNullOrUndefined} from 'util';
 
 //Components 
-import {getDateInDDMMYYYY, getDate} from '../../../common/moment.js';
+import {getDateInDDMMYYYY, fullDateTime } from '../../../common/moment.js';
 import CallLoader from '../../../common/Loader.js';
 import Header from '../../Partials/Header.js';
 import Footer from '../../Partials/Footer.js';
-import FileReaders from  '../../../utils/fileReader.js'
+import {API_URL} from '../../../api/config/Constants.js';
 
 // APIs
 import InvoiceAPI from '../../../api/invoices.js';
@@ -16,61 +16,25 @@ export default function PaymentPanel(props) {
     let propData = props.location.state.invoice;
     const [invoice, setInvoice] =  useState(isNullOrUndefined(propData) ? {} : propData);
     const [isLoading, setIsLoading] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [inputs, setInputs] = useState({transaction_id: '', receipt: ''});
+    const [transaction, setTransaction] = useState({});
     
-    const  handleInputChange = (e) => {
-		setInputs({...inputs, [e.target.name]: e.target.value});
-    }
-                                            
-    const handleSubmit = async (e) =>{
-        e.preventDefault();
-        setIsLoading(true);
-        setIsSubmitting(true);
+    useEffect(() => {
+        getTransactionDetails();
+    },[]);
+
+    const getTransactionDetails = async () =>{
+        setIsLoading(true);        
         try{
-            let doc = document.getElementById('transactionReceipt').files[0];
-            let data = {
-                document : doc ? await FileReaders.toBase64(doc) : '',
-                transaction_id: inputs.transaction_id,                
+            const result = await InvoiceAPI.getTransactionDetails({
                 invoice_version_id: invoice.invoice_version_id,
                 invoice_id: invoice.invoice_id,
-                invoice_billing_id: invoice.invoice_billing_id,
-            }
-            const result = await InvoiceAPI.payInvoiceBill(data);
-            setIsLoading(false); 
-            setIsSubmitting(false);
-            window.history.back();
+            });
+            setTransaction(result.transaction[0]);
+            setIsLoading(false);
         }catch(e){
             console.log('Error...', e);
         }
     }
-
-    
-    const handleFileChange = (e) => {
-        if (window.File && window.FileList && window.FileReader) {
-            let file = e.target.files[0];
-            if(file !== null && file !== undefined && file !== ""){
-                let fileReader = new FileReader();
-                fileReader.onload = (e) => {
-                    document.getElementById("transactionReceiptThumb").setAttribute('src',e.target.result);
-                    document.getElementById("transactionReceiptThumb").setAttribute('title', "Selected image");                    
-                }
-                fileReader.readAsDataURL(file);
-                handleInputChange({target:{name:'receipt', value: "receipt"}});
-            }
-        } else {
-            alert("Your browser doesn't support to File API")
-        }
-    }
-    console.log(inputs)
-
-    const handleFileRemove = (e) => {
-        document.getElementById("transactionReceiptThumb").removeAttribute('src');
-        document.getElementById("transactionReceiptThumb").removeAttribute('title');
-        document.getElementById("transactionReceipt").value = '';
-        handleInputChange({target:{name:'receipt', value: ""}});
-    }
-
 
     return(
     <Fragment>
@@ -80,7 +44,7 @@ export default function PaymentPanel(props) {
                     <div class="row justify-content-center">
                         <div class="col-xl-12 ftco-animate fadeInUp ftco-animated">
                             <h3 class="mb-4 billing-heading">Payment Form</h3>
-                            <form onSubmit={handleSubmit} class="p-5 bg-light b-top-dark">
+                            <form class="p-5 bg-light b-top-dark">
                                 <div class="row align-items-end">
                                 <div class="col-md-4">
                                         <div class="form-group">
@@ -114,7 +78,7 @@ export default function PaymentPanel(props) {
                                             </div>
                                         </div>
                                     </div>  
-                                    <div class="col-md-8">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Status: </label>
                                             <div class="d-flex">
@@ -122,38 +86,58 @@ export default function PaymentPanel(props) {
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-12">
-                                        <hr />
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Transaction Id: </label>
+                                            <div class="d-flex">
+                                                <h6>{
+                                                    (isNullOrUndefined(transaction.transaction_no) || transaction.transaction_no === "")
+                                                    ? "Transaction ID not given by user."
+                                                    :   transaction.transaction_no
+                                                }</h6>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <label>Transaction Id: </label>
-                                            <input type="text" name="transaction_id" class="form-control" required={inputs.receipt === ""} onChange={handleInputChange} />
-                                        </div>
-                                    </div>   
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <h5>OR</h5>
-                                        </div>
-                                    </div>   
-                                    <div class="col-md-12">                                          
-                                        <div class="form-group">
-                                            <div class="field" align="left">
-                                                <label for="transactionReceipt">Upload Transaction Receipt*</label>
-                                                <input type="file" class="form-control" id="transactionReceipt" name="transactionReceipt" onChange={handleFileChange} required={inputs.transaction_id === ""} />
+                                            <label>Transaction At: </label>
+                                            <div class="d-flex">
+                                                <h6>{fullDateTime(transaction.transaction_at)}</h6>
                                             </div>
                                         </div>
-                                        <span>
-                                            <img class="imageThumb" id="transactionReceiptThumb" />
-                                            <br/>
-                                            <span class="remove" onClick={handleFileRemove}>Remove image</span>
-                                        </span>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <hr />
+                                    </div>                                    
+                                    <div class="col-md-12">
+                                        {(isNullOrUndefined(transaction.document) || transaction.document === "")
+                                            ?
+                                                <Fragment> 
+                                                    <div class="form-group">
+                                                        <div class="field" align="left">
+                                                            <label for="transactionReceipt"> Transaction Receipt:</label>
+                                                            <h2>Transaction receipt not uploaded.</h2>
+                                                        </div>
+                                                    </div>                                                    
+                                                </Fragment>
+                                            :  
+                                                <Fragment>
+                                                    <div class="form-group">
+                                                        <div class="field" align="left">
+                                                            <label for="transactionReceipt">Transaction Receipt: 
+                                                                <a href={API_URL + "/api/images?path=transactionReceipt/" + transaction.document} download > Download Receipt </a>
+                                                            </label>                                                
+                                                        </div>
+                                                    </div>
+                                                    <span>                                            
+                                                        <img style={{ height: '500px'}} className="imageThumb" src={API_URL + "/api/images?path=transactionReceipt/" + transaction.document}  alt={transaction.document} />                                            
+                                                        <br/>
+                                                    </span>
+                                                </Fragment>
+                                        }
                                     </div>           
                                     <div class="form-group p-4">
-                                        <button class="btn  px-4 btn-primary"  type="submit" disabled={isSubmitting === true}> Submit </button>
-                                        &nbsp;&nbsp;&nbsp;
-                                        <button class="btn  px-4 btn-primary"  type="button" onClick={() => {window.history.back()}}> Cancel </button>
-                                        {/* <input type="submit" value="Send Request" class="btn  px-4 btn-primary" disabled={isSubmitting} /> */}
+                                        <button class="btn  px-4 btn-primary"  type="button" onClick={() => {window.history.back()}}> Go Back </button>
                                     </div>                                                                                             
                                 </div>
                             </form>                                                        

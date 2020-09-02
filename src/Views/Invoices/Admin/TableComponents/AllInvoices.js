@@ -36,22 +36,26 @@ export default function AllInvoices({invoiceList}) {
                                 <ul class="navbar-nav ml-auto">
                                     <li class="nav-item dropdown">
                                         <a class="nav-link dropdown-toggle" href="#"  id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Options</a>
-                                        <div class="dropdown-menu" aria-labelledby="dropdown04">                                            
+                                        <div class="dropdown-menu" aria-labelledby="dropdown04">
                                         <a class="dropdown-item" style={{cursor: 'pointer'}} disabled> {"View & Download"} </a>
-                                            {data.status ===1 &&
+                                            {data.status === 2 &&
+                                                <Fragment>
+                                                    <Link
+                                                        class="dropdown-item" style={{cursor: 'pointer'}}
+                                                        to={{pathname: '/invoices/viewTransactionReceipt', 
+                                                        state:{invoice: data}}}                                                
+                                                    >View Transaction</Link>
+                                                </Fragment>
+                                            }
+                                            {data.status === 3 &&
                                                 <Fragment>
                                                     <Link 
                                                         class="dropdown-item" style={{cursor: 'pointer'}}
-                                                        to={{pathname: '/invoices/billpay', 
-                                                        state:{invoice: data}}}                                                
-                                                    >Pay</Link>
-                                                    <Link 
-                                                        class="dropdown-item" style={{cursor: 'pointer'}}
-                                                        to={{pathname: '/invoices/update-request', 
+                                                        to={{pathname: '/invoices/handleInvoiceRequest', 
                                                         state:{invoice: data}}}
-                                                    >Request to Update</Link>
+                                                    >Handle Request</Link>
                                                 </Fragment>
-                                            }                                            
+                                            }
                                         </div>
                                     </li>
                                 </ul>

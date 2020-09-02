@@ -82,3 +82,7 @@ export function checkOverDue(payment_date, settlement_date) {
 export function escapeSunday(date){
   return moment(date).format("dddd") == "Sunday";
 }
+
+export function fullDateTime(date){
+  return moment(date).format("dddd, MMMM Do YYYY, h:mm:ss a");
+}

@@ -400,9 +400,9 @@ Order.prototype.insertOrderDetails = function () {
         connection.changeUser({database : dbName});        
         connection.query(`INSERT INTO orders(order_id, user_id, shipping_id, order_date, status, is_active, created_by) 
                           VALUES ((SELECT UPPER(CONCAT('O',
-                          CASE LENGTH(CONVERT(((SELECT o.id FROM orders as o ORDER BY o.id DESC LIMIT 1) + 1), CHAR)) 
+                          CASE LENGTH(CONVERT((IFNULL((SELECT o.id FROM orders as o ORDER BY o.id DESC LIMIT 1),0) + 1), CHAR)) 
                           WHEN 1 THEN '000000' WHEN 2 THEN '00000' WHEN 3 THEN '0000' WHEN 4 THEN '000' WHEN 5 THEN '00' WHEN 6 THEN '0' WHEN 7 THEN '' END,
-                          CONVERT(((SELECT o.id FROM orders as o ORDER BY o.id DESC LIMIT 1) + 1), CHAR)))),
+                          CONVERT((IFNULL((SELECT o.id FROM orders as o ORDER BY o.id DESC LIMIT 1),0) + 1), CHAR)))),
                           ${that.createdBy}, ${that.shipping_id}, '${that.order_date}', 1, 1, ${that.createdBy});`, 
           function (error, orderResult, fields) {
           if (error) {  console.log("Error...", error); reject(error);  }
