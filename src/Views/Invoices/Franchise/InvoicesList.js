@@ -1,5 +1,7 @@
 import React, {useState, useEffect, Fragment} from 'react';
 import Pagination from '@material-ui/lab/Pagination';
+import pdfmake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
 
 
 //Components 
@@ -62,6 +64,23 @@ export default function InvoicesList({stateList}) {
         }
     }
 
+    
+    const downloadOrderInvoiceVersion = async (data) => {        
+        setIsLoading(true);    
+        pdfmake.vfs = pdfFonts.pdfMake.vfs;    
+        try{
+            const result = await InvoiceAPI.downloadOrderInvoiceVersion({
+                invoice_id: data.invoice_id,
+                invoice_version_id: data.invoice_version_id,
+                orderId: data.orderId,
+            });        
+            pdfmake.createPdf(result).open();
+            setIsLoading(false);
+        }catch(e){
+            console.log(e);
+        }
+    }
+
     return(
     <Fragment>
         <section className="ftco-section">
@@ -111,7 +130,7 @@ export default function InvoicesList({stateList}) {
                                         </div>
                                     </div>
                                     <div class="w-100 table-div">
-                                        <AllInvoices invoiceList={invoiceList} />
+                                        <AllInvoices invoiceList={invoiceList} downloadOrderInvoiceVersion={downloadOrderInvoiceVersion} />
                                         {/* {(currentStatus === 0) && <AllInvoices invoiceList={invoiceList} />} */}
                                         {/* {(orderStatus == 2) && <DeliveredOrderTable orderIdsArray={orderIdsArray} orderList = {orderList} />} */}
                                         {/* {(orderStatus == 3) && <VerifiedOrderTable orderIdsArray={orderIdsArray} orderList = {orderList}  handleGenerateInvoice={handleGenerateInvoice} />} */}

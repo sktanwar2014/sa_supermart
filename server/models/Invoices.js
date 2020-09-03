@@ -114,6 +114,47 @@ Invoices.prototype.generateInvoiceItems = function (itemListValues) {
 
 
 
+Invoices.prototype.updateInvoiceItemsStatus = function (itemListValues) {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) { throw error; }
+      
+      connection.changeUser({database : dbName});
+      
+      let Query = `UPDATE invoice_items SET status = ${that.status} WHERE id IN(${that.invoice_item_id});`
+      connection.query(Query, function (error, result, fields) {
+          if (error) {  console.log("Error...", error); reject(error);  }
+          resolve(result);
+      });
+        
+      connection.release();
+      console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
+
+
+Invoices.prototype.updateInvoiceBillingStatus = function (itemListValues) {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) { throw error; }
+      
+      connection.changeUser({database : dbName});
+      
+      let Query = `UPDATE invoice_billing SET status = ${that.status} WHERE id = ${that.invoice_billing_id};`
+      connection.query(Query, function (error, result, fields) {
+          if (error) {  console.log("Error...", error); reject(error);  }
+          resolve(result);
+      });
+        
+      connection.release();
+      console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
+
 
 Invoices.prototype.generateInvoiceBilling = function () {
   const that = this;
@@ -147,7 +188,7 @@ Invoices.prototype.getInvoiceList = function () {
       let Query = '';
 
       if(that.userRole !== 1 && that.userRole === 2){
-        Query = `SELECT o.order_id, iv.invoice_id, iv.id AS invoice_version_id, ib.id AS invoice_billing_id, iv.invoice_no, iv.version_no, iv.invoice_date, iv.status, ib.total AS invoice_total, ib.status as billing_status, ist2.state_name AS billing_status_name, ist.state_name AS status_name  FROM orders as o 
+        Query = `SELECT o.id AS orderId, o.order_id, iv.invoice_id, iv.id AS invoice_version_id, ib.id AS invoice_billing_id, iv.invoice_no, iv.version_no, iv.invoice_date, iv.status, ib.total AS invoice_total, ib.status as billing_status, ist2.state_name AS billing_status_name, ist.state_name AS status_name  FROM orders as o 
                 INNER JOIN invoice as i ON i.order_id = o.id
                 INNER JOIN invoice_versions AS iv ON i.id = iv.invoice_id
                 INNER JOIN invoice_billing AS ib ON ib.invoice_version_Id = iv.id
@@ -156,7 +197,7 @@ Invoices.prototype.getInvoiceList = function () {
                 WHERE o.status = 4 AND o.created_by = ${that.userId} `;
                 
       }else if(that.userRole === 1 && that.userId === 1){
-        Query = `SELECT o.order_id, iv.invoice_id, iv.id AS invoice_version_id, ib.id AS invoice_billing_id, iv.invoice_no, iv.version_no, iv.invoice_date, iv.status, ib.total AS invoice_total, ib.status as billing_status, ist2.state_name AS billing_status_name, ist.state_name AS status_name  FROM orders as o 
+        Query = `SELECT o.id AS orderId, o.order_id, iv.invoice_id, iv.id AS invoice_version_id, ib.id AS invoice_billing_id, iv.invoice_no, iv.version_no, iv.invoice_date, iv.status, ib.total AS invoice_total, ib.status as billing_status, ist2.state_name AS billing_status_name, ist.state_name AS status_name  FROM orders as o 
                 INNER JOIN invoice as i ON i.order_id = o.id
                 INNER JOIN invoice_versions AS iv ON i.id = iv.invoice_id
                 INNER JOIN invoice_billing AS ib ON ib.invoice_version_Id = iv.id
@@ -174,7 +215,7 @@ Invoices.prototype.getInvoiceList = function () {
       if(that.from_date !== "" && that.to_date !== ""){
         Query = Query + ` AND ( iv.invoice_date BETWEEN '${that.from_date}' AND '${that.to_date}') `;
       }
-        Query = Query + ` ORDER BY iv.invoice_id, iv.version_no ASC `;
+        Query = Query + ` ORDER BY iv.invoice_id DESC, iv.version_no ASC `;
          
       if(that.pageNo > 0 ){
         Query = Query + ` LIMIT ${((that.pageNo * 20) - 20)},20 ;`;
@@ -202,7 +243,7 @@ Invoices.prototype.getInvoiceListCount = function () {
       let Query = '';
 
       if(that.userRole !== 1 && that.userRole === 2){
-        Query = `SELECT o.order_id, iv.invoice_id, iv.id AS invoice_version_id, ib.id AS invoice_billing_id, iv.invoice_no, iv.version_no, iv.invoice_date, iv.status, ib.total AS invoice_total, ist.state_name AS status_name  FROM orders as o 
+        Query = `SELECT o.id AS orderId, o.order_id, iv.invoice_id, iv.id AS invoice_version_id, ib.id AS invoice_billing_id, iv.invoice_no, iv.version_no, iv.invoice_date, iv.status, ib.total AS invoice_total, ist.state_name AS status_name  FROM orders as o 
                 INNER JOIN invoice as i ON i.order_id = o.id
                 INNER JOIN invoice_versions AS iv ON i.id = iv.invoice_id
                 INNER JOIN invoice_billing AS ib ON ib.invoice_version_Id = iv.id
@@ -210,7 +251,7 @@ Invoices.prototype.getInvoiceListCount = function () {
                 WHERE o.status = 4 AND o.created_by = ${that.userId} `;
                 
       }else if(that.userRole === 1 && that.userId === 1){
-        Query = `SELECT o.order_id, iv.invoice_id, iv.id AS invoice_version_id, ib.id AS invoice_billing_id, iv.invoice_no, iv.version_no, iv.invoice_date, iv.status, ib.total AS invoice_total, ist.state_name AS status_name  FROM orders as o 
+        Query = `SELECT o.id AS orderId, o.order_id, iv.invoice_id, iv.id AS invoice_version_id, ib.id AS invoice_billing_id, iv.invoice_no, iv.version_no, iv.invoice_date, iv.status, ib.total AS invoice_total, ist.state_name AS status_name  FROM orders as o 
                 INNER JOIN invoice as i ON i.order_id = o.id
                 INNER JOIN invoice_versions AS iv ON i.id = iv.invoice_id
                 INNER JOIN invoice_billing AS ib ON ib.invoice_version_Id = iv.id
@@ -287,6 +328,25 @@ Invoices.prototype.getItemsToHandleRequest = function () {
   });
 } 
 
+
+
+Invoices.prototype.getItemsForInvoiceDoc = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) { throw error; }
+      connection.changeUser({database : dbName});     
+      let Query = `SELECT item_name, unit_name, quantity, total_amt FROM invoice_items 
+                  WHERE invoice_id = ${that.invoice_id} AND invoice_version_id = ${that.invoice_version_id} ORDER BY item_name ASC;`;
+      connection.query(Query, function (error, result, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        resolve(result);
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+} 
 
 
 Invoices.prototype.postItemUpdateRequest = function () {
@@ -403,5 +463,30 @@ Invoices.prototype.getTransactionDetails = function () {
 }
 
 
+
+Invoices.prototype.getOrderInvoiceDetails = function () {
+  const that = this;
+  return new Promise(function (resolve, reject) {
+    connection.getConnection(function (error, connection) {
+      if (error) {
+        throw error;
+      }
+      connection.changeUser({database : dbName});
+      
+      connection.query(`SELECT first_name, email, mobile, state, address, city, postcode FROM profile WHERE user_id = 1 AND is_active = 1`, function (error, companyDetail, fields) {
+        if (error) {  console.log("Error...", error); reject(error);  }
+        connection.query(`SELECT o.order_id, o.order_date, sd.full_name,  sd.mobile, sd.email, sd.pincode, sd.flat_add, sd.street_add, sd.city, sd.state, dp.delivery_date FROM orders AS o INNER JOIN shipping_details AS sd ON sd.id = o.shipping_id LEFT JOIN ordered_product as op ON o.id = op.order_id LEFT JOIN delivered_product as dp ON dp.ordered_id = op.id  WHERE o.id = ${that.order_id} GROUP BY op.order_id`, function (error, shippingDetail, fields) {
+          if (error) {  console.log("Error...", error); reject(error);  }
+          connection.query(`SELECT iv.invoice_no, iv.version_no, iv.invoice_date, ib.total AS invoice_total, ist2.state_name AS billing_status_name FROM invoice_versions AS iv INNER JOIN invoice_billing AS ib ON ib.invoice_version_Id = iv.id INNER JOIN invoice_state AS ist2 ON ist2.id = ib.status WHERE iv.invoice_id = ${that.invoice_id} AND iv.id = ${that.invoice_version_id};`, function (error, invoice, fields) {
+            if (error) {  console.log("Error...", error); reject(error);  }
+            resolve({companyDetail: companyDetail, shippingDetail: shippingDetail, invoice: invoice});
+          });
+        });
+      });
+        connection.release();
+        console.log('Process Complete %d', connection.threadId);
+    });
+  });
+}
 
 module.exports = Invoices;

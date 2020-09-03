@@ -12,7 +12,8 @@ Router.route("/payInvoiceBill").post(validateToken, InvoiceController.payInvoice
 Router.route("/getTransactionDetails").post(validateToken, InvoiceController.getTransactionDetails);
 Router.route("/getItemsToHandleRequest").post(validateToken, InvoiceController.getItemsToHandleRequest);
 Router.route("/handleReqestRejection").post(validateToken, InvoiceController.handleReqestRejection);
-
+Router.route("/handleInvoiceToAcceptRequest").post(validateToken, InvoiceController.handleInvoiceToAcceptRequest);
+Router.route("/downloadOrderInvoiceVersion").post(validateToken, InvoiceController.downloadOrderInvoiceVersion);
 
 
 

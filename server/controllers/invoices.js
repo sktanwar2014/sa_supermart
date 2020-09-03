@@ -3,7 +3,7 @@ const Common = require('../models/common.js');
 const {isNotEmpty} = require('../utils/conditionChecker.js');
 const {uploadDocument} = require('../utils/uploadDocument.js');
 // const invoiceReport  = require('../reports/generateInvoice.js')
-// const orderInvoiceLatestVersion  = require('../reports/orderInvoiceLatestVersion.js');
+const orderInvoiceDocLayout  = require('../reports/orderInvoiceDocLayout.js');
 // const generateOrderedProductReport  = require('../reports/generateOrderedProductReport.js')
 // const generatePurchasedItemCostReport  = require('../reports/generatePurchasedItemCostReport.js')
 const {isNullOrUndefined} = require('util');
@@ -234,6 +234,86 @@ const handleReqestRejection = async function (req, res, next) {
 }
 
 
+
+
+const handleInvoiceToAcceptRequest = async function (req, res, next) {    
+    const params = {
+        invoice_version_id: req.body.invoice_version_id,
+        invoice_id: req.body.invoice_id,
+        invoice_billing_id: req.body.invoice_billing_id,
+        itemList: req.body.itemList,    
+        created_by : req.decoded.id,    
+    }
+    // console.log(params)
+    try {
+        const Model = new Invoices(params);
+
+        
+        Model.status = 8; // Update Item status, set as Items updated
+        const itemsId = [...new Set(params.itemList.map(dist => dist.id))];        
+        Model.invoice_item_id = itemsId.join(',');
+        await Model.updateInvoiceItemsStatus();
+
+        Model.status = 6; // Invoice Updated
+        await Model.updateInvoiceBillingStatus();
+        
+        
+        Model.status = 4; // Request Accepted
+        await Model.updateInvoiceVersionStatus();        
+        Model.status = 6; // Invoice Updated
+        await Model.updateInvoiceVersionStatus();
+        Model.status = 10; // Old Invoice
+        await Model.updateInvoiceVersionStatus();
+
+        const invoiceVersionId = await Model.generateNewVersionOfInvoice();
+
+        Model.invoice_version_id = invoiceVersionId;
+
+        const itemListValues = [];
+        Object.values(params.itemList).map(async (data, index) => {
+            itemListValues.push([params.invoice_id, invoiceVersionId, 1, data.item_id, data.unit_id, data.item_name, data.unit_name, data.unit_price, data.new_quantity, data.new_total_amt, 7, 1]);
+        });        
+        await Model.generateInvoiceItems(itemListValues);
+
+        Model.sub_total = Object.values(params.itemList).reduce((acc, data, index )=> { return acc + Number(data.new_total_amt) }, 0);
+        Model.total_subtraction = 0;
+        Model.total_addition = 0;
+        Model.total = (Model.sub_total + Model.total_addition - Model.total_subtraction).toFixed(2);
+        await Model.generateInvoiceBilling();
+
+        
+        res.send({ isUpdated: true});
+    } catch (err) {
+        next(err);
+    }
+}
+
+
+
+
+const downloadOrderInvoiceVersion = async function (req, res, next) {    
+    const params = {
+        invoice_version_id: req.body.invoice_version_id,
+        invoice_id: req.body.invoice_id,
+        orderId: req.body.orderId,
+    }
+    // console.log(params)
+    try {
+        const Model = new Invoices(params);
+        const itemList = await Model.getItemsForInvoiceDoc();
+
+        const details = await Model.getOrderInvoiceDetails();
+
+        let DD = orderInvoiceDocLayout({itemList: itemList, details: details});
+        res.send(DD);
+
+        
+    } catch (err) {
+        next(err);
+    }
+}
+
+
 module.exports = {    
     getInvoiceList: getInvoiceList,
     getItemsForUpdateRequest: getItemsForUpdateRequest,
@@ -243,4 +323,6 @@ module.exports = {
     getTransactionDetails: getTransactionDetails,
     getItemsToHandleRequest: getItemsToHandleRequest,
     handleReqestRejection: handleReqestRejection,
+    handleInvoiceToAcceptRequest: handleInvoiceToAcceptRequest,
+    downloadOrderInvoiceVersion: downloadOrderInvoiceVersion,
 };

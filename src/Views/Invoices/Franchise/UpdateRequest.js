@@ -207,14 +207,14 @@ export default function UpdateRequest(props) {
                                                         <input type="checkbox" onChange= {handleEnableAll} checked={commonCheckBox} />
                                                     </th>
                                                     <th style={{minWidth : '200px'}} rowSpan={2}>Item</th>
-                                                    <th colSpan={3}>Current Value</th>
+                                                    <th colSpan={2}>Current Value</th>
                                                     <th colSpan={2}>Want to change</th>
                                                     <th style={{minWidth : '200px'}} rowSpan={2}> Comment</th>
                                                     <th style={{minWidth : '130px'}} rowSpan={2}> Action</th>
                                                 </tr>
                                                 <tr className="text-center">                                                    
                                                     <th style={{minWidth : '120px'}}>Quantity</th>
-                                                    <th style={{minWidth : '100px'}}>Unit Price</th>
+                                                    {/* <th style={{minWidth : '100px'}}>Unit Price</th> */}
                                                     <th style={{minWidth : '130px'}}>Total Amount</th>
                                                     <th style={{minWidth : '200px'}}>Quantity</th>
                                                     <th style={{minWidth : '200px'}}>Cost</th>
@@ -230,7 +230,7 @@ export default function UpdateRequest(props) {
                                                                 </td>                                                                
                                                                 <td>{data.item_name}</td>
                                                                 <td>{data.quantity+ ' ' + data.unit_name}</td>
-                                                                <td>${Number(data.unit_price).toFixed(2)}</td>
+                                                                {/* <td>${Number(data.unit_price).toFixed(2)}</td> */}
                                                                 <td>${Number(data.total_amt).toFixed(2)}</td>
                                                                 <td>
                                                                     <div class="d-flex justify-content-center">

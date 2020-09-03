@@ -5,7 +5,7 @@ const {isNotEmpty} = require('../utils/conditionChecker.js');
 const Static = require('../models/static.js')
 const Auth = require('../models/auth.js');
 // const invoiceReport  = require('../reports/generateInvoice.js')
-const orderInvoiceLatestVersion  = require('../reports/orderInvoiceLatestVersion.js');
+const orderInvoiceDocLayout  = require('../reports/orderInvoiceDocLayout.js');
 const generateOrderedProductReport  = require('../reports/generateOrderedProductReport.js')
 const generatePurchasedItemCostReport  = require('../reports/generatePurchasedItemCostReport.js')
 const {isNullOrUndefined} = require('util');
@@ -36,14 +36,19 @@ function calTotalUnit(unitList, unitId, quantity, mainSequence, mainUnitId ){
 
 const getOrderInvoiceLatestVersion = async function (req, res, next) {
     const params = {
-        orderId : req.body.orderId,
+        order_id : req.body.orderId,
     }
 
     try {
         const Model = new Order(params);
-        const result = await Model.getLastestOrderInvoiceDetails();
-
-        let DD = orderInvoiceLatestVersion(result);
+        const InvoiceModel = new Invoices(params);
+        const details = await Model.getLastestOrderInvoiceDetails();
+        
+        InvoiceModel.invoice_id = details.invoice[0].invoice_id;
+        InvoiceModel.invoice_version_id = details.invoice[0].invoice_version_id;
+        const itemList = await InvoiceModel.getItemsForInvoiceDoc();
+        
+        let DD = orderInvoiceDocLayout({itemList: itemList, details: details});
         res.send(DD);
     } catch (err) {
         next(err);

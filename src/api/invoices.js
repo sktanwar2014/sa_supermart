@@ -122,6 +122,34 @@ export default {
     }
   },
 
+  handleInvoiceToAcceptRequest:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/invoices/handleInvoiceToAcceptRequest`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
+  downloadOrderInvoiceVersion:async ({...payload }) => {
+    const URL = `${c.API_CONSUMER}/invoices/downloadOrderInvoiceVersion`;
+    try {
+      const { data } = await axios(URL, Object.assign({}, PARAMS({ methodType: 'POST' }), {
+        data: payload,
+      }),
+    );
+      return data;
+    } catch (error) {
+      checkError(error);
+      throw error;
+    }
+  },
+
   // getMeasuredUnitofProduct:async ({...payload }) => {
   //   const URL = `${c.API_CONSUMER}/staticrecords/getMeasuredUnitofProduct`;
   //   try {

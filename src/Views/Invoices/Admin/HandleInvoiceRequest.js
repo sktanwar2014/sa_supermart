@@ -87,14 +87,15 @@ export default function UpdateRequest(props) {
         setIsLoading(true);
         setIsSubmitting(true);
         try{
-            // const result = await InvoiceAPI.postInvoiceUpdateRequest({
-            //     itemList: itemList, 
-            //     commonComment: commonComment,
-            //     invoice_version_id: itemList[0].invoice_version_id,
-            // });
+            const result = await InvoiceAPI.handleInvoiceToAcceptRequest({
+                itemList: itemList, 
+                invoice_version_id: invoice.invoice_version_id,
+                invoice_id: invoice.invoice_id,
+                invoice_billing_id: invoice.invoice_billing_id,
+            });
             setIsLoading(false); 
             setIsSubmitting(false);
-            // handleCancel();
+            handleCancel();
         }catch(e){
             console.log('Error...', e);
         }
@@ -155,7 +156,7 @@ export default function UpdateRequest(props) {
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <h5>Comment: </h5>
-                                            <textarea value={commonComment.comment} cols="30" rows="5" class="form-control" required ></textarea>
+                                            <textarea value={commonComment.comment} cols="30" rows="5" class="form-control" required disabled ></textarea>
                                         </div>
                                     </div> 
                                     <div class="col-md-12"> <hr /> </div>
@@ -171,13 +172,13 @@ export default function UpdateRequest(props) {
                                                         <input type="checkbox" onChange= {handleEnableAll} checked={commonCheckBox} />
                                                     </th> */}
                                                     <th style={{minWidth : '200px'}} rowSpan={2}>Item</th>
-                                                    <th colSpan={3}>Current Value</th>
+                                                    <th colSpan={2}>Current Value</th>
                                                     <th colSpan={2}>Request to Update</th>
                                                     <th style={{minWidth : '200px'}} rowSpan={2}> Comment</th>
                                                 </tr>
                                                 <tr className="text-center">                                                    
                                                     <th style={{minWidth : '120px'}}>Quantity</th>
-                                                    <th style={{minWidth : '100px'}}>Unit Price</th>
+                                                    {/* <th style={{minWidth : '100px'}}>Unit Price</th> */}
                                                     <th style={{minWidth : '130px'}}>Total Amount</th>
                                                     <th style={{minWidth : '200px'}}>Quantity</th>
                                                     <th style={{minWidth : '200px'}}>Cost</th>
@@ -190,7 +191,7 @@ export default function UpdateRequest(props) {
                                                                 <td>{index + 1}</td>
                                                                 <td>{data.item_name}</td>
                                                                 <td>{data.quantity+ ' ' + data.unit_name}</td>
-                                                                <td>${Number(data.unit_price).toFixed(2)}</td>
+                                                                {/* <td>${Number(data.unit_price).toFixed(2)}</td> */}
                                                                 <td>${Number(data.total_amt).toFixed(2)}</td>
                                                                 <td>
                                                                     <div class="d-flex justify-content-center">
@@ -205,7 +206,7 @@ export default function UpdateRequest(props) {
                                                                     </div>
                                                                 </td>
                                                                 <td>
-                                                                    <textarea type="text" rows={2} name= {"comment-"+data.item_id+"-"+data.unit_id} id={"comment-"+data.item_id+"-"+data.unit_id} value={data.comment} required></textarea>
+                                                                    <textarea type="text" rows={2} name= {"comment-"+data.item_id+"-"+data.unit_id} id={"comment-"+data.item_id+"-"+data.unit_id} value={data.comment} disabled required></textarea>
                                                                 </td>                                                                
                                                             </tr>
                                                         )
